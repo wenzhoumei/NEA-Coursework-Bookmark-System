@@ -1,0 +1,15 @@
+-std=c++20
+-I.
+-I/usr/include/qt
+-I/usr/include/qt/QtWidgets
+-I/usr/include/qt/QtGui
+-I/usr/include/qt/QtCore
+-I/usr/lib/qt/mkspecs/linux-g++
+-pipe
+-O2
+-flto
+-fno-fat-lto-objects
+-Wall
+-Wextra
+-D_REENTRANT
+-fPIC
