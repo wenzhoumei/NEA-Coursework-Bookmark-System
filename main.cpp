@@ -1,21 +1,16 @@
-#include "ftxui/component/screen_interactive.hpp"  // for Component, ScreenInteractive
-#include "ftxui/dom/elements.hpp"
-#include "ftxui/component/component.hpp"
+#include <string>
+#include "entry_list.hpp"
+#include "entry_processor.hpp"
 
-int main(int argc, const char* argv[]) {
-  using namespace ftxui;
 
-  Component input_list = Container::Vertical({});
-  std::vector<std::string> items(100, "");
-  for (unsigned int i = 0; i < items.size(); ++i) {
-    input_list->Add(Input(&(items[i]), "placeholder " + std::to_string(i)));
-  }
+int main() {
+    FileEntryList f("/home/wenzhou/Entries/config/hello.txt");
+    f.UpdateEntry(EntryProcessor::CreateEntry("k"));
+    f.PrintEntries();
+    DirectoryEntryList d("/home/wenzhou/Entries/config/extensions");
 
-  auto renderer = Renderer(input_list, [&] {
-    return input_list->Render() | vscroll_indicator | frame | border |
-           size(HEIGHT, LESS_THAN, 10);
-  });
+    d.AddEntry(EntryProcessor::CreateEntry("when"));
 
-  auto screen = ScreenInteractive::Fullscreen();
-  screen.Loop(renderer);
+    ExecutableDirectoryEntryList d2("/home/wenzhou/Entries/config/scripts");
+    d2.PrintEntries();
 }
