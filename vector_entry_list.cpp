@@ -1,15 +1,15 @@
 #include "vector_entry_list.hpp"
 #include <iterator>
+#include <boost/algorithm/string.hpp>
 
-void VectorEntryList::Search(const std::string& search)
+void VectorEntryList::Search(const std::wstring& search)
 {
     if (!search_on_) return;
 
     searched_.clear();
 
-    // Split the input text into tokens
-    std::istringstream iss(search);
-    std::vector<std::string> inputTokens{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+    std::vector<std::wstring> inputTokens;
+    boost::split(inputTokens, search, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
 
     // If no tokens, return all entries
     if (inputTokens.size() == 0) {
@@ -27,9 +27,9 @@ void VectorEntryList::Search(const std::string& search)
     {
 	// Check if all of the input tokens can be found in the item's text
 	bool allTokensFound = true;
-	for (const std::string& token : inputTokens)
+	for (const std::wstring& token : inputTokens)
 	{
-	    if (entries_[i].find(token) == std::string::npos)
+	    if (entries_[i].find(token) == std::wstring::npos)
 	    {
 		allTokensFound = false;
 		break;

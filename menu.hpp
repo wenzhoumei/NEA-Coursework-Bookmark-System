@@ -6,16 +6,15 @@
 #include <memory>
 
 #include "entry_list.hpp"
-#include "vector_file_entry_list.hpp"
+#include "file_vector_entry_list.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
 
 class Menu {
 public:
     Menu() {
-	options_ = std::make_unique<VectorFileEntryList>(
-		VectorFileEntryList("hello", "/home/wenzhou/Entries/files/hello.txt"));
-	setlocale(LC_ALL, "");
+	options_ = std::make_unique<FileVectorEntryList>(
+		FileVectorEntryList(L"hello", L"/home/wenzhou/Entries/files/hello.txt"));
 
 	initscr(); // Start ncurses mode
 	noecho(); // Don't echo keystrokes
@@ -29,7 +28,7 @@ public:
 	endwin();
     }
 
-    std::string Run() {
+    std::wstring Run() {
 	options_->Search(input_text_);
 
 	do {
@@ -44,10 +43,10 @@ public:
 	    int end_option = std::min((int)options_->SearchedSize(), start_option + visible_rows_);
 
 	    // Print the title row
-	    mvprintw(0, 0, "%s", options_->GetTitle().c_str());
+	    mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
 
 	    // Print input row
-	    mvprintw(1, 0, "%-*s", cols, input_text_.c_str());
+	    mvprintw(1, 0, "%-*ls", cols, input_text_.c_str());
 
 	    // Print the visible menu options
 	    for (int i = start_option; i < end_option; i++) {
@@ -55,7 +54,7 @@ public:
 		    attron(A_REVERSE);
 		}
 
-		mvprintw(i - start_option + 2, 0, "%-*s", cols, options_->AtIndex(i)->GetName().c_str());
+		mvprintw(i - start_option + 2, 0, "%-*ls", cols, options_->AtIndex(i)->GetName().c_str());
 
 		attroff(A_REVERSE);
 	    }
@@ -73,7 +72,8 @@ public:
 
 private:
     bool GetInput_() {
-	int choice = getch();
+	wint_t choice;
+	get_wch(&choice);
 	switch (choice) {
 	    case KEY_DOWN:
 		options_->Down();
@@ -90,9 +90,11 @@ private:
 	    case CTRL_MASK('r'):
 		options_->RemoveEntry();
 		break;
+	    /*
 	    case CTRL_MASK('i'):
 		options_->InsertEntry(input_text_);
 		break;
+	    */
 	    case CTRL_MASK('u'):
 		options_->UpdateEntry(input_text_);
 		break;
@@ -110,8 +112,13 @@ private:
 	    case '\n':
 		return false;
 		break;
+	    case '\t':
+		input_text_ += choice;
+		cur_x_++;
+		options_->Search(input_text_);
+		break;
 	    default:
-		if (isprint(choice)) {
+		if (iswprint(choice)) {
 		    input_text_ += choice;
 		    cur_x_++;
 		    options_->Search(input_text_);
@@ -122,7 +129,7 @@ private:
 	return true;
     }
 
-    std::string input_text_ = "";
+    std::wstring input_text_ = L"";
     std::unique_ptr<EntryList> options_;
 
     int visible_rows_;

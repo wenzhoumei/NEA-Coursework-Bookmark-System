@@ -18,9 +18,9 @@
 
 class VectorEntryList: public EntryList {
 protected:
-    std::unordered_map<std::string, std::unique_ptr<Entry>> entry_dict_;
+    std::unordered_map<std::wstring, std::unique_ptr<Entry>> entry_dict_;
 
-    std::vector<std::string> entries_;
+    std::vector<std::wstring> entries_;
     std::vector<size_t> searched_;
 
     void SetSearchedToEntries_() {
@@ -29,13 +29,13 @@ protected:
     }
 
     size_t selected_ = 0;
-    std::string title_;
+    std::wstring title_;
 
     bool search_on_ = true;
 public:
-    VectorEntryList(const std::string title): title_(title) { }
+    VectorEntryList(const std::wstring title): title_(title) { }
 
-    std::string GetTitle() override { return title_; }
+    std::wstring GetTitle() override { return title_; }
 
     int GetSelected() override { return selected_; }
 
@@ -57,17 +57,17 @@ public:
 
     void PrintAllEntries() override {
 	for (auto& entry: entries_) {
-	    std::cerr << entry_dict_[entry]->GetString() << std::endl;
+	    std::wcerr << entry_dict_[entry]->GetString() << std::endl;
 	}
     }
 
     void PrintSearchedEntries() override {
 	for (auto& i: searched_) {
-	    std::cerr << entry_dict_[entries_[i]]->GetString() << std::endl;
+	    std::wcerr << entry_dict_[entries_[i]]->GetString() << std::endl;
 	}
     }
 
-    void Search(const std::string& search) override;
+    void Search(const std::wstring& search) override;
 
     Entry* AtIndex(int i) override {
 	return entry_dict_[entries_[searched_[i]]].get();
@@ -93,12 +93,12 @@ public:
 	return true;
     }
 
-    bool AddEntry(const std::string& entry) override {
+    bool AddEntry(const std::wstring& entry) override {
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(entry));
 
-	std::string entry_name = unprocessed_entry->GetName();
+	std::wstring entry_name = unprocessed_entry->GetName();
 	if (entry_dict_.contains(entry_name)) {
-	    std::cerr << "Error: Entry(" << entry_name << ") already exists" << std::endl;
+	    std::wcerr << "Error: Entry(" << entry_name << ") already exists" << std::endl;
 	    return false;
 	}
 
@@ -109,10 +109,10 @@ public:
 	return true;
     }
 
-    bool InsertEntry(const std::string& entry) override {
+    bool InsertEntry(const std::wstring& entry) override {
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(entry));
 
-	std::string entry_name = unprocessed_entry->GetName();
+	std::wstring entry_name = unprocessed_entry->GetName();
 
 	if (entry_dict_.contains(entry_name)) {
 	    std::cerr << "Error: Entry already exists" << std::endl;
@@ -132,9 +132,9 @@ public:
 	return true;
     }
 
-    bool UpdateEntry(const std::string& entry) override {
+    bool UpdateEntry(const std::wstring& entry) override {
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(entry));
-	std::string entry_name = unprocessed_entry->GetName();
+	std::wstring entry_name = unprocessed_entry->GetName();
 
 	auto it = std::find(entries_.begin(), entries_.end(), entry_name);
         if (it != entries_.end()) {

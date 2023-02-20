@@ -1,7 +1,5 @@
-#include "entry.hpp"
-#include "entry_list.hpp"
-#include "vector_file_entry_list.hpp"
 #include "menu.hpp"
+#include <locale>
 
 int main() {
     /*
@@ -19,8 +17,10 @@ int main() {
     v.PrintSearchedEntries();
     */
 
+    std::locale::global(std::locale(""));
+
     Menu menu;
-    std::cout << menu.Run() << std::endl;
+    std::wcout << menu.Run() << std::endl;
     return 0;
 }
 

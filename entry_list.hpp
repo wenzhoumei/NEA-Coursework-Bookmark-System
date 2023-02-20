@@ -6,9 +6,9 @@
 
 class EntryList {
 private:
-    std::string SplitByLast_(std::string& str, char del);
-    std::string SplitByFirst_(std::string& str, char del);
-    std::string SplitByIndex_(std::string& str, size_t del_pos);
+    std::wstring SplitByLast_(std::wstring& str, wchar_t del);
+    std::wstring SplitByFirst_(std::wstring& str, wchar_t del);
+    std::wstring SplitByIndex_(std::wstring& str, size_t del_pos);
 
 protected:
     /*
@@ -16,7 +16,7 @@ protected:
     */
 
 public:
-    virtual std::string GetTitle() = 0;
+    virtual std::wstring GetTitle() = 0;
 
     virtual int GetSelected() = 0;
     virtual bool Up() = 0;
@@ -24,9 +24,9 @@ public:
 
     // Return false if any of these fail else return true
     virtual bool RemoveEntry() = 0;
-    virtual bool AddEntry(const std::string& entry) = 0;
-    virtual bool InsertEntry(const std::string& entry) = 0;
-    virtual bool UpdateEntry(const std::string& entry) = 0;
+    virtual bool AddEntry(const std::wstring& entry) = 0;
+    virtual bool InsertEntry(const std::wstring& entry) = 0;
+    virtual bool UpdateEntry(const std::wstring& entry) = 0;
 
     virtual Entry* AtIndex(int i) = 0;
 
@@ -34,7 +34,7 @@ public:
 
     virtual void ToggleSearch() = 0;
 
-    virtual void Search(const std::string& search) = 0;
+    virtual void Search(const std::wstring& search) = 0;
 
     virtual void PrintAllEntries() = 0;
     virtual void PrintSearchedEntries() = 0;

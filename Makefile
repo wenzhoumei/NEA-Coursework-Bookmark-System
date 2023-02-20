@@ -54,10 +54,12 @@ OBJECTS_DIR   = obj/
 
 SOURCES       = main.cpp \
 		vector_entry_list.cpp \
-		entry_list.cpp 
+		entry_list.cpp \
+		util.cpp 
 OBJECTS       = obj/main.o \
 		obj/vector_entry_list.o \
-		obj/entry_list.o
+		obj/entry_list.o \
+		obj/util.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
 		/usr/lib/qt/mkspecs/common/linux.conf \
@@ -274,10 +276,13 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/yacc.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
 		myproject.pro vector_entry_list.hpp \
+		file_vector_entry_list.hpp \
 		entry_list.hpp \
-		menu.hpp main.cpp \
+		menu.hpp \
+		util.hpp main.cpp \
 		vector_entry_list.cpp \
-		entry_list.cpp
+		entry_list.cpp \
+		util.cpp
 QMAKE_TARGET  = program.program
 DESTDIR       = 
 TARGET        = program.program
@@ -737,8 +742,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents vector_entry_list.hpp entry_list.hpp menu.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp vector_entry_list.cpp entry_list.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents vector_entry_list.hpp file_vector_entry_list.hpp entry_list.hpp menu.hpp util.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp vector_entry_list.cpp entry_list.cpp util.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -786,21 +791,27 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-obj/main.o: main.cpp entry.hpp \
+obj/main.o: main.cpp menu.hpp \
 		entry_list.hpp \
-		vector_file_entry_list.hpp \
-		vector_entry_list.hpp \
-		menu.hpp
+		entry.hpp \
+		util.hpp \
+		file_vector_entry_list.hpp \
+		vector_entry_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o main.cpp
 
 obj/vector_entry_list.o: vector_entry_list.cpp vector_entry_list.hpp \
 		entry_list.hpp \
-		entry.hpp
+		entry.hpp \
+		util.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/vector_entry_list.o vector_entry_list.cpp
 
 obj/entry_list.o: entry_list.cpp entry_list.hpp \
-		entry.hpp
+		entry.hpp \
+		util.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/entry_list.o entry_list.cpp
+
+obj/util.o: util.cpp util.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/util.o util.cpp
 
 ####### Install
 
