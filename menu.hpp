@@ -6,47 +6,52 @@
 #include <memory>
 
 #include "entry_list.hpp"
+#include "vector_file_entry_list.hpp"
+
+#define CTRL_MASK(c) ((c) & 0x1f)
 
 class Menu {
 public:
-    Menu(const std::string title, std::unique_ptr<EntryList> options) : title_(title), options_(std::move(options)), sel_(0) {
+    Menu() {
+	options_ = std::make_unique<VectorFileEntryList>(
+		VectorFileEntryList("hello", "/home/wenzhou/Entries/files/hello.txt"));
 	setlocale(LC_ALL, "");
 
 	initscr(); // Start ncurses mode
 	noecho(); // Don't echo keystrokes
 	cbreak(); // Disable line buffering
 
+	raw();
 	keypad(stdscr, TRUE);
-	clear();
     }
 
     ~Menu() {
 	endwin();
     }
 
-    int run() {
+    std::string Run() {
 	options_->Search(input_text_);
 
 	do {
 	    int rows, cols;
 	    getmaxyx(stdscr, rows, cols);
 	    
-	    // Calculate the range of visible options
-	    int start_option = std::max(0, sel_ - visible_rows_ + 1);
-	    int end_option = std::min((int)options_->SearchedSize(), start_option + visible_rows_);
-
 	    // Calculate the number of visible rows (subtract 2 for the title and input box)
 	    visible_rows_ = rows - 2;
 
+	    // Calculate the range of visible options
+	    int start_option = std::max(0, options_->GetSelected() - visible_rows_ + 1);
+	    int end_option = std::min((int)options_->SearchedSize(), start_option + visible_rows_);
+
 	    // Print the title row
-	    mvprintw(0, 0, "%d", (int)options_->SearchedSize());
+	    mvprintw(0, 0, "%s", options_->GetTitle().c_str());
 
 	    // Print input row
 	    mvprintw(1, 0, "%-*s", cols, input_text_.c_str());
 
 	    // Print the visible menu options
 	    for (int i = start_option; i < end_option; i++) {
-		if (i == sel_) {
+		if (i == options_->GetSelected()) {
 		    attron(A_REVERSE);
 		}
 
@@ -61,34 +66,44 @@ public:
 
 	    // Move the cursor to the input row
 	    move(1, cur_x_);
-	} while (getInput());
+	} while (GetInput_());
 
-	return sel_;
+	return options_->AtIndex(options_->GetSelected())->GetString();
     }
 
-    bool getInput() {
+private:
+    bool GetInput_() {
 	int choice = getch();
 	switch (choice) {
 	    case KEY_DOWN:
-		sel_++;
-		if (sel_ >= options_->SearchedSize()) {
-		    sel_ = options_->SearchedSize() - 1;
-		}
+		options_->Down();
 		break;
 	    case KEY_UP:
-		sel_--;
-		if (sel_ < 0) {
-		    sel_ = 0;
-		}
+		options_->Up();
+		break;
+	    case CTRL_MASK('a'):
+		options_->AddEntry(input_text_);
+		break;
+	    case CTRL_MASK('s'):
+		options_->ToggleSearch();
+		break;
+	    case CTRL_MASK('r'):
+		options_->RemoveEntry();
+		break;
+	    case CTRL_MASK('i'):
+		options_->InsertEntry(input_text_);
+		break;
+	    case CTRL_MASK('u'):
+		options_->UpdateEntry(input_text_);
 		break;
 	    case KEY_BACKSPACE:
 	    case 127:  // Some systems use 127 instead of KEY_BACKSPACE
 		if (!input_text_.empty()) {
 		    input_text_.pop_back();
 		    cur_x_--;
-		    options_->Search(input_text_);
-		    mvprintw(1, cur_x_, " ");  // Overwrite deleted character with space
 		}
+
+		options_->Search(input_text_);
 
 		break;
 	    case KEY_ENTER:
@@ -98,7 +113,6 @@ public:
 	    default:
 		if (isprint(choice)) {
 		    input_text_ += choice;
-		    mvprintw(1, 0, "%s", input_text_.c_str());
 		    cur_x_++;
 		    options_->Search(input_text_);
 		}
@@ -108,13 +122,10 @@ public:
 	return true;
     }
 
-private:
-    std::string title_;
     std::string input_text_ = "";
     std::unique_ptr<EntryList> options_;
 
     int visible_rows_;
 
     int cur_x_ = 0;
-    int sel_ = 0;
 };

@@ -8,16 +8,19 @@ int main() {
     VectorFileEntryList v("/home/wenzhou/Entries/files/hello.txt");
 
     v.Search("");
-    v.PrintSearchedEntries();
+
+    v.RemoveEntry(0);
     std::cout << v.SearchedSize() << std::endl;
+    v.PrintSearchedEntries();
 
     v.Search("t 4");
-    v.PrintSearchedEntries();
+
     std::cout << v.SearchedSize() << std::endl;
+    v.PrintSearchedEntries();
     */
 
-    Menu menu("title", std::make_unique<VectorFileEntryList>(VectorFileEntryList("/home/wenzhou/Entries/files/hello.txt")));
-    int choice = menu.run();
+    Menu menu;
+    std::cout << menu.Run() << std::endl;
     return 0;
 }
 

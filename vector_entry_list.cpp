@@ -3,6 +3,8 @@
 
 void VectorEntryList::Search(const std::string& search)
 {
+    if (!search_on_) return;
+
     searched_.clear();
 
     // Split the input text into tokens

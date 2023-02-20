@@ -100,10 +100,9 @@ private:
 	    // Split string into two parts
 	    std::string first_part = str.substr(0, first_del_pos);
 	    std::string end_part = str.substr(first_del_pos + 1);
-	    // Update input string to be the end part
-	    str = end_part;
-	    // Return the first part
-	    return first_part;
+
+	    str = first_part;
+	    return end_part;
 	}
     }
 
@@ -115,8 +114,8 @@ private:
 
 public:
     UnprocessedEntry(const std::string& str): str_(str) {
-	data_ = std::string(str);
-	name_ = SplitByFirst_(data_, '\t');
+	name_ = std::string(str);
+	data_ = SplitByFirst_(name_, '\t');
     };
 
     const bool DataEditable = false;

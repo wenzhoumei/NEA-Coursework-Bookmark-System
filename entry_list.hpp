@@ -16,15 +16,23 @@ protected:
     */
 
 public:
+    virtual std::string GetTitle() = 0;
+
+    virtual int GetSelected() = 0;
+    virtual bool Up() = 0;
+    virtual bool Down() = 0;
+
     // Return false if any of these fail else return true
-    virtual bool RemoveEntry(const int& selected) = 0;
+    virtual bool RemoveEntry() = 0;
     virtual bool AddEntry(const std::string& entry) = 0;
-    virtual bool InsertEntry(const std::string& entry, const int& selected) = 0;
-    virtual bool UpdateEntry(const std::string& entry, const int& selected) = 0;
+    virtual bool InsertEntry(const std::string& entry) = 0;
+    virtual bool UpdateEntry(const std::string& entry) = 0;
 
     virtual Entry* AtIndex(int i) = 0;
 
     virtual size_t SearchedSize() const = 0;
+
+    virtual void ToggleSearch() = 0;
 
     virtual void Search(const std::string& search) = 0;
 

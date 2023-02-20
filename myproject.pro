@@ -1,8 +1,7 @@
 TARGET = program.program
-DESTDIR = ./files
-QT += widgets
-HEADERS += 
-SOURCES += main.cpp
-INCLUDEPATH += /usr/include/qt
-QMAKE_CXXFLAGS += -std=c++20 -I/usr/local/include
-LIBS += -L./libs -lftxui-component -lftxui-dom -lftxui-screen
+OBJECTS_DIR = ./obj
+HEADERS += vector_entry_list.hpp entry_list.hpp menu.hpp
+SOURCES += main.cpp vector_entry_list.cpp entry_list.cpp
+INCLUDE_PATH +=
+QMAKE_CXXFLAGS += -std=c++20 -g
+LIBS += -lncurses

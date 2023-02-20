@@ -1,3 +1,5 @@
+#pragma once
+
 #include "vector_entry_list.hpp"
 #include <filesystem>
 #include <fstream>
@@ -18,12 +20,15 @@ protected:
             file << entry_dict_[entry]->GetString() << std::endl;
         }
 
+	file << std::flush;
+	file.close();
+
         return true;
     }
 
 public:
-    VectorFileEntryList(std::filesystem::path file_path)
-	: file_path_(file_path)
+    VectorFileEntryList(std::string title, std::filesystem::path file_path)
+	: file_path_(file_path), VectorEntryList(title)
     {
 	std::ifstream file(file_path_);
 
@@ -41,23 +46,23 @@ public:
 		AddEntry(line);
 	    }
 	}
-	
+
 	SetSearchedToEntries_();
     }
 
-    bool RemoveEntry(const int& selected) override {
-        return VectorEntryList::RemoveEntry(selected) && WriteToFile_();
+    bool RemoveEntry() override {
+	return VectorEntryList::RemoveEntry() && WriteToFile_();
     }
 
     bool AddEntry(const std::string& entry) override {
         return VectorEntryList::AddEntry(entry) && WriteToFile_();
     }
 
-    bool UpdateEntry(const std::string& entry, const int& selected) override {
-        return VectorEntryList::UpdateEntry(entry, selected) && WriteToFile_();
+    bool UpdateEntry(const std::string& entry) override {
+        return VectorEntryList::UpdateEntry(entry) && WriteToFile_();
     }
 
-    bool InsertEntry(const std::string& entry, const int& selected) override {
-        return VectorEntryList::InsertEntry(entry, selected) && WriteToFile_();
+    bool InsertEntry(const std::string& entry) override {
+        return VectorEntryList::InsertEntry(entry) && WriteToFile_();
     }
 };
