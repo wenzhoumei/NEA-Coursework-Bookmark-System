@@ -21,14 +21,14 @@ protected:
     std::unordered_map<std::string, std::unique_ptr<Entry>> entry_dict_;
 
     std::vector<std::string> entries_;
-    std::vector<int> searched_;
+    std::vector<size_t> searched_;
 
     void SetSearchedToEntries_() {
         searched_.resize(entries_.size());
         std::iota(searched_.begin(), searched_.end(), 0);
     }
 
-    int selected_ = 0;
+    size_t selected_ = 0;
     std::string title_;
 
     bool search_on_ = true;
@@ -82,7 +82,7 @@ public:
         entries_.erase(entries_.begin() + searched_[selected_]);
 
 	// Update the searched_ vector
-	for (int i = selected_; i < searched_.size(); i++) {
+	for (auto i = selected_; i < searched_.size(); i++) {
 	  searched_[i]--;
 	}
 
@@ -123,7 +123,7 @@ public:
 	entries_.insert(entries_.begin() + searched_[selected_], entry_name);
 
 	// Update the searched_ vector
-	for (int i = selected_; i < searched_.size(); i++) {
+	for (auto i = selected_; i < searched_.size(); i++) {
 	  searched_[i]++;
 	}
 

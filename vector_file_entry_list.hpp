@@ -28,7 +28,7 @@ protected:
 
 public:
     VectorFileEntryList(std::string title, std::filesystem::path file_path)
-	: file_path_(file_path), VectorEntryList(title)
+	: VectorEntryList(title), file_path_(file_path)
     {
 	std::ifstream file(file_path_);
 

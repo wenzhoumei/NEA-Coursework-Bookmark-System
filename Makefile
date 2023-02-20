@@ -40,7 +40,7 @@ DISTNAME      = program.program1.0.0
 DISTDIR = /home/wenzhou/Entries/obj/program.program1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -pipe -std=c++20 -g -O2 -flto=8 -fno-fat-lto-objects -fuse-linker-plugin -fPIC
-LIBS          = $(SUBLIBS) -lncurses /usr/lib/libQt5Gui.so /usr/lib/libQt5Core.so -lGL -lpthread   
+LIBS          = $(SUBLIBS) -lncursesw /usr/lib/libQt5Gui.so /usr/lib/libQt5Core.so -lGL -lpthread   
 AR            = gcc-ar cqs
 RANLIB        = 
 SED           = sed

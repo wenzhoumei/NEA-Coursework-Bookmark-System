@@ -18,12 +18,12 @@ void VectorEntryList::Search(const std::string& search)
     }
 
     // Create vectors to store the exact, prefix, and substring matches
-    std::vector<int> exactMatches;
-    std::vector<int> prefixMatches;
-    std::vector<int> substringMatches;
+    std::vector<size_t> exactMatches;
+    std::vector<size_t> prefixMatches;
+    std::vector<size_t> substringMatches;
 
     // Iterate through each item in the search array
-    for (int i = 0; i < entries_.size(); i++)
+    for (size_t i = 0; i < entries_.size(); i++)
     {
 	// Check if all of the input tokens can be found in the item's text
 	bool allTokensFound = true;
