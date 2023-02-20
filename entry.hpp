@@ -1,25 +1,14 @@
 #pragma once
 
 #include <string>
-#include <vector>
-#include <locale>
-#include <codecvt>
-#include <iostream>
-#include <functional>
-#include <unordered_map>
 #include <filesystem>
-#include <cstdlib>
+#include <iostream>
 
 class Entry {
 public:
     enum status { SUCCESS, FAILIURE, RUNNING } status;
 
-protected:
-    std::string str_;
-    std::string script_path_;
-    std::string data_;
-
-    void UpdateStatus_(int exit_code) {
+    void UpdateStatus(int exit_code) {
 	switch (exit_code) {
 	    case(0):
 		status = SUCCESS;
@@ -29,94 +18,117 @@ protected:
 	}
     }
 
-    void RunScript_() {
-	status = RUNNING;
-	std::string command = script_path_ + " " + data_;
-	int exit_code = WEXITSTATUS(std::system(command.c_str()));
-	UpdateStatus_(exit_code);
-    }
-
-public:
-    Entry(const std::string& str, const std::filesystem::path& script_path, const std::string& data)
-	: str_(str), script_path_(script_path), data_(str)
-    {
+    bool operator==(const Entry& other) const {
+	return GetName() == other.GetName();
     }
 
     bool operator<(const Entry& other) const {
-	return str_ < other.str_;
+	return GetName() < other.GetName();
     }
 
     std::string GetString() const {
-	return str_;
+	if (GetData() == "") { return GetName(); }
+	else { return GetName() + '\t' + GetData(); }
     }
 
-    std::string GetData() const {
-	return data_;
-    }
+    const bool DataEditable = false;
+    const bool NameEditable = false;
+    const bool Executable = false;
+
+    virtual std::string GetData() const = 0;
+    virtual bool SetData(std::string data) = 0;
+
+    virtual std::string GetName() const = 0;
+    virtual bool SetName(std::string name) = 0;
 
     virtual void Execute() = 0;
     virtual std::string GetDisplayString() = 0;
 };
 
 class DefaultEntry: public Entry {
-public:
-    DefaultEntry(const std::string& str, const std::filesystem::path& script, const std::string data)
-	: Entry(str, script, data)
-    {
-    }
-
-    void Execute() override {
-	RunScript_();
-    }
-
-    std::string GetDisplayString() override {
-	return GetString();
-    }
-};
-
-class OutputEntry: public Entry {
 protected:
-    std::string RunScriptGetOutput_() {
+    std::string name_;
+    std::string script_path_;
+    std::string data_;
+
+    void RunScript_() {
 	status = RUNNING;
-
-	std::string output;
-
-	// Open the script for reading
-	FILE* pipe = popen(script_path_.c_str(), "r");
-	if (!pipe) {
-	    std::cerr << "Failed to execute script: " << script_path_ << std::endl;
-	    return "";
-	}
-
-	// Read the output of the script
-	char buffer[128];
-	output = "";
-	while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-	    output += buffer;
-	}
-
-	// Close the pipe and get the exit code of the script
-	int exit_code = pclose(pipe);
-	UpdateStatus_(exit_code);
-
-	return output;
+	std::string command = script_path_ + " " + data_;
+	int exit_code = WEXITSTATUS(std::system(command.c_str()));
+	UpdateStatus(exit_code);
     }
 
 public:
-    OutputEntry(const std::string& str, const std::filesystem::path& script, const std::string data)
-	: Entry(str, script, data)
+    const bool DataEditable = true;
+    const bool NameEditable = true;
+    const bool Executable = true;
+
+    DefaultEntry(const std::string& name, const std::filesystem::path& script_path, const std::string& data)
+	: name_(name), script_path_(script_path), data_(data)
     {
     }
+
+    std::string GetData() const override { return data_; }
+    bool SetData(std::string data) override {
+	data_ = data;
+	return true;
+    };
+
+    std::string GetName() const override { return name_; }
+    bool SetName(std::string name) override {
+	name_ = name;
+	return true;
+    };
 
     void Execute() override {
 	RunScript_();
     }
 
     std::string GetDisplayString() override {
-	std::string output;
-
-	RunScriptGetOutput_();
-	return output;
+	return name_;
     }
 };
 
+class UnprocessedEntry: public Entry {
+private:
+    std::string SplitByFirst_(std::string& str, char del) {
+	size_t first_del_pos = str.find(del);
+	if (first_del_pos == std::string::npos) {
+	    // Delimiter not found, return empty string
+	    return "";
+	} else {
+	    // Split string into two parts
+	    std::string first_part = str.substr(0, first_del_pos);
+	    std::string end_part = str.substr(first_del_pos + 1);
+	    // Update input string to be the end part
+	    str = end_part;
+	    // Return the first part
+	    return first_part;
+	}
+    }
+
+private:
+    std::string str_;
+
+    std::string name_;
+    std::string data_;
+
+public:
+    UnprocessedEntry(const std::string& str): str_(str) {
+	data_ = std::string(str);
+	name_ = SplitByFirst_(data_, '\t');
+    };
+
+    const bool DataEditable = false;
+    const bool NameEditable = false;
+    const bool Executable = false;
+
+    std::string GetData() const override { return data_; };
+    bool SetData(std::string data) override { return false; };
+
+    std::string GetName() const override { return name_; }
+    bool SetName(std::string name) override { return false; };
+
+    void Execute() override { return; };
+    std::string GetDisplayString() override { return "..."; };
+};
