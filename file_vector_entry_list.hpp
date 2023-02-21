@@ -40,10 +40,11 @@ public:
 	    }
 	} else {
 	    // File exists, so read entries from it
-	    std::wstring line;
-	    while (std::getline(file, line)) {
-		AddEntry(line);
+	    while (std::getline(file, input_text_)) {
+		VectorEntryList::AddEntry();
 	    }
+
+	    input_text_ = L"";
 	}
 
 	SetSearchedToEntries_();
@@ -53,15 +54,15 @@ public:
 	return VectorEntryList::RemoveEntry() && WriteToFile_();
     }
 
-    bool AddEntry(const std::wstring& entry) override {
-        return VectorEntryList::AddEntry(entry) && WriteToFile_();
+    bool AddEntry() override {
+        return VectorEntryList::AddEntry() && WriteToFile_();
     }
 
-    bool UpdateEntry(const std::wstring& entry) override {
-        return VectorEntryList::UpdateEntry(entry) && WriteToFile_();
+    bool UpdateEntry() override {
+        return VectorEntryList::UpdateEntry() && WriteToFile_();
     }
 
-    bool InsertEntry(const std::wstring& entry) override {
-        return VectorEntryList::InsertEntry(entry) && WriteToFile_();
+    bool InsertEntry() override {
+        return VectorEntryList::InsertEntry() && WriteToFile_();
     }
 };

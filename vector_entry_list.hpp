@@ -17,27 +17,14 @@
 // multi index
 
 class VectorEntryList: public EntryList {
-protected:
-    std::unordered_map<std::wstring, std::unique_ptr<Entry>> entry_dict_;
-
-    std::vector<std::wstring> entries_;
-    std::vector<size_t> searched_;
-
-    void SetSearchedToEntries_() {
-        searched_.resize(entries_.size());
-        std::iota(searched_.begin(), searched_.end(), 0);
-    }
-
-    size_t selected_ = 0;
-    std::wstring title_;
-
-    bool search_on_ = true;
 public:
     VectorEntryList(const std::wstring title): title_(title) { }
 
     std::wstring GetTitle() override { return title_; }
+    std::wstring GetInputText() override { return input_text_; }
+    void SetInputText(const std::wstring& input_text) override { input_text_ = input_text; }
 
-    int GetSelected() override { return selected_; }
+    size_t GetSelectedIndex() override { return selected_; }
 
     bool Down() override { 
 	if (selected_ >= SearchedSize() - 1) { return false; }
@@ -67,10 +54,14 @@ public:
 	}
     }
 
-    void Search(const std::wstring& search) override;
+    void Search() override;
 
-    Entry* AtIndex(int i) override {
+    Entry* GetEntryAtIndex(size_t i) override {
 	return entry_dict_[entries_[searched_[i]]].get();
+    }
+
+    Entry* GetSelectedEntry() override {
+	return entry_dict_[entries_[searched_[selected_]]].get();
     }
 
     size_t SearchedSize() const override {
@@ -78,6 +69,8 @@ public:
     }
 
     bool RemoveEntry() override {
+	if (SearchedSize() == 0) { return false; }
+
 	entry_dict_.erase(entries_[searched_[selected_]]);
         entries_.erase(entries_.begin() + searched_[selected_]);
 
@@ -93,8 +86,8 @@ public:
 	return true;
     }
 
-    bool AddEntry(const std::wstring& entry) override {
-	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(entry));
+    bool AddEntry() override {
+	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(input_text_));
 
 	std::wstring entry_name = unprocessed_entry->GetName();
 	if (entry_dict_.contains(entry_name)) {
@@ -109,8 +102,10 @@ public:
 	return true;
     }
 
-    bool InsertEntry(const std::wstring& entry) override {
-	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(entry));
+    bool InsertEntry() override {
+	if (SearchedSize() == 0) { AddEntry(); }
+
+	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(input_text_));
 
 	std::wstring entry_name = unprocessed_entry->GetName();
 
@@ -132,8 +127,10 @@ public:
 	return true;
     }
 
-    bool UpdateEntry(const std::wstring& entry) override {
-	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(entry));
+    bool UpdateEntry() override {
+	if (SearchedSize() == 0) { return false; }
+
+	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(input_text_));
 	std::wstring entry_name = unprocessed_entry->GetName();
 
 	auto it = std::find(entries_.begin(), entries_.end(), entry_name);
@@ -141,11 +138,28 @@ public:
 	    // Swap selected entry with found entry if entry found
 	    std::swap(entries_[searched_[selected_]], *it);
         } else {
-	    // Else replace indexed entry
-	    entry_dict_.emplace(entry_name, std::move(entry_dict_[entries_[searched_[selected_]]]));
-	    entry_dict_.erase(entries_[searched_[selected_]]);
+	    auto it2 = entry_dict_.find(entries_[searched_[selected_]]);
+	    entry_dict_.emplace(entry_name, std::move(unprocessed_entry));
+	    entry_dict_.erase(it2);
 	    entries_[searched_[selected_]] = entry_name;
 	}
 	return true;
     }
+
+protected:
+    std::unordered_map<std::wstring, std::unique_ptr<Entry>> entry_dict_;
+
+    std::vector<std::wstring> entries_;
+    std::vector<size_t> searched_;
+
+    void SetSearchedToEntries_() {
+        searched_.resize(entries_.size());
+        std::iota(searched_.begin(), searched_.end(), 0);
+    }
+
+    size_t selected_ = 0;
+    std::wstring title_;
+    std::wstring input_text_;
+
+    bool search_on_ = true;
 };

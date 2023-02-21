@@ -118,7 +118,7 @@ private:
 public:
     UnprocessedEntry(const std::wstring& str): str_(str) {
 	name_ = std::wstring(str);
-	data_ = SplitByFirst_(name_, '\t');
+	data_ = SplitByFirst_(name_, ',');
     };
 
     const bool DataEditable = false;

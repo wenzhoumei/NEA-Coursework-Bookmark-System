@@ -2,17 +2,17 @@
 #include <iterator>
 #include <boost/algorithm/string.hpp>
 
-void VectorEntryList::Search(const std::wstring& search)
+void VectorEntryList::Search()
 {
     if (!search_on_) return;
 
     searched_.clear();
 
-    std::vector<std::wstring> inputTokens;
-    boost::split(inputTokens, search, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
+    std::vector<std::wstring> input_tokens;
+    boost::split(input_tokens, input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
 
     // If no tokens, return all entries
-    if (inputTokens.size() == 0) {
+    if (input_tokens.size() == 0) {
 	SetSearchedToEntries_();
         return;
     }
@@ -27,7 +27,7 @@ void VectorEntryList::Search(const std::wstring& search)
     {
 	// Check if all of the input tokens can be found in the item's text
 	bool allTokensFound = true;
-	for (const std::wstring& token : inputTokens)
+	for (const std::wstring& token : input_tokens)
 	{
 	    if (entries_[i].find(token) == std::wstring::npos)
 	    {
@@ -40,11 +40,11 @@ void VectorEntryList::Search(const std::wstring& search)
 	// a prefix match, or a substring match, and add the item to the appropriate vector
 	if (allTokensFound)
 	{
-	    if (search == entries_[i])
+	    if (input_text_ == entries_[i])
 	    {
 		exactMatches.push_back(i);
 	    }
-	    else if (entries_[i].find(inputTokens[0]) == 0)
+	    else if (entries_[i].find(input_tokens[0]) == 0)
 	    {
 		prefixMatches.push_back(i);
 	    }
@@ -59,4 +59,5 @@ void VectorEntryList::Search(const std::wstring& search)
     searched_.insert(searched_.end(), exactMatches.begin(), exactMatches.end());
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
+    selected_ = 0;
 }

@@ -3,17 +3,8 @@
 
 int main() {
     /*
-    VectorFileEntryList v("/home/wenzhou/Entries/files/hello.txt");
-
-    v.Search("");
-
-    v.RemoveEntry(0);
-    std::cout << v.SearchedSize() << std::endl;
-    v.PrintSearchedEntries();
-
-    v.Search("t 4");
-
-    std::cout << v.SearchedSize() << std::endl;
+    FileVectorEntryList v(L"hello", "/home/wenzhou/Entries/files/hello.txt");
+    v.PrintAllEntries();
     v.PrintSearchedEntries();
     */
 

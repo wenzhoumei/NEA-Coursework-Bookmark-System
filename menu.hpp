@@ -28,46 +28,54 @@ public:
 	endwin();
     }
 
-    std::wstring Run() {
-	options_->Search(input_text_);
-
-	do {
+    void DrawEntryList() {
 	    int rows, cols;
 	    getmaxyx(stdscr, rows, cols);
 	    
 	    // Calculate the number of visible rows (subtract 2 for the title and input box)
-	    visible_rows_ = rows - 2;
+	    if (rows < 2) { return; }
+	    size_t visible_rows = rows - 2;
+
+	    size_t selected_index = options_->GetSelectedIndex();
 
 	    // Calculate the range of visible options
-	    int start_option = std::max(0, options_->GetSelected() - visible_rows_ + 1);
-	    int end_option = std::min((int)options_->SearchedSize(), start_option + visible_rows_);
+	    size_t start_option = visible_rows > selected_index ? 0: std::max<size_t>(0, selected_index - visible_rows + 1);
+	    size_t end_option = std::min(options_->SearchedSize(), start_option + visible_rows);
 
 	    // Print the title row
-	    mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
+	    //mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
+	    mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, options_->GetSelectedIndex());
 
 	    // Print input row
-	    mvprintw(1, 0, "%-*ls", cols, input_text_.c_str());
+	    mvprintw(1, 0, "%-*ls", cols, options_->GetInputText().c_str());
 
 	    // Print the visible menu options
-	    for (int i = start_option; i < end_option; i++) {
-		if (i == options_->GetSelected()) {
+	    for (size_t i = start_option; i < end_option; i++) {
+		if (i == selected_index) {
 		    attron(A_REVERSE);
 		}
 
-		mvprintw(i - start_option + 2, 0, "%-*ls", cols, options_->AtIndex(i)->GetName().c_str());
+		mvprintw(i - start_option + 2, 0, "%-*ls", cols, options_->GetEntryAtIndex(i)->GetName().c_str());
 
 		attroff(A_REVERSE);
 	    }
 
-	    for (int i = end_option; i < visible_rows_; i++) {
+	    for (size_t i = end_option; i < visible_rows; i++) {
 		mvprintw(i - start_option + 2, 0, "%-*s", cols, "");
 	    }
 
 	    // Move the cursor to the input row
 	    move(1, cur_x_);
+    }
+
+    std::wstring Run() {
+	options_->Search();
+
+	do {
+	    DrawEntryList();
 	} while (GetInput_());
 
-	return options_->AtIndex(options_->GetSelected())->GetString();
+	return options_->GetSelectedEntry()->GetString();
     }
 
 private:
@@ -81,31 +89,31 @@ private:
 	    case KEY_UP:
 		options_->Up();
 		break;
-	    case CTRL_MASK('a'):
-		options_->AddEntry(input_text_);
+	    case CTRL_MASK('A'):
+		options_->AddEntry();
 		break;
-	    case CTRL_MASK('s'):
+	    case CTRL_MASK('S'):
 		options_->ToggleSearch();
 		break;
-	    case CTRL_MASK('r'):
+	    case CTRL_MASK('R'):
 		options_->RemoveEntry();
 		break;
-	    /*
-	    case CTRL_MASK('i'):
+		/*
+	    case CTRL_MASK('I'):
 		options_->InsertEntry(input_text_);
 		break;
-	    */
-	    case CTRL_MASK('u'):
-		options_->UpdateEntry(input_text_);
+		*/
+	    case CTRL_MASK('U'):
+		options_->UpdateEntry();
 		break;
 	    case KEY_BACKSPACE:
 	    case 127:  // Some systems use 127 instead of KEY_BACKSPACE
-		if (!input_text_.empty()) {
-		    input_text_.pop_back();
+		if (!options_->GetInputText().empty()) {
+		    options_->SetInputText(options_->GetInputText().substr(0, options_->GetInputText().size() - 1));
 		    cur_x_--;
 		}
 
-		options_->Search(input_text_);
+		options_->Search();
 
 		break;
 	    case KEY_ENTER:
@@ -113,15 +121,13 @@ private:
 		return false;
 		break;
 	    case '\t':
-		input_text_ += choice;
-		cur_x_++;
-		options_->Search(input_text_);
+		options_->SetInputText(options_->GetSelectedEntry()->GetName());
 		break;
 	    default:
 		if (iswprint(choice)) {
-		    input_text_ += choice;
+		    options_->SetInputText(options_->GetInputText() + (wchar_t)choice);
 		    cur_x_++;
-		    options_->Search(input_text_);
+		    options_->Search();
 		}
 		break;
 	}
@@ -129,10 +135,7 @@ private:
 	return true;
     }
 
-    std::wstring input_text_ = L"";
     std::unique_ptr<EntryList> options_;
-
-    int visible_rows_;
 
     int cur_x_ = 0;
 };
