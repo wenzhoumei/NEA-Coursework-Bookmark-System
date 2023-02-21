@@ -13,7 +13,8 @@ protected:
 
         if (!file) {
             std::cerr << "Error: Unable to open file for writing: " << file_path_ << std::endl;
-            return false;
+	    // TODO Handle if there is an error
+	    return false;
         }
 
         for (const std::wstring& entry : entries_) {
@@ -21,14 +22,16 @@ protected:
         }
 
 	file.close();
-
-        return true;
+	return true;
     }
 
 public:
     FileVectorEntryList(std::wstring title, std::filesystem::path file_path)
 	: VectorEntryList(title), file_path_(file_path)
     {
+    }
+
+    bool Initialize() override {
 	std::wifstream file(file_path_);
 
 	if (!file) {
@@ -36,7 +39,7 @@ public:
 	    std::ofstream new_file(file_path_);
 	    if (!new_file) {
 		std::cerr << "Error: Unable to create file: " << file_path_ << std::endl;
-		return;
+		return false;
 	    }
 	} else {
 	    // File exists, so read entries from it
@@ -48,21 +51,10 @@ public:
 	}
 
 	SetSearchedToEntries_();
+	return EntryList::Initialize();
     }
 
-    bool RemoveEntry() override {
-	return VectorEntryList::RemoveEntry() && WriteToFile_();
-    }
-
-    bool AddEntry() override {
-        return VectorEntryList::AddEntry() && WriteToFile_();
-    }
-
-    bool UpdateEntry() override {
-        return VectorEntryList::UpdateEntry() && WriteToFile_();
-    }
-
-    bool InsertEntry() override {
-        return VectorEntryList::InsertEntry() && WriteToFile_();
+    bool UpdateMenu() override {
+	return WriteToFile_();
     }
 };

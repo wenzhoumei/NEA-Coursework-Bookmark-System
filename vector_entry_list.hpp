@@ -17,27 +17,78 @@
 // multi index
 
 class VectorEntryList: public EntryList {
+protected:
+    void SetCurPos_(size_t new_cur_pos) {
+	Previous.CursorPosition = cur_x_;
+	cur_x_ = new_cur_pos;
+    }
+
+    void SetSelPos_(size_t new_sel_pos) {
+	Previous.SelectedPosition = selected_;
+	selected_ = new_sel_pos;
+    }
+
 public:
     VectorEntryList(const std::wstring title): title_(title) { }
 
     std::wstring GetTitle() override { return title_; }
     std::wstring GetInputText() override { return input_text_; }
-    void SetInputText(const std::wstring& input_text) override { input_text_ = input_text; }
 
-    size_t GetSelectedIndex() override { return selected_; }
+    void SetInputText(const std::wstring& input_text) override { 
+	input_text_ = input_text;
+	
+	SetCurPos_(input_text.size());
+	NeedsUpdate.Input = true;
 
-    bool Down() override { 
-	if (selected_ >= SearchedSize() - 1) { return false; }
-
-	selected_++;
-	return true;
+	Search();
     }
 
-    bool Up() override { 
-	if (selected_ <= 0) { return false; }
+    void AddCharToInputText(const wchar_t &input_char) override {
+	if (!iswprint(input_char)) return;
+
+	input_text_.insert(cur_x_, 1, input_char);
+	NeedsUpdate.Input = true;
+
+	SetCurPos_(cur_x_ + 1);
+
+	Search();
+    }
+
+    void RemoveCharFromInputText() override {
+	if (input_text_ == L"") return;
+
+	NeedsUpdate.Input = true;
+
+	Left();
+	input_text_.pop_back();
+	Search();
+    }
+
+    size_t GetSelectedIndex() override { return selected_; }
+    size_t GetCursorPosition() override { return cur_x_; }
+
+    void Down() override { 
+	if (selected_ >= SearchedSize() - 1) { return; }
+
+	SetSelPos_(selected_ + 1);
+    }
+
+    void Up() override { 
+	if (selected_ <= 0) { return; }
 	
-	selected_--;
-	return true;
+	SetSelPos_(selected_ - 1);
+    }
+
+    void Left() override { 
+	if (cur_x_ <= 0) { return; }
+
+	SetCurPos_(cur_x_ - 1);
+    }
+
+    void Right() override { 
+	if (cur_x_ >= input_text_.size()) { return; }
+	
+	SetCurPos_(cur_x_ + 1);
     }
 
     void ToggleSearch() override { search_on_ = !search_on_; }
@@ -68,8 +119,8 @@ public:
 	return searched_.size();
     }
 
-    bool RemoveEntry() override {
-	if (SearchedSize() == 0) { return false; }
+    void RemoveEntry() override {
+	if (SearchedSize() == 0) { return; }
 
 	entry_dict_.erase(entries_[searched_[selected_]]);
         entries_.erase(entries_.begin() + searched_[selected_]);
@@ -83,26 +134,26 @@ public:
 
 	if (selected_ > SearchedSize() - 1) { selected_ = SearchedSize() - 1; }
 
-	return true;
+	NeedsUpdate.Menu = true;
     }
 
-    bool AddEntry() override {
+    void AddEntry() override {
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(input_text_));
 
 	std::wstring entry_name = unprocessed_entry->GetName();
 	if (entry_dict_.contains(entry_name)) {
 	    std::wcerr << "Error: Entry(" << entry_name << ") already exists" << std::endl;
-	    return false;
+	    return;
 	}
 
         entries_.push_back(entry_name);
 	entry_dict_.emplace(entry_name, std::move(unprocessed_entry));
 	searched_.push_back(entries_.size() - 1);
 
-	return true;
+	NeedsUpdate.Menu = true;
     }
 
-    bool InsertEntry() override {
+    void InsertEntry() override {
 	if (SearchedSize() == 0) { AddEntry(); }
 
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(input_text_));
@@ -111,7 +162,7 @@ public:
 
 	if (entry_dict_.contains(entry_name)) {
 	    std::cerr << "Error: Entry already exists" << std::endl;
-	    return false;
+	    return;
 	}
 
 	entry_dict_.emplace(entry_name, std::move(unprocessed_entry));
@@ -124,11 +175,11 @@ public:
 
 	searched_.insert(searched_.begin() + selected_, searched_[selected_] - 1);
 
-	return true;
+	NeedsUpdate.Menu = true;
     }
 
-    bool UpdateEntry() override {
-	if (SearchedSize() == 0) { return false; }
+    void UpdateEntry() override {
+	if (SearchedSize() == 0) { return; }
 
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(input_text_));
 	std::wstring entry_name = unprocessed_entry->GetName();
@@ -143,7 +194,8 @@ public:
 	    entry_dict_.erase(it2);
 	    entries_[searched_[selected_]] = entry_name;
 	}
-	return true;
+
+	NeedsUpdate.Menu = true;
     }
 
 protected:
@@ -160,6 +212,8 @@ protected:
     size_t selected_ = 0;
     std::wstring title_;
     std::wstring input_text_;
+
+    size_t cur_x_ = 0;
 
     bool search_on_ = true;
 };

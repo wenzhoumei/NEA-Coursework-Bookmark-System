@@ -5,7 +5,7 @@
 void VectorEntryList::Search()
 {
     if (!search_on_) return;
-
+    selected_ = 0;
     searched_.clear();
 
     std::vector<std::wstring> input_tokens;
@@ -59,5 +59,6 @@ void VectorEntryList::Search()
     searched_.insert(searched_.end(), exactMatches.begin(), exactMatches.end());
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
-    selected_ = 0;
+
+    NeedsUpdate.Menu = true;
 }
