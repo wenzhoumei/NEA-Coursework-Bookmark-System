@@ -792,11 +792,10 @@ compiler_clean: compiler_moc_predefs_clean
 ####### Compile
 
 obj/main.o: main.cpp menu.hpp \
+		vector_entry_list.hpp \
 		entry_list.hpp \
 		entry.hpp \
-		util.hpp \
-		file_vector_entry_list.hpp \
-		vector_entry_list.hpp
+		util.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o main.cpp
 
 obj/vector_entry_list.o: vector_entry_list.cpp vector_entry_list.hpp \

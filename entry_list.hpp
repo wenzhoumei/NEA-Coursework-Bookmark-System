@@ -5,77 +5,186 @@
 #include "entry.hpp"
 
 class EntryList {
-private:
-    std::wstring SplitByLast_(std::wstring& str, wchar_t del);
-    std::wstring SplitByFirst_(std::wstring& str, wchar_t del);
-    std::wstring SplitByIndex_(std::wstring& str, size_t del_pos);
+public:
+    enum mode { SEARCH, EDIT };
+    void Mode_Set(enum mode m) { Mode_mode_ = m; }
+    enum mode Mode_Get() { return Mode_mode_; }
 
 protected:
-    /*
-    std::unique_ptr<Entry> ProcessEntry(std::unique_ptr<Entry> entry);
-    */
+    enum mode Mode_mode_;
+    bool Mode_decay_to_search_;
 
 public:
-    struct {
-	bool Title;
-	bool Input;
-	bool Menu;
+    std::wstring Title_Get() { return Title_text_; }
+    virtual bool Title_Update() { return true; }
+    bool Title_NeedsUpdate() { return Title_needs_update_; }
 
-	void Reset() {
-	    Title = Input = Menu = false;
-	};
-    } NeedsUpdate;
+protected:
+    bool Title_needs_update_;
+    std::wstring Title_text_;
 
-    struct {
-	size_t CursorPosition;
-	size_t SelectedPosition;
-    } Previous;
+public:
+    // If not enough, return false
+    bool Visibility_Update(size_t visible_rows, size_t visible_cols) {
+	if (visible_rows < 2) { return false; }
+	if (visible_cols < 20) { return false; }
 
-    virtual bool Initialize() {
-	NeedsUpdate.Title = true;
-	NeedsUpdate.Input = true;
-	NeedsUpdate.Menu = true;
+	size_t menu_size = visible_rows - 2;
+	Visibility_num_cols = visible_cols;
 
-	Previous.CursorPosition = -1;
-	Previous.SelectedPosition = -1;
+	Visibility_start_option_ = Selected_GetIndex() > menu_size ? Selected_GetIndex() - menu_size + 1: 0;
+	Visibility_end_option_ = std::min(SearchMenu_Size(), Visibility_start_option_ + menu_size);
 	return true;
     }
 
-    virtual bool UpdateTitle() { return true; }
-    virtual bool UpdateMenu() { return true; }
+    size_t Visibility_StartOption() { return Visibility_start_option_; }
+    size_t Visibility_EndOption() { return Visibility_end_option_; }
+    size_t Visibility_TranslateIndexToRow(size_t i) { return i - Visibility_start_option_ + 2; }
 
-    virtual std::wstring GetTitle() = 0;
+protected:
+    size_t Visibility_start_option_;
+    size_t Visibility_end_option_;
+    size_t Visibility_num_cols;
 
-    virtual size_t GetSelectedIndex() = 0;
-    virtual size_t GetCursorPosition() = 0;
+public:
+    void Selected_Down() { 
+	if (Selected_selected_ >= SearchMenu_Size() - 1) { return; }
 
-    virtual void Up() = 0;
-    virtual void Down() = 0;
+	Selected_set_pos_(Selected_selected_ + 1);
+    }
 
-    virtual void Left() = 0;
-    virtual void Right() = 0;
+    void Selected_Up() { 
+	if (Selected_selected_ <= 0) { return; }
+	
+	Selected_set_pos_(Selected_selected_ - 1);
+    }
 
-    virtual std::wstring GetInputText() = 0;
+    void Selected_Reset() { 
+	if (Selected_selected_ <= 0) { return; }
+	
+	Selected_set_pos_(0);
+    }
 
-    virtual void SetInputText(const std::wstring& input_char) = 0;
-    virtual void AddCharToInputText(const wchar_t& input_char) = 0;
-    virtual void RemoveCharFromInputText() = 0;
+    size_t Selected_GetIndex() { return Selected_selected_; }
+    size_t Selected_GetPreviousIndex() { return Selected_previous_position_; }
+    Entry* Selected_GetEntry() { return SearchMenu_Get(Selected_selected_); }
+protected:
+    void Selected_set_pos_(size_t new_sel_pos) {
+	Selected_previous_position_ = Selected_selected_;
+	Selected_selected_ = new_sel_pos;
+    }
+
+    size_t Selected_previous_position_;
+    size_t Selected_selected_;
+
+public:
+    void Cursor_Left() { 
+	if (Cursor_cur_x_ <= 0) { return; }
+
+	Cursor_set_x_pos_(Cursor_cur_x_ - 1);
+    }
+
+    void Cursor_Right() { 
+	if (Cursor_cur_x_ >= Input_text_.size()) { return; }
+	
+	Cursor_set_x_pos_(Cursor_cur_x_ + 1);
+    }
+
+    size_t Cursor_GetXPosition() { return Cursor_cur_x_; }
+
+protected:
+    size_t Cursor_cur_x_;
+    size_t Cursor_previous_position_;
+
+    void Cursor_set_x_pos_(size_t new_cur_pos) {
+	Cursor_previous_position_ = Cursor_cur_x_;
+	Cursor_cur_x_ = new_cur_pos;
+    }
+
+public:
+    void Input_Tab() { 
+	Input_SetText(Selected_GetEntry()->GetDisplayString());
+    }
+
+    void Input_PrintableKey(const wchar_t &input_char) {
+	if (!iswprint(input_char)) return;
+
+	Input_text_.insert(Cursor_cur_x_, 1, input_char);
+	Input_needs_update_ = true;
+
+	Selected_set_pos_(0);
+	Cursor_set_x_pos_(Cursor_cur_x_ + 1);
+
+	SearchMenu_Update();
+    }
+
+    void Input_Backspace() {
+	if (Input_text_ == L"") return;
+
+	Input_needs_update_ = true;
+
+	Selected_set_pos_(0);
+
+	Cursor_Left();
+	Input_text_.pop_back();
+	SearchMenu_Update();
+    }
+
+    std::wstring Input_GetText() { return Input_text_; }
+
+    void Input_SetText(const std::wstring& input_text) { 
+	Input_text_ = input_text;
+	
+	Cursor_set_x_pos_(input_text.size());
+	Selected_set_pos_(0);
+	Input_needs_update_ = true;
+
+	SearchMenu_Update();
+    }
+
+    bool Input_NeedsUpdate() { return Input_needs_update_; }
+
+protected:
+    bool Input_needs_update_;
+    std::wstring Input_text_;
+
+public:
+    virtual bool Update_Initialize() {
+	Selected_selected_ = 0;
+
+	Title_needs_update_ = Input_needs_update_ = SearchMenu_needs_update_ = true;
+	Mode_mode_ = SEARCH;
+
+	Cursor_cur_x_ = 0;
+	Cursor_previous_position_ = -1;
+	Selected_previous_position_ = -1;
+
+	return true;
+    }
+
+    virtual bool Update_EndLoop() {
+	Title_needs_update_ = Input_needs_update_ = SearchMenu_needs_update_ = false;
+	return true;
+    }
 
     // Return false if any of these fail else return true
-    virtual void RemoveEntry() = 0;
-    virtual void AddEntry() = 0;
-    virtual void InsertEntry() = 0;
-    virtual void UpdateEntry() = 0;
+    virtual void EntryList_RemoveEntry() = 0;
+    virtual void EntryList_AddEntry() = 0;
+    virtual void EntryList_InsertEntry() = 0;
+    virtual void EntryList_UpdateEntry() = 0;
 
-    virtual Entry* GetSelectedEntry() = 0;
-    virtual Entry* GetEntryAtIndex(size_t i) = 0;
+    virtual bool EntryList_Update() { return true; }
 
-    virtual size_t SearchedSize() const = 0;
+public:
+    virtual size_t SearchMenu_Size() const = 0;
+    virtual void SearchMenu_Update() = 0;
+    virtual Entry* SearchMenu_Get(size_t i) = 0;
 
-    virtual void ToggleSearch() = 0;
+    bool SearchMenu_NeedsUpdate() { return SearchMenu_needs_update_; }
+protected:
+    bool SearchMenu_needs_update_;
 
-    virtual void Search() = 0;
-
-    virtual void PrintAllEntries() = 0;
-    virtual void PrintSearchedEntries() = 0;
+public:
+    virtual void Debug_PrintAllEntries() = 0;
+    virtual void Debug_PrintSearchedEntries() = 0;
 };

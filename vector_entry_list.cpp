@@ -2,14 +2,15 @@
 #include <iterator>
 #include <boost/algorithm/string.hpp>
 
-void VectorEntryList::Search()
+void VectorEntryList::SearchMenu_Update()
 {
-    if (!search_on_) return;
-    selected_ = 0;
+    if (Mode_mode_ != SEARCH) return;
+
+    Selected_set_pos_(0);
     searched_.clear();
 
     std::vector<std::wstring> input_tokens;
-    boost::split(input_tokens, input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
+    boost::split(input_tokens, Input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
 
     // If no tokens, return all entries
     if (input_tokens.size() == 0) {
@@ -40,7 +41,7 @@ void VectorEntryList::Search()
 	// a prefix match, or a substring match, and add the item to the appropriate vector
 	if (allTokensFound)
 	{
-	    if (input_text_ == entries_[i])
+	    if (Input_text_ == entries_[i])
 	    {
 		exactMatches.push_back(i);
 	    }
@@ -60,5 +61,5 @@ void VectorEntryList::Search()
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
 
-    NeedsUpdate.Menu = true;
+    SearchMenu_needs_update_ = true;
 }

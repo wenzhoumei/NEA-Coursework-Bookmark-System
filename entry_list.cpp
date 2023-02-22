@@ -1,5 +1,6 @@
 #include "entry_list.hpp"
 
+/*
 std::wstring EntryList::SplitByLast_(std::wstring& str, wchar_t del) {
     size_t last_del_pos = str.find_last_of(del);
     if (last_del_pos == std::wstring::npos) {
@@ -41,6 +42,7 @@ std::wstring EntryList::SplitByIndex_(std::wstring& str, size_t del_pos) {
     // Return the end part
     return end_part;
 }
+*/
 
 /*
 std::unique_ptr<Entry> EntryList::ProcessEntry(std::unique_ptr<Entry> entry) {

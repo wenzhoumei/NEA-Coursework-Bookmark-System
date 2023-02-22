@@ -7,7 +7,8 @@
 
 class Entry {
 public:
-    enum status { SUCCESS, FAILIURE, RUNNING } status;
+    enum { SUCCESS, FAILIURE, RUNNING } status;
+    enum { NAME, DATA } editing = NAME;
 
     void UpdateStatus(int exit_code) {
 	switch (exit_code) {
@@ -61,6 +62,8 @@ protected:
 	UpdateStatus(exit_code);
     }
 
+    std::wstring& edit_string_ = data_;
+
 public:
     const bool DataEditable = true;
     const bool NameEditable = true;
@@ -79,6 +82,8 @@ public:
 
     std::wstring GetName() const override { return name_; }
     bool SetName(std::wstring name) override {
+	if (data_.find(L',')) { return false; }
+
 	name_ = name;
 	return true;
     };
