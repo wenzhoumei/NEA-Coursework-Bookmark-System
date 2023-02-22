@@ -41,13 +41,12 @@ public:
 	size_t end_option = options_->Visibility_EndOption();
 
 	// Print the title row
-	mvprintw(0, 0, "%zu %zu", start_option, end_option);
-	//mvprintw(0, 0, "%-*zu", cols, selected_index);
+	mvprintw(0, 0, "%-*zu", cols, selected_index);
 	if (options_->Title_NeedsUpdate()) {
 	    //mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
 	    //mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, options_->GetSelectedIndex());
 	    //mvprintw(0, 0, "%zu", options_->GetCursorPosition());
-	    options_->Title_Update();
+	    options_->Title_UpdateBackend();
 	}
 
 	// Print input row
@@ -70,6 +69,7 @@ public:
 	    // Fill out empty remaining rows
 	    for (size_t i = end_option; i < (size_t)rows; i++) {
 		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*s", cols, "");
+		mvchgat(options_->Visibility_TranslateIndexToRow(i), 0, cols, A_NORMAL, 0, NULL);
 	    }
 
 	    options_->SearchMenu_Update();
@@ -136,11 +136,8 @@ private:
 	    case CTRL_MASK('r'):
 		options_->EntryList_RemoveEntry();
 		break;
-	    case CTRL_MASK('p'):
-		options_->EntryList_RemoveEntry();
-		break;
-	    case CTRL_MASK('u'):
-		options_->EntryList_InsertEntry();
+	    case CTRL_MASK('k'):
+		/* Someday, insert above like edit */
 		break;
 	    case CTRL_MASK('e'):
 		options_->Mode_Set(EntryList::EDIT);
@@ -164,7 +161,7 @@ private:
 		}
 		break;
 	    case '\t':
-		options_->Input_Tab();
+		options_->Input_SetTextToSelected();
 		break;
 	    default:
 		options_->Input_PrintableKey((wchar_t)choice);

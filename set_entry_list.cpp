@@ -1,16 +1,13 @@
-#include "vector_entry_list.hpp"
-#include <iterator>
 #include <boost/algorithm/string.hpp>
+#include "set_entry_list.hpp"
 
-void VectorEntryList::SearchMenu_Update()
+void SetEntryList::Search()
 {
-    if (Mode_mode_ != SEARCH) return;
-
-    Selected_Reset_();
+    if (!search_on_) return;
     searched_.clear();
 
     std::vector<std::wstring> input_tokens;
-    boost::split(input_tokens, Input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
+    boost::split(input_tokens, input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
 
     // If no tokens, return all entries
     if (input_tokens.size() == 0) {
@@ -19,18 +16,18 @@ void VectorEntryList::SearchMenu_Update()
     }
 
     // Create vectors to store the exact, prefix, and substring matches
-    std::vector<size_t> exactMatches;
-    std::vector<size_t> prefixMatches;
-    std::vector<size_t> substringMatches;
+    std::vector<std::wstring> exactMatches;
+    std::vector<std::wstring> prefixMatches;
+    std::vector<std::wstring> substringMatches;
 
     // Iterate through each item in the search array
-    for (size_t i = 0; i < entries_.size(); i++)
+    for (const auto& [key, val]: entry_dict_)
     {
 	// Check if all of the input tokens can be found in the item's text
 	bool allTokensFound = true;
 	for (const std::wstring& token : input_tokens)
 	{
-	    if (entries_[i].find(token) == std::wstring::npos)
+	    if (key.find(token) == std::wstring::npos)
 	    {
 		allTokensFound = false;
 		break;
@@ -41,17 +38,17 @@ void VectorEntryList::SearchMenu_Update()
 	// a prefix match, or a substring match, and add the item to the appropriate vector
 	if (allTokensFound)
 	{
-	    if (Input_text_ == entries_[i])
+	    if (input_text_ == key)
 	    {
-		exactMatches.push_back(i);
+		exactMatches.push_back(key);
 	    }
-	    else if (entries_[i].find(input_tokens[0]) == 0)
+	    else if (key.find(input_tokens[0]) == 0)
 	    {
-		prefixMatches.push_back(i);
+		prefixMatches.push_back(key);
 	    }
 	    else
 	    {
-		substringMatches.push_back(i);
+		substringMatches.push_back(key);
 	    }
 	}
     }
@@ -61,5 +58,6 @@ void VectorEntryList::SearchMenu_Update()
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
 
-    SearchMenu_needs_update_ = true;
+    NeedsUpdate.Menu = true;
+    SetSelPos_(0);
 }

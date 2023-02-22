@@ -11,12 +11,19 @@ public:
     enum mode Mode_Get() { return Mode_mode_; }
 
 protected:
+    void Mode_ResetToSearch() { 
+	if (Mode_mode_ != SEARCH) {
+	    Mode_mode_ = SEARCH;
+	    SearchMenu_Update();
+	}
+    }
+
     enum mode Mode_mode_;
     bool Mode_decay_to_search_;
 
 public:
     std::wstring Title_Get() { return Title_text_; }
-    virtual bool Title_Update() { return true; }
+    virtual bool Title_UpdateBackend() { return true; }
     bool Title_NeedsUpdate() { return Title_needs_update_; }
 
 protected:
@@ -50,28 +57,35 @@ public:
     void Selected_Down() { 
 	if (Selected_selected_ >= SearchMenu_Size() - 1) { return; }
 
-	Selected_set_pos_(Selected_selected_ + 1);
+	Selected_SetPos_(Selected_selected_ + 1);
     }
 
     void Selected_Up() { 
 	if (Selected_selected_ <= 0) { return; }
 	
-	Selected_set_pos_(Selected_selected_ - 1);
-    }
-
-    void Selected_Reset() { 
-	if (Selected_selected_ <= 0) { return; }
-	
-	Selected_set_pos_(0);
+	Selected_SetPos_(Selected_selected_ - 1);
     }
 
     size_t Selected_GetIndex() { return Selected_selected_; }
     size_t Selected_GetPreviousIndex() { return Selected_previous_position_; }
     Entry* Selected_GetEntry() { return SearchMenu_Get(Selected_selected_); }
 protected:
-    void Selected_set_pos_(size_t new_sel_pos) {
+    void Selected_ReduceIfAboveMaximum_() {
+	if (Selected_selected_ > SearchMenu_Size() - 1) { Selected_selected_ = SearchMenu_Size() - 1; }
+    }
+
+    void Selected_SetPos_(size_t new_sel_pos) {
+	if (Mode_mode_ == EDIT) {
+	    Input_SetTextToSelected();
+	}
 	Selected_previous_position_ = Selected_selected_;
 	Selected_selected_ = new_sel_pos;
+    }
+
+    void Selected_Reset_() { 
+	if (SearchMenu_Size() == 0) { return; }
+	
+	Selected_selected_ = 0;
     }
 
     size_t Selected_previous_position_;
@@ -81,13 +95,13 @@ public:
     void Cursor_Left() { 
 	if (Cursor_cur_x_ <= 0) { return; }
 
-	Cursor_set_x_pos_(Cursor_cur_x_ - 1);
+	Cursor_SetXPos_(Cursor_cur_x_ - 1);
     }
 
     void Cursor_Right() { 
 	if (Cursor_cur_x_ >= Input_text_.size()) { return; }
 	
-	Cursor_set_x_pos_(Cursor_cur_x_ + 1);
+	Cursor_SetXPos_(Cursor_cur_x_ + 1);
     }
 
     size_t Cursor_GetXPosition() { return Cursor_cur_x_; }
@@ -96,13 +110,13 @@ protected:
     size_t Cursor_cur_x_;
     size_t Cursor_previous_position_;
 
-    void Cursor_set_x_pos_(size_t new_cur_pos) {
+    void Cursor_SetXPos_(size_t new_cur_pos) {
 	Cursor_previous_position_ = Cursor_cur_x_;
 	Cursor_cur_x_ = new_cur_pos;
     }
 
 public:
-    void Input_Tab() { 
+    void Input_SetTextToSelected() { 
 	Input_SetText(Selected_GetEntry()->GetDisplayString());
     }
 
@@ -112,8 +126,7 @@ public:
 	Input_text_.insert(Cursor_cur_x_, 1, input_char);
 	Input_needs_update_ = true;
 
-	Selected_set_pos_(0);
-	Cursor_set_x_pos_(Cursor_cur_x_ + 1);
+	Cursor_SetXPos_(Cursor_cur_x_ + 1);
 
 	SearchMenu_Update();
     }
@@ -122,8 +135,6 @@ public:
 	if (Input_text_ == L"") return;
 
 	Input_needs_update_ = true;
-
-	Selected_set_pos_(0);
 
 	Cursor_Left();
 	Input_text_.pop_back();
@@ -135,8 +146,7 @@ public:
     void Input_SetText(const std::wstring& input_text) { 
 	Input_text_ = input_text;
 	
-	Cursor_set_x_pos_(input_text.size());
-	Selected_set_pos_(0);
+	Cursor_SetXPos_(input_text.size());
 	Input_needs_update_ = true;
 
 	SearchMenu_Update();
@@ -173,7 +183,7 @@ public:
     virtual void EntryList_InsertEntry() = 0;
     virtual void EntryList_UpdateEntry() = 0;
 
-    virtual bool EntryList_Update() { return true; }
+    virtual bool EntryList_UpdateBackend() { return true; }
 
 public:
     virtual size_t SearchMenu_Size() const = 0;

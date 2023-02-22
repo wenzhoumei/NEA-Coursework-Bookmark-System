@@ -137,5 +137,5 @@ public:
     bool SetName(std::wstring name) override { return false; };
 
     void Execute() override { return; };
-    std::wstring GetDisplayString() override { return L"..."; };
+    std::wstring GetDisplayString() override { return name_; };
 };
