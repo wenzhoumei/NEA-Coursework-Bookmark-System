@@ -10,7 +10,6 @@ public:
     void Mode_Set(enum mode m) {
 	if (m == EDIT) {
 	    Input_SetTextToSelected();
-	    Input_changed_ = true;
 	} else if (m == INSERT) {
 	    Input_SetText(L"");
 	} else if (m == SEARCH) {
@@ -43,6 +42,7 @@ public:
 	if (visible_cols < 20) { return false; }
 
 	size_t visible_menu_rows = visible_rows - 2;
+	if (Mode_mode_ == INSERT) { visible_menu_rows--; }
 	Visibility_num_cols = visible_cols;
 
 	Visibility_previous_start_option_ = Visibility_start_option_;
@@ -60,11 +60,19 @@ public:
     bool Visibility_StartOptionChanged() { return Visibility_previous_start_option_ != Visibility_start_option_; }
 
     size_t Visibility_PreviousSelectedRow() { return Visibility_previous_selected_row_; }
-    size_t Visibility_SelectedRow() { return Visibility_selected_row_; }
+    size_t Visibility_SelectedRow() { 
+	return Visibility_selected_row_;
+    }
+
     size_t Visibility_SelectedRowChanged() { return Visibility_selected_row_ != Visibility_previous_selected_row_; }
 
-    size_t Visibility_NumOptions() { return Visibility_end_option_; }
-    size_t Visibility_TranslateIndexToRow(size_t i) { return i - Visibility_start_option_ + 2; }
+    size_t Visibility_NumOptions() {
+	return Visibility_end_option_;
+    }
+
+    size_t Visibility_TranslateIndexToRow(size_t i) {
+	return i - Visibility_start_option_ + 2;
+    }
 
 protected:
     size_t Visibility_start_option_;
@@ -75,11 +83,9 @@ protected:
 
     size_t Visibility_end_option_;
     size_t Visibility_num_cols;
-
 public:
     void Selected_Down() { 
 	if (SearchMenu_Size() == 0) { return; }
-	if (Selected_selected_ >= SearchMenu_Size() - 1) { return; }
 
 	Selected_SetPos_(Selected_selected_ + 1);
     }
@@ -95,7 +101,7 @@ public:
 
 protected:
     void Selected_ReduceIfAboveMaximum_() {
-	if (Selected_selected_ > SearchMenu_Size() - 1) { Selected_selected_ = SearchMenu_Size() - 1; }
+	if (Selected_selected_ > Selected_Max_()) { Selected_selected_ = Selected_Max_(); }
     }
 
     void Selected_SetPos_(size_t new_sel_pos) {
@@ -104,6 +110,15 @@ protected:
 	}
 
 	Selected_selected_ = new_sel_pos;
+	Selected_ReduceIfAboveMaximum_();
+    }
+
+    size_t Selected_Max_() {
+	if (Mode_mode_ == INSERT) {
+	    return SearchMenu_Size();
+	} else {
+	    return SearchMenu_Size() - 1;
+	}
     }
 
     void Selected_Reset_() { 

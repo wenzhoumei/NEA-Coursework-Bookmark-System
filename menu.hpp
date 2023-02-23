@@ -53,15 +53,30 @@ public:
 	    //mvprintw(0, 0, "%zu", options_->GetCursorPosition());
 	    options_->Title_UpdateBackend();
 	}
+	
+	if (mode == EntryList::INSERT) {
+	    for (size_t i = start_option; i < selected_index; i++) {
+		//mvprintw(0, 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
+		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
+	    }
 
-	// Print the visible menu options
-	if (options_->SearchMenu_NeedsDisplayUpdate()) {
+	    for (size_t i = selected_index; i < num_options; i++) {
+		//mvprintw(0, 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
+		mvprintw(options_->Visibility_TranslateIndexToRow(i) + 1, 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
+	    }
+
+	    // Fill out remaining empty rows
+	    for (size_t i = num_options + 1; i < (size_t)rows; i++) {
+		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*s", cols, "");
+		mvchgat(options_->Visibility_TranslateIndexToRow(i), 0, cols, A_NORMAL, 0, NULL);
+	    }
+	} else if (options_->SearchMenu_NeedsDisplayUpdate()) {
 	    for (size_t i = start_option; i < num_options; i++) {
 		//mvprintw(0, 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
 		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
 	    }
 
-	    // Fill out empty remaining rows
+	    // Fill out remaining empty rows
 	    for (size_t i = num_options; i < (size_t)rows; i++) {
 		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*s", cols, "");
 		mvchgat(options_->Visibility_TranslateIndexToRow(i), 0, cols, A_NORMAL, 0, NULL);
@@ -73,12 +88,16 @@ public:
 	    std::wstring input_text = options_->Input_GetText();
 	    mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
 
-	    if (mode == EntryList::EDIT) {
+	    if (mode == EntryList::EDIT || mode == EntryList::INSERT) {
 		mvprintw(options_->Visibility_SelectedRow(), 0, "%-*ls", cols, input_text.c_str());
 	    }
 	}
 
-	if (options_->Visibility_SelectedRowChanged()|| selected_index == 0) {
+	if (options_->Visibility_SelectedRowChanged() || selected_index == 0 || mode == EntryList::INSERT) {
+	    if (mode == EntryList::INSERT) {
+		mvprintw(options_->Visibility_SelectedRow(), 0, "%-*ls", cols, options_->Input_GetText().c_str());
+	    }
+
 	    // Reverse foreground and background of selected line
 	    mvchgat(options_->Visibility_PreviousSelectedRow(), 0, cols, A_NORMAL, 0, NULL);
 	    mvchgat(options_->Visibility_SelectedRow(), 0, cols, A_REVERSE, 0, NULL);
@@ -143,7 +162,7 @@ private:
 		options_->EntryList_RemoveEntry();
 		break;
 	    case CTRL_MASK('k'):
-		/* Someday, insert above like edit */
+		options_->Mode_Set(EntryList::INSERT);
 		break;
 	    case CTRL_MASK('e'):
 		options_->Mode_Set(EntryList::EDIT);
@@ -165,8 +184,10 @@ private:
 	    case '\n':
 		if (options_->Mode_Get() == EntryList::SEARCH) {
 		    return false;
-		} else {
+		} else if (options_->Mode_Get() == EntryList::EDIT) {
 		    options_->EntryList_UpdateEntry();
+		} else if (options_->Mode_Get() == EntryList::INSERT) {
+		    options_->EntryList_InsertEntry();
 		}
 		break;
 	    case '\t':

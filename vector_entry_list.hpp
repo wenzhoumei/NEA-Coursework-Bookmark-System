@@ -39,8 +39,6 @@ public:
     }
 
     void EntryList_RemoveEntry() override {
-	Mode_Set(SEARCH);
-
 	if (SearchMenu_Size() == 0) { return; }
 
 	entry_dict_.erase(entries_[searched_[Selected_selected_]]);
@@ -55,12 +53,11 @@ public:
 
 	Selected_ReduceIfAboveMaximum_();
 
+	Mode_Set(SEARCH);
 	EntryList_changed_ = true;
     }
 
     void EntryList_AddEntry() override {
-	Mode_Set(SEARCH);
-
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(Input_text_));
 
 	std::wstring entry_name = unprocessed_entry->GetName();
@@ -73,13 +70,15 @@ public:
 	entry_dict_.emplace(entry_name, std::move(unprocessed_entry));
 	searched_.push_back(entries_.size() - 1);
 
+	Mode_Set(SEARCH);
 	EntryList_changed_ = true;
     }
 
     void EntryList_InsertEntry() override {
-	Mode_Set(SEARCH);
-
-	if (SearchMenu_Size() == 0) { EntryList_AddEntry(); }
+	if (SearchMenu_Size() == 0 || Selected_selected_ == SearchMenu_Size()) {
+	    EntryList_AddEntry();
+	    return;
+	}
 
 	std::unique_ptr<Entry> unprocessed_entry = std::make_unique<UnprocessedEntry>(UnprocessedEntry(Input_text_));
 
@@ -100,6 +99,7 @@ public:
 
 	searched_.insert(searched_.begin() + Selected_selected_, searched_[Selected_selected_] - 1);
 
+	Mode_Set(SEARCH);
 	EntryList_changed_ = true;
     }
 
