@@ -6,28 +6,34 @@
 
 class EntryList {
 public:
-    enum mode { SEARCH, EDIT };
-    void Mode_Set(enum mode m) { Mode_mode_ = m; }
-    enum mode Mode_Get() { return Mode_mode_; }
-
-protected:
-    void Mode_ResetToSearch() { 
-	if (Mode_mode_ != SEARCH) {
-	    Mode_mode_ = SEARCH;
-	    SearchMenu_Update();
+    enum mode { SEARCH, EDIT, INSERT };
+    void Mode_Set(enum mode m) {
+	if (m == EDIT) {
+	    Input_SetTextToSelected();
+	    Input_changed_ = true;
+	} else if (m == INSERT) {
+	    Input_SetText(L"");
+	} else if (m == SEARCH) {
+	    if (Mode_mode_ != SEARCH) {
+		Mode_mode_ = SEARCH;
+		Input_SetText(L"");
+	    }
 	}
+
+	Mode_mode_ = m;
     }
 
+    enum mode Mode_Get() { return Mode_mode_; }
+protected:
     enum mode Mode_mode_;
-    bool Mode_decay_to_search_;
 
 public:
     std::wstring Title_Get() { return Title_text_; }
     virtual bool Title_UpdateBackend() { return true; }
-    bool Title_NeedsUpdate() { return Title_needs_update_; }
+    bool Title_Changed() { return Title_changed_; }
 
 protected:
-    bool Title_needs_update_;
+    bool Title_changed_;
     std::wstring Title_text_;
 
 public:
@@ -39,17 +45,34 @@ public:
 	size_t visible_menu_rows = visible_rows - 2;
 	Visibility_num_cols = visible_cols;
 
-	Visibility_start_option_ = Selected_GetIndex() > visible_menu_rows ? Selected_GetIndex() - visible_menu_rows + 1: 0;
+	Visibility_previous_start_option_ = Visibility_start_option_;
+	Visibility_start_option_ = Selected_GetIndex() > visible_menu_rows - 1 ? Selected_GetIndex() - visible_menu_rows + 1: 0;
+
+	Visibility_previous_selected_row_ = Visibility_selected_row_;
+	Visibility_selected_row_ = Visibility_TranslateIndexToRow(Selected_selected_);
+
 	Visibility_end_option_ = std::min(SearchMenu_Size(), Visibility_start_option_ + visible_menu_rows);
 	return true;
     }
 
+    size_t Visibility_PreviousStartOption() { return Visibility_previous_start_option_; }
     size_t Visibility_StartOption() { return Visibility_start_option_; }
-    size_t Visibility_EndOption() { return Visibility_end_option_; }
+    bool Visibility_StartOptionChanged() { return Visibility_previous_start_option_ != Visibility_start_option_; }
+
+    size_t Visibility_PreviousSelectedRow() { return Visibility_previous_selected_row_; }
+    size_t Visibility_SelectedRow() { return Visibility_selected_row_; }
+    size_t Visibility_SelectedRowChanged() { return Visibility_selected_row_ != Visibility_previous_selected_row_; }
+
+    size_t Visibility_NumOptions() { return Visibility_end_option_; }
     size_t Visibility_TranslateIndexToRow(size_t i) { return i - Visibility_start_option_ + 2; }
 
 protected:
     size_t Visibility_start_option_;
+    size_t Visibility_previous_start_option_;
+
+    size_t Visibility_selected_row_;
+    size_t Visibility_previous_selected_row_;
+
     size_t Visibility_end_option_;
     size_t Visibility_num_cols;
 
@@ -68,8 +91,8 @@ public:
     }
 
     size_t Selected_GetIndex() { return Selected_selected_; }
-    size_t Selected_GetPreviousIndex() { return Selected_previous_position_; }
     Entry* Selected_GetEntry() { return SearchMenu_Get(Selected_selected_); }
+
 protected:
     void Selected_ReduceIfAboveMaximum_() {
 	if (Selected_selected_ > SearchMenu_Size() - 1) { Selected_selected_ = SearchMenu_Size() - 1; }
@@ -79,7 +102,7 @@ protected:
 	if (Mode_mode_ == EDIT) {
 	    Input_SetTextToSelected();
 	}
-	Selected_previous_position_ = Selected_selected_;
+
 	Selected_selected_ = new_sel_pos;
     }
 
@@ -89,7 +112,6 @@ protected:
 	Selected_selected_ = 0;
     }
 
-    size_t Selected_previous_position_;
     size_t Selected_selected_;
 
 public:
@@ -106,13 +128,14 @@ public:
     }
 
     size_t Cursor_GetXPosition() { return Cursor_cur_x_; }
+    size_t Cursor_ChangedXPos() { return Cursor_cur_x_ == Cursor_previous_cur_x_; }
 
 protected:
     size_t Cursor_cur_x_;
-    size_t Cursor_previous_position_;
+    size_t Cursor_previous_cur_x_;
 
     void Cursor_SetXPos_(size_t new_cur_pos) {
-	Cursor_previous_position_ = Cursor_cur_x_;
+	Cursor_previous_cur_x_ = Cursor_cur_x_;
 	Cursor_cur_x_ = new_cur_pos;
     }
 
@@ -125,21 +148,18 @@ public:
 	if (!iswprint(input_char)) return;
 
 	Input_text_.insert(Cursor_cur_x_, 1, input_char);
-	Input_needs_update_ = true;
+	Input_changed_ = true;
 
 	Cursor_SetXPos_(Cursor_cur_x_ + 1);
-
-	SearchMenu_Update();
     }
 
     void Input_Backspace() {
 	if (Input_text_ == L"") return;
 
-	Input_needs_update_ = true;
+	Input_changed_ = true;
 
 	Cursor_Left();
 	Input_text_.pop_back();
-	SearchMenu_Update();
     }
 
     std::wstring Input_GetText() { return Input_text_; }
@@ -148,33 +168,34 @@ public:
 	Input_text_ = input_text;
 	
 	Cursor_SetXPos_(input_text.size());
-	Input_needs_update_ = true;
-
-	SearchMenu_Update();
+	Input_changed_ = true;
     }
 
-    bool Input_NeedsUpdate() { return Input_needs_update_; }
+    bool Input_Changed() { return Input_changed_; }
+
+    Entry* Input_GetEntry() { 
+	Input_unprocessed_input = std::make_unique<UnprocessedEntry>(UnprocessedEntry(Input_text_));
+	return Input_unprocessed_input.get();
+    }
 
 protected:
-    bool Input_needs_update_;
+    bool Input_changed_;
     std::wstring Input_text_;
+    std::unique_ptr<Entry> Input_unprocessed_input;
 
 public:
     virtual bool Update_Initialize() {
-	Selected_selected_ = 0;
-
-	Title_needs_update_ = Input_needs_update_ = SearchMenu_needs_update_ = true;
+	Title_changed_ = Input_changed_ = EntryList_changed_ = true;
 	Mode_mode_ = SEARCH;
 
-	Cursor_cur_x_ = 0;
-	Cursor_previous_position_ = -1;
-	Selected_previous_position_ = -1;
+	Selected_selected_ = Visibility_selected_row_ = Cursor_previous_cur_x_ = Cursor_cur_x_ = 0;
+	Visibility_previous_selected_row_ = Cursor_previous_cur_x_ = -1;
 
 	return true;
     }
 
     virtual bool Update_EndLoop() {
-	Title_needs_update_ = Input_needs_update_ = SearchMenu_needs_update_ = false;
+	Title_changed_ = Input_changed_ = EntryList_changed_ = false;
 	return true;
     }
 
@@ -186,14 +207,27 @@ public:
 
     virtual bool EntryList_UpdateBackend() { return true; }
 
+    Entry* EntryList_GetEntry() { 
+	if (SearchMenu_Size() == 0) {
+	    return Input_GetEntry();
+	} else {
+	    return Selected_GetEntry();
+	}
+    }
+
+    bool EntryList_Changed() { return EntryList_changed_; }
+
+protected:
+    bool EntryList_changed_;
+
 public:
     virtual size_t SearchMenu_Size() const = 0;
-    virtual void SearchMenu_Update() = 0;
+    virtual void SearchMenu_Search() = 0;
     virtual Entry* SearchMenu_Get(size_t i) = 0;
 
-    bool SearchMenu_NeedsUpdate() { return SearchMenu_needs_update_; }
-protected:
-    bool SearchMenu_needs_update_;
+    bool SearchMenu_NeedsDisplayUpdate() {
+	return EntryList_Changed() || Input_Changed() || Visibility_StartOptionChanged();
+    }
 
 public:
     virtual void Debug_PrintAllEntries() = 0;

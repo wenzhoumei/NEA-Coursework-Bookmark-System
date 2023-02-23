@@ -8,7 +8,7 @@
 #include "vector_entry_list.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
-
+#define KEY_ESCAPE 27
 class Menu {
 public:
     Menu() {
@@ -32,56 +32,61 @@ public:
 	int rows, cols;
 	getmaxyx(stdscr, rows, cols);
 
+	if (options_->Input_Changed() || options_->EntryList_Changed()) {
+	    options_->SearchMenu_Search();
+	}
 	options_->Visibility_Update(rows, cols);
 
 	size_t selected_index = options_->Selected_GetIndex();
-	size_t previous_selected_index = options_->Selected_GetPreviousIndex();
 
 	size_t start_option = options_->Visibility_StartOption();
-	size_t end_option = options_->Visibility_EndOption();
+	size_t num_options = options_->Visibility_NumOptions();
+
+	EntryList::mode mode = options_->Mode_Get();
 
 	// Print the title row
 	//mvprintw(0, 0, "%-*zu", cols, selected_index);
-	mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, selected_index);
-	if (options_->Title_NeedsUpdate()) {
+	mvprintw(0, 0, "%zu %zu %zu", num_options, start_option, selected_index);
+	if (options_->Title_Changed()) {
 	    //mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
 	    //mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, options_->GetSelectedIndex());
 	    //mvprintw(0, 0, "%zu", options_->GetCursorPosition());
 	    options_->Title_UpdateBackend();
 	}
 
-	// Print input row
-	if (options_->Input_NeedsUpdate()) {
-	    std::wstring input_text = options_->Input_GetText();
-	    mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
-
-	    if (options_->Mode_Get() == EntryList::EDIT) {
-		mvprintw(options_->Visibility_TranslateIndexToRow(selected_index), 0, "%-*ls", cols, input_text.c_str());
-	    }
-	}
-
 	// Print the visible menu options
-	if (options_->SearchMenu_NeedsUpdate()) {
-	    for (size_t i = start_option; i < end_option; i++) {
+	if (options_->SearchMenu_NeedsDisplayUpdate()) {
+	    for (size_t i = start_option; i < num_options; i++) {
 		//mvprintw(0, 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
 		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*ls", cols, options_->SearchMenu_Get(i)->GetName().c_str());
 	    }
 
 	    // Fill out empty remaining rows
-	    for (size_t i = end_option; i < (size_t)rows; i++) {
+	    for (size_t i = num_options; i < (size_t)rows; i++) {
 		mvprintw(options_->Visibility_TranslateIndexToRow(i), 0, "%-*s", cols, "");
 		mvchgat(options_->Visibility_TranslateIndexToRow(i), 0, cols, A_NORMAL, 0, NULL);
 	    }
-
-	    options_->SearchMenu_Update();
 	}
 
-	// Reverse foreground and background of selected line
-	mvchgat(options_->Visibility_TranslateIndexToRow(previous_selected_index), 0, cols, A_NORMAL, 0, NULL);
-	mvchgat(options_->Visibility_TranslateIndexToRow(selected_index), 0, cols, A_REVERSE, 0, NULL);
+	// Print input row
+	if (options_->Input_Changed()) {
+	    std::wstring input_text = options_->Input_GetText();
+	    mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
 
-	if (options_->SearchMenu_Size() == 0) {
-	    mvchgat(selected_index + 2, 0, cols, A_NORMAL, 0, NULL);
+	    if (mode == EntryList::EDIT) {
+		mvprintw(options_->Visibility_SelectedRow(), 0, "%-*ls", cols, input_text.c_str());
+	    }
+	}
+
+	if (options_->Visibility_SelectedRowChanged()|| selected_index == 0) {
+	    // Reverse foreground and background of selected line
+	    mvchgat(options_->Visibility_PreviousSelectedRow(), 0, cols, A_NORMAL, 0, NULL);
+	    mvchgat(options_->Visibility_SelectedRow(), 0, cols, A_REVERSE, 0, NULL);
+	}
+
+	// If no results, there is no selected
+	if (options_->SearchMenu_Size() == 0 && mode == EntryList::SEARCH) {
+	    mvchgat(2, 0, cols, A_NORMAL, 0, NULL);
 	}
 
 	/* else if (options_->SearchedSize() == 1) {
@@ -110,7 +115,7 @@ public:
 	    options_->Update_EndLoop();
 	} while (GetInput_());
 
-	return options_->Selected_GetEntry()->GetString();
+	return options_->EntryList_GetEntry()->GetString();
     }
 
 private:
@@ -152,6 +157,9 @@ private:
 	    case KEY_BACKSPACE:
 	    case 127:  // Some systems use 127 instead of KEY_BACKSPACE
 		options_->Input_Backspace();
+		break;
+	    case KEY_ESCAPE:
+		options_->Mode_Set(EntryList::SEARCH);
 		break;
 	    case KEY_ENTER:
 	    case '\n':

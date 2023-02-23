@@ -2,7 +2,7 @@
 #include <iterator>
 #include <boost/algorithm/string.hpp>
 
-void VectorEntryList::SearchMenu_Update()
+void VectorEntryList::SearchMenu_Search()
 {
     if (Mode_mode_ != SEARCH) return;
 
@@ -61,5 +61,5 @@ void VectorEntryList::SearchMenu_Update()
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
 
-    SearchMenu_needs_update_ = true;
+    EntryList_changed_ = true;
 }
