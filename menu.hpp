@@ -41,7 +41,8 @@ public:
 	size_t end_option = options_->Visibility_EndOption();
 
 	// Print the title row
-	mvprintw(0, 0, "%-*zu", cols, selected_index);
+	//mvprintw(0, 0, "%-*zu", cols, selected_index);
+	mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, selected_index);
 	if (options_->Title_NeedsUpdate()) {
 	    //mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
 	    //mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, options_->GetSelectedIndex());

@@ -36,11 +36,11 @@ public:
 	if (visible_rows < 2) { return false; }
 	if (visible_cols < 20) { return false; }
 
-	size_t menu_size = visible_rows - 2;
+	size_t visible_menu_rows = visible_rows - 2;
 	Visibility_num_cols = visible_cols;
 
-	Visibility_start_option_ = Selected_GetIndex() > menu_size ? Selected_GetIndex() - menu_size + 1: 0;
-	Visibility_end_option_ = std::min(SearchMenu_Size(), Visibility_start_option_ + menu_size);
+	Visibility_start_option_ = Selected_GetIndex() > visible_menu_rows ? Selected_GetIndex() - visible_menu_rows + 1: 0;
+	Visibility_end_option_ = std::min(SearchMenu_Size(), Visibility_start_option_ + visible_menu_rows);
 	return true;
     }
 
@@ -55,6 +55,7 @@ protected:
 
 public:
     void Selected_Down() { 
+	if (SearchMenu_Size() == 0) { return; }
 	if (Selected_selected_ >= SearchMenu_Size() - 1) { return; }
 
 	Selected_SetPos_(Selected_selected_ + 1);
