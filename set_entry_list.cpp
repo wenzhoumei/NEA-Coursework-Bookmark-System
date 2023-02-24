@@ -1,13 +1,13 @@
 #include <boost/algorithm/string.hpp>
 #include "set_entry_list.hpp"
 
-void SetEntryList::Search()
+void SetEntryList::SearchMenu_Search()
 {
-    if (!search_on_) return;
+    if (Mode_mode_ != SEARCH) return;
     searched_.clear();
 
     std::vector<std::wstring> input_tokens;
-    boost::split(input_tokens, input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
+    boost::split(input_tokens, Input_text_, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
 
     // If no tokens, return all entries
     if (input_tokens.size() == 0) {
@@ -38,7 +38,7 @@ void SetEntryList::Search()
 	// a prefix match, or a substring match, and add the item to the appropriate vector
 	if (allTokensFound)
 	{
-	    if (input_text_ == key)
+	    if (Input_text_ == key)
 	    {
 		exactMatches.push_back(key);
 	    }
@@ -58,6 +58,5 @@ void SetEntryList::Search()
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
 
-    NeedsUpdate.Menu = true;
-    SetSelPos_(0);
+    EntryList_changed_ = true;
 }

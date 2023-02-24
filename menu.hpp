@@ -5,7 +5,9 @@
 #include <locale.h>
 #include <memory>
 
-#include "vector_entry_list.hpp"
+#include "file_vector_entry_list.hpp"
+#include "set_entry_list.hpp"
+#include "directory_entry_list.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
 #define KEY_ESCAPE 27
@@ -13,7 +15,9 @@ class Menu {
 public:
     Menu() {
 	//options_ = std::make_unique<FileVectorEntryList>(FileVectorEntryList(L"hello", "/home/wenzhou/Entries/files/hello.txt"));
-	options_ = std::make_unique<VectorEntryList>(VectorEntryList(L"hello"));
+	options_ = std::make_unique<DirectorySetEntryList>(DirectorySetEntryList(L"hello", "/home/wenzhou/Downloads"));
+	//options_ = std::make_unique<VectorEntryList>(VectorEntryList(L"hello"));
+	//options_ = std::make_unique<SetEntryList>(SetEntryList(L"hello"));
 
 	initscr(); // Start ncurses mode
 	noecho(); // Don't echo keystrokes
@@ -46,7 +50,8 @@ public:
 
 	// Print the title row
 	//mvprintw(0, 0, "%-*zu", cols, selected_index);
-	mvprintw(0, 0, "%zu %zu %zu", num_options, start_option, selected_index);
+	//mvprintw(0, 0, "%zu %zu %zu", num_options, start_option, selected_index);
+	mvprintw(0, 0, "%zu %zu", selected_index, options_->SearchMenu_Size());
 	if (options_->Title_Changed()) {
 	    //mvprintw(0, 0, "%ls", options_->GetTitle().c_str());
 	    //mvprintw(0, 0, "%zu %zu %zu", end_option, start_option, options_->GetSelectedIndex());

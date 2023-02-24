@@ -31,7 +31,7 @@ public:
     {
     }
 
-    bool Initialize() override {
+    bool Update_Initialize() override {
 	std::wifstream file(file_path_);
 
 	if (!file) {
@@ -43,18 +43,18 @@ public:
 	    }
 	} else {
 	    // File exists, so read entries from it
-	    while (std::getline(file, input_text_)) {
-		VectorEntryList::AddEntry();
+	    while (std::getline(file, Input_text_)) {
+		VectorEntryList::EntryList_AddEntry();
 	    }
 
-	    input_text_ = L"";
+	    Input_text_ = L"";
 	}
 
-	SetSearchedToEntries_();
-	return EntryList::Initialize();
+	//SetSearchedToEntries_();
+	return EntryList::Update_Initialize();
     }
 
-    bool UpdateMenu() override {
-	return WriteToFile_();
+    bool Update_EndLoop() override {
+	return EntryList::Update_EndLoop() && WriteToFile_();
     }
 };

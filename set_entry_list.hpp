@@ -8,6 +8,16 @@
 
 #include "entry_list.hpp"
 
+#pragma once
+
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <unordered_map>
+#include <numeric>
+
+#include "entry_list.hpp"
+
 class SetEntryList: public EntryList {
 protected:
     std::wstring GetSearchedEntryNameAtIndex_(size_t i) {
@@ -16,10 +26,20 @@ protected:
     }
 
 public:
+    SetEntryList(const std::wstring title) {
+	Title_text_ = title;
+    }
+
     void Debug_PrintAllEntries() override {
 	for (const auto& [key, val]: entry_dict_) {
 	    std::wcerr << val->GetString() << std::endl;
 	}
+    }
+
+    Entry* SearchMenu_Get(size_t i) override {
+	std::wstring key = *std::next(searched_.begin(), i);
+
+	return entry_dict_[key].get();
     }
 
     void Debug_PrintSearchedEntries() override {
@@ -28,7 +48,7 @@ public:
 	}
     }
 
-    void SearchMenu_Update() override;
+    void SearchMenu_Search() override;
 
     size_t SearchMenu_Size() const override {
 	return searched_.size();
@@ -43,7 +63,8 @@ public:
 
 	if (Selected_selected_ > SearchMenu_Size() - 1) { Selected_selected_ = SearchMenu_Size() - 1; }
 
-	SearchMenu_needs_update_ = true;
+	Mode_Set(SEARCH);
+	EntryList_changed_ = true;
     }
 
     void EntryList_AddEntry() override {
@@ -56,9 +77,9 @@ public:
 	}
 
 	entry_dict_.emplace(name_to_add, std::move(unprocessed_entry));
-	SearchMenu_Update();
 
-	SearchMenu_needs_update_ = true;
+	Mode_Set(SEARCH);
+	EntryList_changed_ = true;
     }
 
     void EntryList_InsertEntry() override {
@@ -81,9 +102,8 @@ public:
 	    entry_dict_.erase(name_to_update);
 	}
 
-	SearchMenu_Update();
-
-	SearchMenu_needs_update_ = true;
+	Mode_Set(SEARCH);
+	EntryList_changed_ = true;
     }
 
 protected:
