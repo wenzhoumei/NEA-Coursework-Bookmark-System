@@ -1,30 +1,32 @@
-#include "menu.hpp"
-#include <locale>
+#include <iostream>
+#include <string>
+#include <functional>
+#include <sstream>
 
-int main() {
-    /*
-    FileVectorEntryList v(L"hello", "/home/wenzhou/Entries/files/hello.txt");
-    v.PrintAllEntries();
-    v.PrintSearchedEntries();
-    */
+#include "parameter_processor.hpp"
+#include "settings.hpp"
 
+#include <filesystem>
+
+
+int main(int argc, char* argv[]) {
     std::locale::global(std::locale(""));
 
-    Menu menu;
-    std::wcout << menu.Run() << std::endl;
+    ParameterProcessor parameter_processor(argc, argv);
+
+    if (!parameter_processor.IsNumParametersValid() || !parameter_processor.IsPathValid()) {
+	std::cerr << "Usage: " << argv[0] << " option_string config_directory\n";
+	return 1;
+    }
+
+    std::string argument = parameter_processor.GetOptionString();
+
+    Settings& settings = Settings::Instance();
+    settings.Initialize(parameter_processor.GetOptionString());
+
+    std::cout << "The argument you provided is: " << argument << "\n";
+
+    // Rest of your program logic goes here
+
     return 0;
 }
-
-/*
-int main() {
-    FileEntryList f("/home/wenzhou/Entries/config/hello.txt");
-    f.UpdateEntry(EntryProcessor::CreateEntry("k"));
-    f.PrintEntries();
-    DirectoryEntryList d("/home/wenzhou/Entries/config/extensions");
-
-    d.AddEntry(EntryProcessor::CreateEntry("when"));
-
-    ExecutableDirectoryEntryList d2("/home/wenzhou/Entries/config/scripts");
-    d2.PrintEntries();
-}
-*/
