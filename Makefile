@@ -17,7 +17,7 @@ CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -flto -fno-fat-lto-objects -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -std=c++20 -g -O2 -flto -fno-fat-lto-objects -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I/usr/include/qt -I/usr/include/qt/QtGui -I/usr/include/qt/QtCore -I. -I/usr/lib/qt/mkspecs/linux-g++
+INCPATH       = -I. -Iinclude -I/usr/include/qt -I/usr/include/qt/QtGui -I/usr/include/qt/QtCore -I. -I/usr/lib/qt/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -52,14 +52,10 @@ OBJECTS_DIR   = obj/
 
 ####### Files
 
-SOURCES       = main.cpp \
-		vector_entry_list.cpp \
-		entry_list.cpp \
-		util.cpp 
+SOURCES       = src/main.cpp \
+		src/settings.cpp 
 OBJECTS       = obj/main.o \
-		obj/vector_entry_list.o \
-		obj/entry_list.o \
-		obj/util.o
+		obj/settings.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
 		/usr/lib/qt/mkspecs/common/linux.conf \
@@ -275,14 +271,21 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/exceptions.prf \
 		/usr/lib/qt/mkspecs/features/yacc.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
-		myproject.pro vector_entry_list.hpp \
-		file_vector_entry_list.hpp \
-		entry_list.hpp \
-		menu.hpp \
-		util.hpp main.cpp \
-		vector_entry_list.cpp \
-		entry_list.cpp \
-		util.cpp
+		myproject.pro include/component_controller.hpp \
+		include/cursor_position_controller.hpp \
+		include/input_controller.hpp \
+		include/menu_controller.hpp \
+		include/menu_data.hpp \
+		include/menu_tui.hpp \
+		include/option.hpp \
+		include/option_factory.hpp \
+		include/options_controller.hpp \
+		include/parameter_processor.hpp \
+		include/selected_option_position_controller.hpp \
+		include/settings.hpp \
+		include/status_log_controller.hpp \
+		include/title_controller.hpp src/main.cpp \
+		src/settings.cpp
 QMAKE_TARGET  = program.program
 DESTDIR       = 
 TARGET        = program.program
@@ -742,8 +745,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents vector_entry_list.hpp file_vector_entry_list.hpp entry_list.hpp menu.hpp util.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp vector_entry_list.cpp entry_list.cpp util.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/component_controller.hpp include/cursor_position_controller.hpp include/input_controller.hpp include/menu_controller.hpp include/menu_data.hpp include/menu_tui.hpp include/option.hpp include/option_factory.hpp include/options_controller.hpp include/parameter_processor.hpp include/selected_option_position_controller.hpp include/settings.hpp include/status_log_controller.hpp include/title_controller.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp src/settings.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -791,26 +794,12 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-obj/main.o: main.cpp menu.hpp \
-		vector_entry_list.hpp \
-		entry_list.hpp \
-		entry.hpp \
-		util.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o main.cpp
+obj/main.o: src/main.cpp include/parameter_processor.hpp \
+		include/settings.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
 
-obj/vector_entry_list.o: vector_entry_list.cpp vector_entry_list.hpp \
-		entry_list.hpp \
-		entry.hpp \
-		util.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/vector_entry_list.o vector_entry_list.cpp
-
-obj/entry_list.o: entry_list.cpp entry_list.hpp \
-		entry.hpp \
-		util.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/entry_list.o entry_list.cpp
-
-obj/util.o: util.cpp util.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/util.o util.cpp
+obj/settings.o: src/settings.cpp include/settings.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/settings.o src/settings.cpp
 
 ####### Install
 

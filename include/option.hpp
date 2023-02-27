@@ -1,8 +1,17 @@
 #pragma once
 #include <string>
 #include "settings.hpp"
+#include "action.hpp"
 #include <boost/algorithm/string.hpp>
 
+class Option {
+public:
+    std::string Name;
+    std::string Data;
+    Action Action;
+};
+
+/*
 class OptionController;
 class Option {
 public:
@@ -25,12 +34,6 @@ public:
     virtual std::string GetData() { return data_; }
 
     virtual std::string GetSaveString() { return name_ + Settings::Delimiter.Data + data_; }
-
-    /* These parameters don't have to be used
-     * pointer_to_self allows for function to replace itself
-     * option_controller allows for function to operate on menu
-     * If it is a nullptr, it indicates it is executing in a no menu environment
-     */
 
     virtual int Execute(Option* pointer_to_self, const OptionController* option_controller) = 0;
 protected:
@@ -68,3 +71,4 @@ public:
 	data_ = parent_option_->GetData();
     }
 };
+*/

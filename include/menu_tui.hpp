@@ -209,3 +209,24 @@ private:
 
     std::unique_ptr<EntryList> options_;
 };
+
+// Handles display of MenuData
+// Recieves events and execute appropriate Controller function
+class MenuTUI {
+public:
+    MenuTUI(MenuOption menu_option) {
+        menu_data_ = new MenuData();
+        menu_controller_ = new MenuController(*menu_data_, menu_option);
+    }
+
+    ~MenuTUI(); // Delete menu controllers and data
+
+    void Display(); // Display menu_data_
+
+    std::wstring Input(); // Get character and handle with appropriate controller function
+
+private:
+    MenuData* menu_data_;
+
+    MenuController* menu_controller_;
+};
