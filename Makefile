@@ -274,7 +274,6 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		include/file_retriever.hpp \
 		include/parameter_processor.hpp \
 		include/parser.hpp \
-		include/parser_constants.hpp \
 		include/retriever.hpp src/main.cpp
 QMAKE_TARGET  = program.program
 DESTDIR       = 
@@ -735,7 +734,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents include/config_directory.hpp include/directory_retriever.hpp include/file_retriever.hpp include/parameter_processor.hpp include/parser.hpp include/parser_constants.hpp include/retriever.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/config_directory.hpp include/directory_retriever.hpp include/file_retriever.hpp include/parameter_processor.hpp include/parser.hpp include/retriever.hpp $(DISTDIR)/
 	$(COPY_FILE) --parents src/main.cpp $(DISTDIR)/
 
 
@@ -786,7 +785,6 @@ compiler_clean: compiler_moc_predefs_clean
 
 obj/main.o: src/main.cpp include/config_directory.hpp \
 		include/parser.hpp \
-		include/parser_constants.hpp \
 		include/file_retriever.hpp \
 		include/retriever.hpp \
 		include/directory_retriever.hpp
