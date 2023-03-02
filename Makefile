@@ -52,10 +52,8 @@ OBJECTS_DIR   = obj/
 
 ####### Files
 
-SOURCES       = src/main.cpp \
-		src/settings.cpp 
-OBJECTS       = obj/main.o \
-		obj/settings.o
+SOURCES       = src/main.cpp 
+OBJECTS       = obj/main.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
 		/usr/lib/qt/mkspecs/common/linux.conf \
@@ -271,21 +269,13 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/exceptions.prf \
 		/usr/lib/qt/mkspecs/features/yacc.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
-		myproject.pro include/component_controller.hpp \
-		include/cursor_position_controller.hpp \
-		include/input_controller.hpp \
-		include/menu_controller.hpp \
-		include/menu_data.hpp \
-		include/menu_tui.hpp \
-		include/option.hpp \
-		include/option_factory.hpp \
-		include/options_controller.hpp \
+		myproject.pro include/config_directory.hpp \
+		include/directory_retriever.hpp \
+		include/file_retriever.hpp \
 		include/parameter_processor.hpp \
-		include/selected_option_position_controller.hpp \
-		include/settings.hpp \
-		include/status_log_controller.hpp \
-		include/title_controller.hpp src/main.cpp \
-		src/settings.cpp
+		include/parser.hpp \
+		include/parser_constants.hpp \
+		include/retriever.hpp src/main.cpp
 QMAKE_TARGET  = program.program
 DESTDIR       = 
 TARGET        = program.program
@@ -745,8 +735,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents include/component_controller.hpp include/cursor_position_controller.hpp include/input_controller.hpp include/menu_controller.hpp include/menu_data.hpp include/menu_tui.hpp include/option.hpp include/option_factory.hpp include/options_controller.hpp include/parameter_processor.hpp include/selected_option_position_controller.hpp include/settings.hpp include/status_log_controller.hpp include/title_controller.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/settings.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/config_directory.hpp include/directory_retriever.hpp include/file_retriever.hpp include/parameter_processor.hpp include/parser.hpp include/parser_constants.hpp include/retriever.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -794,12 +784,13 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-obj/main.o: src/main.cpp include/parameter_processor.hpp \
-		include/settings.hpp
+obj/main.o: src/main.cpp include/config_directory.hpp \
+		include/parser.hpp \
+		include/parser_constants.hpp \
+		include/file_retriever.hpp \
+		include/retriever.hpp \
+		include/directory_retriever.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
-
-obj/settings.o: src/settings.cpp include/settings.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/settings.o src/settings.cpp
 
 ####### Install
 
