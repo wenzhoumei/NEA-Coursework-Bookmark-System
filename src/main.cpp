@@ -16,13 +16,12 @@ int main(int argc, char* argv[]) {
 
     std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
 
-    ConfigDirectory config_directory;
-    if (!config_directory.SetPath(config_file_path)) { return 2; };
+    Parser parser;
 
-    Parser parser(config_directory);
+    if (!parser.Config_Directory.SetPath(config_file_path)) { return 1; };
 
-    if (!parser.Scripts_Retriever.Load()) { return 2; };
-    if (!parser.IdentifierExtension_To_Action_Retriever.Load()) { return 2; };
+    if (!parser.Config_Directory.Scripts_Retriever->Load()) { return 2; };
+    if (!parser.Config_Directory.IdentifierExtension_To_Action_Retriever->Load()) { return 2; };
 
     parser.LoadScripts();
     if (!parser.LoadIdentifierExtensions()) { return 3; };

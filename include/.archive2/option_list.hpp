@@ -6,6 +6,7 @@
 /**
  * @class OptionList
  * @brief A class that represents a list of options.
+ * Option is an entry of a menu
  */
 class OptionList {
 public:
