@@ -1,3 +1,4 @@
+#pragma once
 #include "component_controller.hpp"
 
 class StatusLogController: public ComponentController {

@@ -6,16 +6,30 @@
 #include <unordered_map>
 #include <string>
 #include <functional>
-#include "menu_controller.hpp"
 
 #include "option_list.hpp"
+
+#define PARSER_EXIT_STAY_IN_MENU 999
+
+class MenuController;
 
 class Parser {
     std::set<std::wstring> Scripts_;
     std::unordered_map<std::wstring, std::wstring> IdentifierExtension_To_Action_;
 
     MenuController* menu_controller_ = nullptr;
+
+    Parser() {}; // Private constructor to prevent instantiation
+    Parser(const Parser&) = delete; // Delete copy constructor
+    Parser& operator=(const Parser&) = delete; // Delete assignment operato
+
 public:
+    static Parser& Instance()
+    {
+	static Parser INSTANCE;
+	return INSTANCE;
+    }
+
     struct Delimiter {
 	static constexpr wchar_t ScriptAction = L'|';
 	static constexpr wchar_t ProgramAction = L'~';
@@ -30,9 +44,9 @@ public:
     } Delimiter;
 
     static const std::unordered_map<std::wstring, std::function<int(std::wstring)>> ProgramAction_String_To_Function;
-    static const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring)>> DestinationAction_String_To_Function;
+    static const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>()>> DestinationAction_String_To_Function;
 
-    ConfigDirectory Config_Directory;
+    ConfigDirectory& Config_Directory = ConfigDirectory::Instance();
 
     void LoadScripts();
     bool LoadIdentifierExtensions();

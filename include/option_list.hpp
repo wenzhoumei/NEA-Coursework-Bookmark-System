@@ -4,10 +4,12 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 class OptionList {
 public:
-    virtual bool Load() = 0;
+    bool SuccessfullyLoaded = false;
+    virtual void Load(std::filesystem::path file_path) = 0;
 
     virtual bool Add(const std::wstring& option_string) {
 	if (Contains(option_string)) { return false; }
@@ -71,7 +73,7 @@ public:
 
     const std::vector<int>& GetSearched() { return searched_; }
 
-    const size_t SearchedSize() { return searched_.size(); }
+    size_t SearchedSize() { return searched_.size(); }
     std::wstring At(size_t i) {
 	return options_[searched_[i]];
     }
@@ -83,7 +85,8 @@ public:
 	}
     }
 
-    const bool IsBookmarkList = false;
+    const bool HasData = false;
+    const bool Editable = false;
 protected:
     std::vector<std::wstring> options_;
     std::vector<int> searched_;

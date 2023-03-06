@@ -8,7 +8,7 @@ bool OptionList::Search(const std::wstring& input_text)
     searched_.clear();
 
     std::vector<std::wstring> input_tokens;
-    boost::split(input_tokens, input_text, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
+    boost::split(input_tokens, input_text, boost::is_any_of(L" \t.-"), boost::token_compress_on);
 
     // If no tokens, return all entries
     if (input_tokens.size() == 0) {

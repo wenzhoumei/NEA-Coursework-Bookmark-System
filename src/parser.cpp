@@ -4,8 +4,7 @@
 #include "menu_tui.hpp"
 
 #include "data_option_list.hpp"
-
-#define EXIT_STAY_IN_MENU 999
+#include "read_only_data_option_list.hpp"
 
 /*
     static struct DestinationAction {
@@ -28,17 +27,20 @@
 
 #define PROGRAM_ACTION_NOTHING L"nothing"
 #define PROGRAM_ACTION_ECHO L"echo"
+#define PROGRAM_ACTION_OPTION_STRING L"option_string"
 
 const std::unordered_map<std::wstring, std::function<int(std::wstring)>> Parser::ProgramAction_String_To_Function {
     { PROGRAM_ACTION_NOTHING, [](std::wstring data) { std::cout << "hello :)" << std::endl; return 0; }},
     { PROGRAM_ACTION_ECHO, [](std::wstring data) { std::wcout << data << std::endl; return 0; }},
+    { PROGRAM_ACTION_OPTION_STRING, [](std::wstring data) { return 0; }},
 };
 
-const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring)>> Parser::DestinationAction_String_To_Function {
+const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(void)>> Parser::DestinationAction_String_To_Function {
     //{ L"dir", [](std::wstring data) { ; }},
     //{ L"rdir"::ReadDirectory, [](std::wstring data) { return 0; }},
     //{ L"bmk", [](std::wstring data) { return 0; }},
-    { L"file", [](std::wstring data) { return std::make_unique<DataOptionList>(DataOptionList(data)); }},
+    { L"file", []() { return std::make_unique<DataOptionList>(DataOptionList()); }},
+    { L"rfile", []() { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList()); }},
 };
 
 void Parser::LoadScripts() {
@@ -142,8 +144,9 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     char action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
 
-    std::wcout << "action: " << action << std::endl;
-    std::wcout << "data: " << data << std::endl;
+    Log& log = Log::Instance();
+    log.Info() << L"action: " << action;
+    log.Info() << L"data: " << data;
 
     switch (action_delimiter) {
 	case (Delimiter::DestinationAction):
@@ -151,30 +154,23 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    size_t next_action_pos = action_identifier.find_first_of(Delimiter.ActionAll);
 
 	    std::wstring destination_action;
-	    std::wstring destination_default = L"";
+	    std::wstring action_at_destination = std::wstring(1, Delimiter::ProgramAction) + PROGRAM_ACTION_OPTION_STRING;
 
 	    if (next_action_pos == std::wstring::npos) {
 		destination_action = action_identifier;
 	    } else {
 		destination_action = action_identifier.substr(0, next_action_pos);
-		destination_default = action_identifier.substr(next_action_pos);
+		action_at_destination = action_identifier.substr(next_action_pos);
 	    }
 
-	    std::unique_ptr<OptionList> option_list = std::move(DestinationAction_String_To_Function.at(action_identifier)(data));
-	    option_list->Load();
+	    std::unique_ptr<OptionList> option_list = std::move(DestinationAction_String_To_Function.at(action_identifier)());
+	    option_list->Load(data);
 
 	    //option_list->Print();
-	    MenuTUI menu_tui = MenuTUI(std::move(option_list), data, action);
+	    MenuTUI menu_tui = MenuTUI(std::move(option_list), action_at_destination, data);
+	    return menu_tui.Open();
 
-	    menu_tui.Start();
-
-	    int ret;
-	    while((ret = Execute(destination_default, menu_tui.Input())) == EXIT_STAY_IN_MENU);
-
-	    //menu_tui.Close();
-
-	    return ret;
-	    //menu_controller = ...;
+	    // menu_controller = ...;
 	    break;
 	}
 
@@ -185,7 +181,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    if (menu_controller_ == nullptr) {
 		std::cerr << "Error: you can't execute a menu action here" << std::endl;
 	    } else {
-		return EXIT_STAY_IN_MENU;
+		return PARSER_EXIT_STAY_IN_MENU;
 	    }
 
 	    break;

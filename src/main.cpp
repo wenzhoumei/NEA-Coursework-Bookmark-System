@@ -1,29 +1,37 @@
 #include "config_directory.hpp"
 #include "parser.hpp"
 #include "parameter_processor.hpp"
+#include "log.hpp"
+#include <functional>
+
 
 int main(int argc, char* argv[]) {
     std::locale::global(std::locale(""));
 
+    Log& log = Log::Instance();
+    log.Time();
+
+    std::atexit([]() { Log::Instance().PrintSession(); });
+
     ParameterProcessor parameter_processor(argc, argv);
 
     if (!parameter_processor.IsNumParametersValid()) {
-	std::cerr << "Usage: " << argv[0] << " option_string\n";
-	return 1;
+	log.Error(1) << "Usage - " << argv[0] << " option_string";
     }
 
     std::wstring argument = parameter_processor.GetOptionString();
 
-    std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
+    const std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
 
-    Parser parser;
+    ConfigDirectory& config_directory = ConfigDirectory::Instance();
+    config_directory.Initialize(config_file_path);
 
-    if (!parser.Config_Directory.SetPath(config_file_path)) { return 1; };
+    Parser& parser = Parser::Instance();
 
-    if (!parser.Config_Directory.Scripts_Retriever->Load()) { return 2; };
-    if (!parser.Config_Directory.IdentifierExtension_To_Action_Retriever->Load()) { return 2; };
+    std::atexit([]() { Log::Instance().FlushSession(); });
 
     parser.LoadScripts();
+
     if (!parser.LoadIdentifierExtensions()) { return 3; };
 
     parser.ExecuteOptionString(argument);

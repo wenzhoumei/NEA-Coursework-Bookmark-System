@@ -52,10 +52,14 @@ OBJECTS_DIR   = obj/
 
 ####### Files
 
-SOURCES       = src/main.cpp \
+SOURCES       = src/log.cpp \
+		src/main.cpp \
+		src/menu_tui.cpp \
 		src/option_list.cpp \
 		src/parser.cpp 
-OBJECTS       = obj/main.o \
+OBJECTS       = obj/log.o \
+		obj/main.o \
+		obj/menu_tui.o \
 		obj/option_list.o \
 		obj/parser.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
@@ -282,6 +286,7 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		include/directory_retriever.hpp \
 		include/file_retriever.hpp \
 		include/input_controller.hpp \
+		include/log.hpp \
 		include/menu_controller.hpp \
 		include/menu_data.hpp \
 		include/menu_tui.hpp \
@@ -291,10 +296,13 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		include/parameter_processor.hpp \
 		include/parser.hpp \
 		include/read_directory_option_list.hpp \
+		include/read_only_data_option_list.hpp \
 		include/retriever.hpp \
 		include/selected_option_position_controller.hpp \
 		include/status_log_controller.hpp \
-		include/title_controller.hpp src/main.cpp \
+		include/title_controller.hpp src/log.cpp \
+		src/main.cpp \
+		src/menu_tui.cpp \
 		src/option_list.cpp \
 		src/parser.cpp
 QMAKE_TARGET  = program.program
@@ -756,8 +764,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents include/bookmark_option_list.hpp include/component_controller.hpp include/config_directory.hpp include/cursor_position_controller.hpp include/data_option_list.hpp include/directory_option_list.hpp include/directory_retriever.hpp include/file_retriever.hpp include/input_controller.hpp include/menu_controller.hpp include/menu_data.hpp include/menu_tui.hpp include/menu_view.hpp include/option_list.hpp include/option_list_controller.hpp include/parameter_processor.hpp include/parser.hpp include/read_directory_option_list.hpp include/retriever.hpp include/selected_option_position_controller.hpp include/status_log_controller.hpp include/title_controller.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/main.cpp src/option_list.cpp src/parser.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents include/bookmark_option_list.hpp include/component_controller.hpp include/config_directory.hpp include/cursor_position_controller.hpp include/data_option_list.hpp include/directory_option_list.hpp include/directory_retriever.hpp include/file_retriever.hpp include/input_controller.hpp include/log.hpp include/menu_controller.hpp include/menu_data.hpp include/menu_tui.hpp include/menu_view.hpp include/option_list.hpp include/option_list_controller.hpp include/parameter_processor.hpp include/parser.hpp include/read_directory_option_list.hpp include/read_only_data_option_list.hpp include/retriever.hpp include/selected_option_position_controller.hpp include/status_log_controller.hpp include/title_controller.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/log.cpp src/main.cpp src/menu_tui.cpp src/option_list.cpp src/parser.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -805,23 +813,36 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
+obj/log.o: src/log.cpp include/log.hpp \
+		include/config_directory.hpp \
+		include/directory_retriever.hpp \
+		include/retriever.hpp \
+		include/file_retriever.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/log.o src/log.cpp
+
 obj/main.o: src/main.cpp include/config_directory.hpp \
 		include/directory_retriever.hpp \
 		include/retriever.hpp \
 		include/file_retriever.hpp \
+		include/log.hpp \
 		include/parser.hpp \
+		include/option_list.hpp \
+		include/parameter_processor.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
+
+obj/menu_tui.o: src/menu_tui.cpp include/menu_tui.hpp \
+		include/option_list.hpp \
+		include/menu_data.hpp \
+		include/menu_view.hpp \
 		include/menu_controller.hpp \
 		include/status_log_controller.hpp \
 		include/component_controller.hpp \
-		include/menu_data.hpp \
-		include/option_list.hpp \
 		include/title_controller.hpp \
 		include/selected_option_position_controller.hpp \
 		include/option_list_controller.hpp \
 		include/cursor_position_controller.hpp \
-		include/input_controller.hpp \
-		include/parameter_processor.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
+		include/input_controller.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_tui.o src/menu_tui.cpp
 
 obj/option_list.o: src/option_list.cpp include/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/option_list.o src/option_list.cpp
@@ -831,19 +852,21 @@ obj/parser.o: src/parser.cpp include/parser.hpp \
 		include/directory_retriever.hpp \
 		include/retriever.hpp \
 		include/file_retriever.hpp \
+		include/log.hpp \
+		include/option_list.hpp \
+		include/menu_tui.hpp \
+		include/menu_data.hpp \
+		include/menu_view.hpp \
 		include/menu_controller.hpp \
 		include/status_log_controller.hpp \
 		include/component_controller.hpp \
-		include/menu_data.hpp \
-		include/option_list.hpp \
 		include/title_controller.hpp \
 		include/selected_option_position_controller.hpp \
 		include/option_list_controller.hpp \
 		include/cursor_position_controller.hpp \
 		include/input_controller.hpp \
-		include/menu_tui.hpp \
-		include/menu_view.hpp \
-		include/data_option_list.hpp
+		include/data_option_list.hpp \
+		include/read_only_data_option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/parser.o src/parser.cpp
 
 ####### Install
