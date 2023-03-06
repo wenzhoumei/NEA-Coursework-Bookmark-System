@@ -15,13 +15,13 @@ public:
 	    return false;
 	}
 
-	std::ifstream file_stream(file_path_);
+	std::wifstream file_stream(file_path_);
 	if (!file_stream.is_open()) {
 	    std::cerr << "Error: Could not open file " << file_path_ << std::endl;
 	    return false;
 	}
 
-	std::string line;
+	std::wstring line;
 
 	while (std::getline(file_stream, line)) {
 	    data_.push_back(line);

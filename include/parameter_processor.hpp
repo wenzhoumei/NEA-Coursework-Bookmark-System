@@ -2,6 +2,8 @@
 
 #include <string>
 #include <filesystem>
+#include <locale>
+#include <codecvt>
 
 // Deals with parameter
 class ParameterProcessor {
@@ -10,7 +12,10 @@ public:
 
     bool IsNumParametersValid() const { return argc_ == 2; }
 
-    std::string GetOptionString() const { return argv_[1]; }
+    std::wstring GetOptionString() const {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        return converter.from_bytes(argv_[1]);
+    }
 
 private:
     const int& argc_;

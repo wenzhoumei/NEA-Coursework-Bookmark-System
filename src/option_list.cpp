@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <numeric>
 
-bool OptionList::Search(const std::string& input_text)
+bool OptionList::Search(const std::wstring& input_text)
 {
     searched_.clear();
 
-    std::vector<std::string> input_tokens;
+    std::vector<std::wstring> input_tokens;
     boost::split(input_tokens, input_text, boost::is_any_of(L" \t\n\r."), boost::token_compress_on);
 
     // If no tokens, return all entries
@@ -27,9 +27,9 @@ bool OptionList::Search(const std::string& input_text)
     {
 	// Check if all of the input tokens can be found in the item's text
 	bool allTokensFound = true;
-	for (const std::string& token : input_tokens)
+	for (const std::wstring& token : input_tokens)
 	{
-	    if (options_[i].find(token) == std::string::npos)
+	    if (options_[i].find(token) == std::wstring::npos)
 	    {
 		allTokensFound = false;
 		break;

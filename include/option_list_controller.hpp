@@ -16,23 +16,29 @@ public:
 
     void Add() {
 	if (!menu_data_.Option_List->Add(menu_data_.Input)) { return; }
+	menu_data_.Option_List->Search(menu_data_.Input);
+	selected_position_controller_.Reset();
 
 	menu_data_.Changed.Option_List = true;
     }
+
     void Remove() {
 	if (!menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition)) { return; }
+	menu_data_.Option_List->Search(menu_data_.Input);
 
 	menu_data_.Changed.Option_List = true;
     }
 
     void Update() {
 	if (!menu_data_.Option_List->Update(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
+	menu_data_.Option_List->Search(menu_data_.Input);
 
 	menu_data_.Changed.Option_List = true;
     }
 
     void Insert() {
 	if (!menu_data_.Option_List->Insert(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
+	menu_data_.Option_List->Search(menu_data_.Input);
 
 	menu_data_.Changed.Option_List = true;
     }

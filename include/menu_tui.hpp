@@ -23,7 +23,7 @@ class MenuTUI {
     std::unique_ptr<MenuView> menu_view_;
 
 public:
-    MenuTUI(std::unique_ptr<OptionList> option_list, const std::string& action, const std::string& data)
+    MenuTUI(std::unique_ptr<OptionList> option_list, const std::wstring& action, const std::wstring& data)
     {
         menu_data_ = std::make_unique<MenuData>(MenuData(data + action, action, std::move(option_list)));
         menu_view_ = std::make_unique<MenuView>(MenuView(menu_data_.get()));
@@ -32,9 +32,12 @@ public:
 
     void Start() {
 	menu_view_->Start();
+	menu_controller_->Option_List->Search();
     }
 
-    std::string Input() {
+    std::wstring Input() {
+	menu_view_->Display();
+
 	while (GetChar_()) {
 	    menu_view_->Display();
 	}
@@ -95,8 +98,10 @@ private:
 		    return false;
 		} else if (menu_data_->Mode == MenuData::EDIT) {
 		    menu_controller_->Option_List->Update();
+		    menu_controller_->SetMode(MenuData::SEARCH);
 		} else if (menu_data_->Mode == MenuData::INSERT) {
 		    menu_controller_->Option_List->Insert();
+		    menu_controller_->SetMode(MenuData::SEARCH);
 		}
 		break;
 	    case '\t':

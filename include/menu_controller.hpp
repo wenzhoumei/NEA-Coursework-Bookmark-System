@@ -24,18 +24,19 @@ public:
 
     void SetMode(enum MenuData::Mode m) {
 	if (m == MenuData::EDIT) {
+	    menu_data_.Mode = m;
 	    Input->SetTextToSelected();
 	} else if (m == MenuData::INSERT) {
-	    Input->SetText("");
+	    menu_data_.Mode = m;
+	    Input->Clear();
+	    menu_data_.Changed.Option_List = true;
 	} else if (m == MenuData::SEARCH) {
 	    if (menu_data_.Mode != MenuData::SEARCH) {
 		menu_data_.Mode = MenuData::SEARCH;
-		Input->SetText("");
+		Input->SetText(L"");
 		Selected_Option_Position->Reset();
 	    }
 	}
-
-	menu_data_.Mode = m;
     }
 
     StatusLogController* Status_Log;

@@ -12,17 +12,17 @@ public:
 	    return;
 	}
 
-	menu_data_.SelectedOptionPosition++;
+	ChangePos(menu_data_.SelectedOptionPosition + 1);
     }
 
     void Up() {
 	if (menu_data_.SelectedOptionPosition == 0) { return; }
 
-	menu_data_.SelectedOptionPosition--;
+	ChangePos(menu_data_.SelectedOptionPosition - 1);
     }
 
     void Reset() {
-	menu_data_.SelectedOptionPosition = 0;
+	ChangePos(0);
     }
 
 private:
@@ -34,8 +34,14 @@ private:
 	}
     }
 
-    void ChangePos() {
-	if (menu_data_.Mode == MenuData::INSERT || menu_data_.Mode == MenuData::EDIT) {
+    void ChangePos(size_t new_position) {
+	menu_data_.SelectedOptionPosition = new_position;
+
+	if (menu_data_.Mode == MenuData::INSERT) {
+	    menu_data_.Input = menu_data_.Option_List->At(menu_data_.SelectedOptionPosition);
+	    menu_data_.Changed.Option_List = true;
+	    menu_data_.Changed.Input = true;
+	} else if (menu_data_.Mode == MenuData::EDIT) {
 	    menu_data_.Input = menu_data_.Option_List->At(menu_data_.SelectedOptionPosition);
 	    menu_data_.Changed.Input = true;
 	}

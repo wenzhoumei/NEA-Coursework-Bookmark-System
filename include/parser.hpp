@@ -11,52 +11,34 @@
 #include "option_list.hpp"
 
 class Parser {
-    std::set<std::string> Scripts_;
-    std::unordered_map<std::string, std::string> IdentifierExtension_To_Action_;
+    std::set<std::wstring> Scripts_;
+    std::unordered_map<std::wstring, std::wstring> IdentifierExtension_To_Action_;
 
     MenuController* menu_controller_ = nullptr;
 public:
-    static struct Delimiter {
-	static constexpr char ScriptAction = '|';
-	static constexpr char ProgramAction = '~';
-	static constexpr char DestinationAction = '@';
-	static constexpr char MenuAction = ':';
+    struct Delimiter {
+	static constexpr wchar_t ScriptAction = L'|';
+	static constexpr wchar_t ProgramAction = L'~';
+	static constexpr wchar_t DestinationAction = L'@';
+	static constexpr wchar_t MenuAction = L':';
 
-	static constexpr std::string ActionAll = "~@:|";
+	const std::wstring ActionAll = L"~@:|";
 
-	static constexpr char Data = '>';
+	static constexpr wchar_t Data = L'>';
 
-	static constexpr char IdentifierExtension = '.';
+	static constexpr wchar_t IdentifierExtension = L'.';
     } Delimiter;
 
-    static struct DestinationAction {
-	static constexpr std::string Directory = "dir";
-	static constexpr std::string ReadDirectory = "rdir";
-	static constexpr std::string BookmarkList = "bmk";
-	static constexpr std::string DataList = "file";
-    } DestinationAction;
-
-    static struct MenuAction {
-	static constexpr std::string Directory = "add";
-	static constexpr std::string ReadDirectory = "remove";
-    } MenuAction;
-
-    static struct ProgramAction {
-	static constexpr std::string Nothing = "nothing";
-	static constexpr std::string Echo = "echo";
-    } ProgramAction;
-
-    static const std::unordered_map<std::string, std::function<int(std::string)>> ProgramAction_String_To_Function_;
-
-    static const std::unordered_map<std::string, std::function<std::unique_ptr<OptionList>(std::string)>> DestinationAction_String_To_Function;
+    static const std::unordered_map<std::wstring, std::function<int(std::wstring)>> ProgramAction_String_To_Function;
+    static const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring)>> DestinationAction_String_To_Function;
 
     ConfigDirectory Config_Directory;
 
     void LoadScripts();
     bool LoadIdentifierExtensions();
 
-    int ExecuteOptionString(const std::string& option_string);
-    int ExecuteDataDefault(const std::string& option_string);
-    bool ValidAction(const std::string& action);
-    int Execute(const std::string& action, const std::string& data);
+    int ExecuteOptionString(const std::wstring& option_string);
+    int ExecuteDataDefault(const std::wstring& option_string);
+    bool ValidAction(const std::wstring& action);
+    int Execute(const std::wstring& action, const std::wstring& data);
 };

@@ -25,7 +25,7 @@ public:
 	}
 
 	for (const auto& file : std::filesystem::directory_iterator(directory_path_)) {
-	    data_.push_back(file.path().filename().string());
+	    data_.push_back(file.path().filename().wstring());
 	}
 
 	return true;

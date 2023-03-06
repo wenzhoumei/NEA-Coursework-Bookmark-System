@@ -15,7 +15,7 @@ public:
 	    return;
 	}
 
-	menu_data_.Cursor_Position--;
+	menu_data_.Cursor_Position++;
     }
 
     /**

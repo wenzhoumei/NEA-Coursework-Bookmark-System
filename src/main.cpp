@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	return 1;
     }
 
-    std::string argument = parameter_processor.GetOptionString();
+    std::wstring argument = parameter_processor.GetOptionString();
 
     std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
 

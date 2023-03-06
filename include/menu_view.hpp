@@ -27,6 +27,8 @@ public:
 
 	UpdateRowInformation(rows);
 
+	if (start_option_ != previous_start_option_) { menu_data_->Changed.Option_List = true; }
+
 	if (menu_data_->Changed.Title == true) {
 	    UpdateTitle(cols);
 	}
@@ -35,21 +37,25 @@ public:
 	    UpdateInput(cols);
 	}
 
-	if (menu_data_->Changed.Option_List == true || start_option_ != previous_start_option_) {
+	if (menu_data_->Changed.Option_List == true ) {
 	    UpdateMenuOptions(rows, cols);
 	}
 
-
 	UpdateSelectedOptionPosition(cols);
-	UpdateCursorPosition();
 
+	// If no results, there is no selected
+	if (menu_data_->Option_List->GetSearched().size() == 0 && menu_data_->Mode == MenuData::SEARCH) {
+	    mvchgat(2, 0, cols, A_NORMAL, 0, NULL);
+	}
+
+	UpdateCursorPosition();
 	menu_data_->Changed.Reset();
 
 	curs_set(1);
     }
 
     void UpdateTitle(int cols) {
-	mvprintw(0, 0, "%*s", cols, menu_data_->Title.c_str());
+	mvprintw(0, 0, "%-*ls", cols, menu_data_->Title.c_str());
     }
 
     void UpdateRowInformation(int rows) {
@@ -72,22 +78,21 @@ public:
 
 	enum MenuData::Mode mode = menu_data_->Mode;
 	size_t selected_index = menu_data_->SelectedOptionPosition;
-	size_t menu_total_size = menu_data_->Option_List->GetSearched().size();
 
 	if (mode == MenuData::INSERT) {
 	    attron(A_NORMAL);
 
 	    for (size_t i = start_option_; i < selected_index; i++) {
-		mvprintw(i - start_option_ + 2, 0, "%-*s", cols, menu_data_->Option_List->At(i).c_str());
+		mvprintw(i - start_option_ + 2, 0, "%-*ls", cols, menu_data_->Option_List->At(i).c_str());
 	    }
 
 	    for (size_t i = selected_index; i < num_options_; i++) {
-		mvprintw(i - start_option_ + 2, 0, "%-*s", cols, menu_data_->Option_List->At(i).c_str());
+		mvprintw(i - start_option_ + 2 + 1, 0, "%-*ls", cols, menu_data_->Option_List->At(i).c_str());
 	    }
 
 	    // Fill out remaining empty rows
 	    for (size_t i = num_options_ + 1; i < (size_t)rows; i++) {
-		mvprintw(i - start_option_ + 2, 0, "%-*s", cols, "");
+		mvprintw(i - start_option_ + 2, 0, "%-*ls", cols, L"");
 	    }
 
 	    attroff(A_NORMAL);
@@ -95,57 +100,54 @@ public:
 	    attron(A_NORMAL);
 
 	    for (size_t i = start_option_; i < num_options_; i++) {
-		mvprintw(i - start_option_ + 2, 0, "%-*s", cols, menu_data_->Option_List->At(i).c_str());
+		mvprintw(i - start_option_ + 2, 0, "%-*ls", cols, menu_data_->Option_List->At(i).c_str());
 	    }
 
 	    // Fill out remaining empty rows
 	    for (size_t i = num_options_; i < (size_t)rows; i++) {
-		mvprintw(i - start_option_ + 2, 0, "%-*s", cols, "");
+		mvprintw(i - start_option_ + 2, 0, "%-*ls", cols, L"");
 	    }
 
 	    attroff(A_NORMAL);
-	}
-
-	// If no results, there is no selected
-	if (menu_total_size == 0 && mode == MenuData::SEARCH) {
-	    mvchgat(2, 0, cols, A_NORMAL, 0, NULL);
 	}
     }
 
     void UpdateInput(int cols) {
 	enum MenuData::Mode mode = menu_data_->Mode;
 
+	static size_t test = 0;
+	mvprintw(0, 0, "%zu", test++);
 	// Print input row
-	std::string input_text = menu_data_->Input;
-	mvprintw(1, 0, "%-*s", cols, input_text.c_str());
+	std::wstring input_text = menu_data_->Input;
+	mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
 
 	if (mode == MenuData::EDIT || mode == MenuData::INSERT) {
-	    mvprintw(menu_data_->SelectedOptionPosition, 0, "%-*s", cols, input_text.c_str());
+	    mvprintw(menu_data_->SelectedOptionPosition - start_option_ + 2, 0, "%-*ls", cols, input_text.c_str());
 	}
     }
 
     void UpdateSelectedOptionPosition(int cols) {
-	static int previous_position = -1;
+	static size_t previous_position = 0;
+	size_t new_position = menu_data_->SelectedOptionPosition - start_option_ + 2;
 
-	int new_position = menu_data_->SelectedOptionPosition - start_option_ + 2;
+	enum MenuData::Mode mode = menu_data_->Mode;
 
-	if (previous_position != new_position) {
-	    // Reverse foreground and background of selected line
-	    mvchgat(new_position, 0, cols, A_NORMAL, 0, NULL);
-	    mvchgat(new_position, 0, cols, A_REVERSE, 0, NULL);
+	//mvprintw(0, 0, "%zu %zu %zu", previous_position, new_position, menu_data_->SelectedOptionPosition);
+
+	if (mode == MenuData::INSERT || mode == MenuData::EDIT) {
+	    mvprintw(menu_data_->SelectedOptionPosition - start_option_ + 2, 0, "%-*ls", cols, menu_data_->Input.c_str());
 	}
 
-	previous_position = menu_data_->SelectedOptionPosition;
+	// Reverse foreground and background of selected line
+	mvchgat(previous_position, 0, cols, A_NORMAL, 0, NULL);
+	mvchgat(new_position, 0, cols, A_REVERSE, 0, NULL);
+
+
+	previous_position = new_position;
     }
 
     void UpdateCursorPosition() {
-	static int previous_position = -1;
-
-	int new_position = menu_data_->Cursor_Position;
-
-	if (previous_position != new_position) {
-	    move(1, new_position);
-	}
+	move(1, menu_data_->Cursor_Position);
     }
 
 private:

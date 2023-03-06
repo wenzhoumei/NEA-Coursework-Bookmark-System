@@ -12,7 +12,7 @@ public:
      * @brief Adds character in cursor position
      * @param c is character to add
      */
-    void AddChar(char c) {
+    void AddChar(wchar_t c) {
 	if (!iswprint(c)) return;
 
 	menu_data_.Input.insert(menu_data_.Cursor_Position, 1, c);
@@ -20,7 +20,9 @@ public:
 
 	cursor_position_controller_.Right();
 
-	options_controller_.Search();
+	if (menu_data_.Mode == MenuData::SEARCH) {
+	    options_controller_.Search();
+	}
     }
 
 
@@ -28,40 +30,43 @@ public:
      * @brief Removes last character from input box if it is not empty
      */
     void PopChar() {
-	if (menu_data_.Input == "") return;
+	if (menu_data_.Input == L"") return;
 
 	cursor_position_controller_.Left();
 	menu_data_.Input.pop_back();
 	menu_data_.Changed.Input = true;
 
-	options_controller_.Search();
+	if (menu_data_.Mode == MenuData::SEARCH) {
+	    options_controller_.Search();
+	}
     }
 
     /**
      * @brief Sets text in input box
      * @param input_text is text to set it as
      */
-    void SetText(std::string input_text) { 
+    void SetText(std::wstring input_text) { 
 	menu_data_.Input = input_text;
 	
 	cursor_position_controller_.MoveEnd();
 	menu_data_.Changed.Input = true;
 
-	options_controller_.Search();
+	if (menu_data_.Mode == MenuData::SEARCH) {
+	    options_controller_.Search();
+	}
     }
 
     /**
      * @brief Clears all text in input box
      */
     void Clear() { 
-	SetText("");
+	SetText(L"");
     }
 
     void SetTextToSelected() {
-	menu_data_.Input = menu_data_.Option_List->At(menu_data_.SelectedOptionPosition);
+	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
 
-	options_controller_.Search();
-	cursor_position_controller_.MoveEnd();
+	SetText(menu_data_.Option_List->At(menu_data_.SelectedOptionPosition));
     }
 protected:
     CursorPositionController& cursor_position_controller_;

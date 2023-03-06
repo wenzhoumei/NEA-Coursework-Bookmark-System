@@ -9,14 +9,14 @@ class OptionList {
 public:
     virtual bool Load() = 0;
 
-    virtual bool Add(const std::string& option_string) {
+    virtual bool Add(const std::wstring& option_string) {
 	if (Contains(option_string)) { return false; }
 
 	options_.push_back(option_string);
 	return true;
     };
 
-    virtual bool Insert(size_t pos, const std::string& option_string) {
+    virtual bool Insert(size_t pos, const std::wstring& option_string) {
 	if (pos > options_.size()) {
 	    // Position out of range
 	    return false;
@@ -30,11 +30,16 @@ public:
     }
 
     virtual bool Remove(size_t pos) {
+	if (pos >= options_.size()) {
+	    // Position out of range
+	    return false;
+	}
+
 	options_.erase(options_.begin() + pos);
 	return true;
     };
 
-    virtual bool Update(size_t pos, const std::string& new_option_string) {
+    virtual bool Update(size_t pos, const std::wstring& new_option_string) {
 	if (pos >= options_.size()) {
 	    // Position out of range
 	    return false;
@@ -53,7 +58,7 @@ public:
 	return true;
     }
 
-    virtual bool Contains(const std::string& option_string) {
+    virtual bool Contains(const std::wstring& option_string) {
 	auto it = std::find(options_.begin(), options_.end(), option_string);
 	if (it != options_.end()) {
 	    return true;
@@ -62,23 +67,24 @@ public:
 	}
     }
 
-    bool Search(const std::string& input_text);
+    bool Search(const std::wstring& input_text);
 
     const std::vector<int>& GetSearched() { return searched_; }
 
-    std::string At(size_t i) {
+    const size_t SearchedSize() { return searched_.size(); }
+    std::wstring At(size_t i) {
 	return options_[searched_[i]];
     }
 
     void Print() {
 	std::cout << "-------------" << std::endl;
 	for (const auto& option: options_) {
-	    std::cout << option << std::endl;
+	    std::wcout << option << std::endl;
 	}
     }
 
     const bool IsBookmarkList = false;
 protected:
-    std::vector<std::string> options_;
+    std::vector<std::wstring> options_;
     std::vector<int> searched_;
 };

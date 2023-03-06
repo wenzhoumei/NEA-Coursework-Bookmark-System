@@ -5,9 +5,9 @@
 
 class Retriever {
 protected:
-    std::vector<std::string> data_;
+    std::vector<std::wstring> data_;
 
 public:
     virtual bool Load() = 0;
-    const std::vector<std::string>& GetData() const { return data_; };
+    const std::vector<std::wstring>& GetData() const { return data_; };
 };
