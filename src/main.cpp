@@ -8,10 +8,18 @@
 int main(int argc, char* argv[]) {
     std::locale::global(std::locale(""));
 
+    const std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
+
+    ConfigDirectory& config_directory = ConfigDirectory::Instance();
+    config_directory.Initialize(config_file_path);
+
+    Parser& parser = Parser::Instance();
+
     Log& log = Log::Instance();
     log.Time();
+    std::atexit([]() { Log::Instance().FlushSession(); });
 
-    std::atexit([]() { Log::Instance().PrintSession(); });
+    //std::atexit([]() { Log::Instance().PrintSession(); });
 
     ParameterProcessor parameter_processor(argc, argv);
 
@@ -21,14 +29,6 @@ int main(int argc, char* argv[]) {
 
     std::wstring argument = parameter_processor.GetOptionString();
 
-    const std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
-
-    ConfigDirectory& config_directory = ConfigDirectory::Instance();
-    config_directory.Initialize(config_file_path);
-
-    Parser& parser = Parser::Instance();
-
-    std::atexit([]() { Log::Instance().FlushSession(); });
 
     parser.LoadScripts();
 
