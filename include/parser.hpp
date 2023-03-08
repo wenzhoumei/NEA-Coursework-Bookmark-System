@@ -8,9 +8,8 @@
 #include <functional>
 
 #include "option_list.hpp"
+#include "bookmark_option_list.hpp"
 #include "read_only_data_option_list.hpp"
-
-#define PARSER_EXIT_STAY_IN_MENU 999
 
 class MenuController;
 
@@ -85,14 +84,14 @@ public:
     const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(void)>> DestinationAction_String_To_Function {
 	//{ L"dir", [](std::wstring data) { ; }},
 	//{ L"rdir"::ReadDirectory, [](std::wstring data) { return 0; }},
-	//{ L"bmk", [](std::wstring data) { return 0; }},
+	{ L"bmk", []() { return std::make_unique<BmkOptionList>(BmkOptionList()); }},
 	{ L"file", []() { return std::make_unique<DataOptionList>(DataOptionList()); }},
 	{ L"rfile", []() { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList()); }},
     };
 
     ConfigDirectory& Config_Directory = ConfigDirectory::Instance();
 
-    void LoadScripts();
+    bool LoadScripts();
     bool LoadIdentifierExtensions();
 
     int ExecuteOptionString(const std::wstring& option_string);
@@ -102,7 +101,6 @@ public:
 private:
     size_t GetActionPos_(const std::wstring& name, size_t action_pos=std::wstring::npos, bool first_it=true) const {
 	size_t action_delimiter_pos = FindLastActionDelimiterPos_(name);
-	Log::Instance().Debug() << "name: " << name;
 
 	if (action_delimiter_pos == std::wstring::npos) {
 	    return action_pos;

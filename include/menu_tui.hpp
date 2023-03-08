@@ -21,8 +21,6 @@ class MenuTUI {
     std::unique_ptr<MenuData> menu_data_;
     std::unique_ptr<MenuController> menu_controller_;
     std::unique_ptr<MenuView> menu_view_;
-
-    int exit_code_ = 0;
 public:
     MenuTUI(std::unique_ptr<OptionList> option_list, const std::wstring& action, const std::wstring& data);
 
@@ -31,5 +29,5 @@ public:
     MenuController* GetController();
 
 private:
-    bool GetChar_();
+    int GetChar_();
 };

@@ -38,12 +38,14 @@ private:
 	menu_data_.SelectedOptionPosition = new_position;
 
 	if (menu_data_.Mode == MenuData::INSERT) {
-	    menu_data_.Input = menu_data_.Option_List->At(menu_data_.SelectedOptionPosition);
+	    menu_data_.Input = menu_data_.SelectedName();
 	    menu_data_.Changed.Option_List = true;
 	    menu_data_.Changed.Input = true;
 	} else if (menu_data_.Mode == MenuData::EDIT) {
-	    menu_data_.Input = menu_data_.Option_List->At(menu_data_.SelectedOptionPosition);
+	    menu_data_.Input = menu_data_.SelectedName();
 	    menu_data_.Changed.Input = true;
+	} else if (menu_data_.Editing == MenuData::DATA) {
+	    menu_data_.Editing = MenuData::NAME;
 	}
     }
 };

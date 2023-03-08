@@ -1,5 +1,5 @@
 #include "menu_tui.hpp"
-#include "parser.hpp"
+#include "exit_code.hpp"
 
 MenuTUI::MenuTUI(std::unique_ptr<OptionList> option_list, const std::wstring& action, const std::wstring& data)
 {
@@ -8,28 +8,34 @@ MenuTUI::MenuTUI(std::unique_ptr<OptionList> option_list, const std::wstring& ac
 
 int MenuTUI::Open() {
     menu_view_ = std::make_unique<MenuView>(MenuView(menu_data_.get()));
-    if (menu_data_->Option_List->SuccessfullyLoaded) {
+    if (menu_data_->Option_List->SuccessfullyLoaded()) {
 	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
     } else {
+	//TODO
+	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
+	//menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
 	//menu_controller_ = std::make_unique<FailedMenuController>(FailedMenuController(*menu_data_));
     }
+
+    set_escdelay(0);
 
     menu_view_->Start();
     menu_controller_->Option_List->Search();
     menu_view_->Display();
 
-    while (GetChar_()) {
+    int exit_code;
+    while ((exit_code = GetChar_()) == ExitCode::DontExit) {
 	menu_view_->Display();
     }
 
-    return exit_code_;
+    return exit_code;
 }
 
 MenuController* MenuTUI::GetController() {
     return menu_controller_.get();
 }
 
-bool MenuTUI::GetChar_() {
+int MenuTUI::GetChar_() {
     wint_t choice;
     get_wch(&choice);
 
@@ -59,31 +65,22 @@ bool MenuTUI::GetChar_() {
 	    menu_controller_->SetMode(MenuData::EDIT);
 	    break;
 	case CTRL_MASK('d'):
-	    // Change to data
-	    /*
-	       menu_controller_->GetSelectedEntry();
-	       */
+	    menu_controller_->ToggleData();
 	    break;
 	case KEY_BACKSPACE:
 	case 127:  // Some systems use 127 instead of KEY_BACKSPACE
 	    menu_controller_->Input->PopChar();
 	    break;
 	case KEY_ESCAPE:
-	    menu_controller_->SetMode(MenuData::SEARCH);
+	    if (menu_data_->Mode != MenuData::SEARCH) {
+		menu_controller_->SetMode(MenuData::SEARCH);
+	    } else {
+		return 0;
+	    }
 	    break;
 	case KEY_ENTER:
 	case '\n':
-	    if (menu_data_->Mode == MenuData::SEARCH) {
-		if ((exit_code_ = Parser::Instance().Execute(menu_data_->Action, menu_data_->Option_List->At(menu_data_->SelectedOptionPosition))) != PARSER_EXIT_STAY_IN_MENU) {
-		    return false;
-		}
-	    } else if (menu_data_->Mode == MenuData::EDIT) {
-		menu_controller_->Option_List->Update();
-		menu_controller_->SetMode(MenuData::SEARCH);
-	    } else if (menu_data_->Mode == MenuData::INSERT) {
-		menu_controller_->Option_List->Insert();
-		menu_controller_->SetMode(MenuData::SEARCH);
-	    }
+	    return menu_controller_->Enter();
 	    break;
 	case '\t':
 	    menu_controller_->Input->SetTextToSelected();
@@ -93,5 +90,5 @@ bool MenuTUI::GetChar_() {
 	    break;
     }
 
-    return true;
+    return ExitCode::DontExit;
 }

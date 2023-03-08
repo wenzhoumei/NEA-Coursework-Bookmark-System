@@ -66,7 +66,13 @@ public:
     void SetTextToSelected() {
 	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
 
-	SetText(menu_data_.Option_List->At(menu_data_.SelectedOptionPosition));
+	SetText(menu_data_.SelectedName());
+    }
+
+    void SetTextToData() {
+	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
+
+	SetText(menu_data_.SelectedData());
     }
 protected:
     CursorPositionController& cursor_position_controller_;

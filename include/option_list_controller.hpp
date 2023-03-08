@@ -8,7 +8,8 @@ public:
     OptionListController(MenuData& menu_data, StatusLogController& status_log_controller, SelectedOptionPositionController& selected_option_position_controller): ComponentController(menu_data, status_log_controller), selected_position_controller_(selected_option_position_controller) {}
 
     void Search() {
-	if (!menu_data_.Option_List->Search(menu_data_.Input)) { return; }
+	if (!(menu_data_.Mode == MenuData::SEARCH)) { return; }
+	menu_data_.Option_List->Search(menu_data_.Input);
 	selected_position_controller_.Reset();
 
 	menu_data_.Changed.Option_List = true;
@@ -30,10 +31,13 @@ public:
     }
 
     void Update() {
-	if (!menu_data_.Option_List->Update(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
-	menu_data_.Option_List->Search(menu_data_.Input);
-
 	menu_data_.Changed.Option_List = true;
+	if (menu_data_.Editing == MenuData::NAME) {
+	    if (!menu_data_.Option_List->Update(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
+	    menu_data_.Option_List->Search(menu_data_.Input);
+	} else {
+	    if (!menu_data_.Option_List->UpdateData(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
+	}
     }
 
     void Insert() {

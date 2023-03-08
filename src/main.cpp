@@ -15,9 +15,10 @@ int main(int argc, char* argv[]) {
 
     Parser& parser = Parser::Instance();
 
+    std::atexit([]() { Log::Instance().FlushSession(); });
+
     Log& log = Log::Instance();
     log.Time();
-    std::atexit([]() { Log::Instance().FlushSession(); });
 
     //std::atexit([]() { Log::Instance().PrintSession(); });
 

@@ -2,6 +2,7 @@
 
 #include "option_list.hpp"
 #include "menu_tui.hpp"
+#include "exit_code.hpp"
 
 /*
     static struct DestinationAction {
@@ -22,10 +23,12 @@
     } ProgramAction;
 */
 
-void Parser::LoadScripts() {
+bool Parser::LoadScripts() {
     for (auto script: Config_Directory.Scripts_Retriever->GetData()) {
 	Scripts_.emplace(script);
     }
+
+    return true;
 }
 
 bool Parser::LoadIdentifierExtensions() {
@@ -36,12 +39,17 @@ bool Parser::LoadIdentifierExtensions() {
 	std::wstring data;
 
 	if (pos == std::wstring::npos) {
-	    Log::Instance().Error(1) << "Error: Malformed option list - missing \'>\'";
+	    Log::Instance().Error(1) << "Malformed option list - missing \'>\'";
 	    return false;
 	} else {
 	    name = identifier_extension_to_script.substr(0, pos);
 	    data = identifier_extension_to_script.substr(pos + 1);
-	    IdentifierExtension_To_Action_[name] = data;
+
+	    if (GetActionPos_(data) != 0) {
+		Log::Instance().Warning() << "Ignoring invalid action assigned to file extension: " << data;
+	    } else {
+		IdentifierExtension_To_Action_[name] = data;
+	    }
 	}
 
     }
@@ -99,32 +107,6 @@ int Parser::ExecuteDataDefault(const std::wstring& option_string) {
     return Execute(action, option_string);
 }
 
-/*
-bool Parser::ValidAction(const std::wstring& action) {
-    char action_delimiter = action[0];
-
-    std::wstring action_identifier = action.substr(1);
-
-    size_t next_action_pos = action_identifier.find_first_of(Delimiter.ActionAll);
-
-    switch (action_delimiter) {
-	case (DestinationAction::Delimiter):
-	    if (next_action_pos == std::wstring::npos) { return DestinationAction_String_To_Function.contains(action_identifier); }
-	    else if (!DestinationAction_String_To_Function.contains(action_identifier.substr(0, next_action_pos))) { return false; }
-	    else { return ValidAction(action_identifier.substr(next_action_pos)); }
-	    break;
-	case (ProgramAction::Delimiter):
-	    return ProgramAction_String_To_Function.contains(action_identifier);
-	    break;
-	case (ScriptAction::Delimiter):
-	    return Scripts_.contains(action_identifier);
-	    break;
-    }
-
-    return false;
-}
-*/
-
 int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     char action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
@@ -152,11 +134,16 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    std::unique_ptr<OptionList> option_list = std::move(DestinationAction_String_To_Function.at(destination_action_identifier)());
 	    option_list->Load(data);
 
-	    //option_list->Print();
+	    if (!option_list->SuccessfullyLoaded()) {
+		Log::Instance().Warning() << "Failed to load";
+		break;
+	    }
+
 	    MenuTUI menu_tui = MenuTUI(std::move(option_list), action_at_destination, data);
+	    menu_controller_ = menu_tui.GetController();
+
 	    return menu_tui.Open();
 
-	    // menu_controller = ...;
 	    break;
 	}
 	case (ProgramAction::Delimiter):
@@ -164,9 +151,9 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
-		std::cerr << "Error: you can't execute a menu action here" << std::endl;
+		Log::Instance().Error(1) << "You can't execute a menu action here";
 	    } else {
-		return PARSER_EXIT_STAY_IN_MENU;
+		return ExitCode::DontExit;
 	    }
 
 	    break;

@@ -19,7 +19,8 @@ public:
     std::wstring Input = L"";
     size_t Cursor_Position = 0;
 
-    enum Mode { SEARCH, INSERT, EDIT, DATA } Mode = SEARCH;
+    enum Editing { NAME, DATA } Editing = NAME;
+    enum Mode { SEARCH, INSERT, EDIT } Mode = SEARCH;
 
     std::unique_ptr<OptionList> Option_List;
 
@@ -39,4 +40,20 @@ public:
 	    Title = Input = Option_List = Selected = Status_Log = false;
 	}
     } Changed;
+
+    std::wstring SelectedName() const {
+	return Option_List->NameAt(SelectedOptionPosition);
+    }
+
+    std::wstring SelectedOptionString() const {
+	return Option_List->OptionStringAt(SelectedOptionPosition);
+    }
+
+    std::wstring SelectedData() const {
+	return Option_List->DataAt(SelectedOptionPosition);
+    }
+
+    bool IsSearchListEmpty() const {
+	return Option_List->SearchedSize() == 0;
+    }
 };

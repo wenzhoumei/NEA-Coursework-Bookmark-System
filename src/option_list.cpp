@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <numeric>
 
-bool OptionList::Search(const std::wstring& input_text)
+void OptionList::Search(const std::wstring& input_text)
 {
     searched_.clear();
 
@@ -14,7 +14,7 @@ bool OptionList::Search(const std::wstring& input_text)
     if (input_tokens.size() == 0) {
         searched_.resize(options_.size());
         std::iota(searched_.begin(), searched_.end(), 0);
-        return true;;
+        return;
     }
 
     // Create vectors to store the exact, prefix, and substring matches
@@ -59,6 +59,4 @@ bool OptionList::Search(const std::wstring& input_text)
     searched_.insert(searched_.end(), exactMatches.begin(), exactMatches.end());
     searched_.insert(searched_.end(), prefixMatches.begin(), prefixMatches.end());
     searched_.insert(searched_.end(), substringMatches.begin(), substringMatches.end());
-
-    return true;
 }

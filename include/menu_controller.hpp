@@ -25,19 +25,30 @@ public:
     void SetMode(enum MenuData::Mode m) {
 	if (m == MenuData::EDIT) {
 	    menu_data_.Mode = m;
-	    Input->SetTextToSelected();
+	    if (menu_data_.Editing == MenuData::NAME) {
+		Input->SetTextToSelected();
+	    } else {
+		Input->SetTextToData();
+	    }
 	} else if (m == MenuData::INSERT) {
 	    menu_data_.Mode = m;
 	    Input->Clear();
 	    menu_data_.Changed.Option_List = true;
 	} else if (m == MenuData::SEARCH) {
 	    if (menu_data_.Mode != MenuData::SEARCH) {
+		Selected_Option_Position->Reset();
 		menu_data_.Mode = MenuData::SEARCH;
 		Input->SetText(L"");
-		Selected_Option_Position->Reset();
 	    }
 	}
     }
+
+    void ToggleData() {
+	if (menu_data_.Editing == MenuData::NAME) { menu_data_.Editing = MenuData::DATA; }
+	else if (menu_data_.Editing == MenuData::DATA) { menu_data_.Editing = MenuData::NAME; }
+    }
+
+    int Enter();
 
     StatusLogController* Status_Log;
     TitleController* Title;

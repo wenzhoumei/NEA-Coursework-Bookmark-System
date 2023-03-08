@@ -5,44 +5,41 @@
 #include <filesystem>
 #include <vector>
 
-#include "file_retriever.hpp"
-#include "option_list.hpp"
+#include "file_option_list.hpp"
+#include "log.hpp"
 
-class DataOptionList: public OptionList {
+class DataOptionList: public FileOptionList {
 protected:
     std::filesystem::path File_Path_;
-    std::unique_ptr<Retriever> Option_Retriever = nullptr;
-
 
 public:
-    bool Flush() {
+    bool Flush() override {
         std::wofstream file(File_Path_);
 
         if (!file) {
-            std::cerr << "Error: Unable to open file for writing: " << File_Path_ << std::endl;
+	    Log::Instance().Error(1) << "Unable to open file for writing: " << File_Path_;
             return false;
         }
 
-        for (const std::wstring& entry : options_) {
-            file << entry << std::endl;
+        for (const std::wstring& option_name : options_) {
+            file << option_name << std::endl;
         }
 
         return true;
     }
 
-    bool SuccessfullyLoaded = false;
-    void Load(std::filesystem::path file_path) override {
+    void Load(const std::filesystem::path& file_path) override {
 	File_Path_ = file_path;
-	Option_Retriever = std::make_unique<FileRetriever>(FileRetriever(file_path));
+	File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(file_path));
 
-	if (!Option_Retriever->Load()) {
-	    SuccessfullyLoaded = false;
+	if (!File_Retriever_->Load()) {
+	    SuccessfullyLoaded_ = false;
 	    return;
 	}
 
-	options_ = Option_Retriever->GetData();
+	options_ = File_Retriever_->GetData();
 
-	SuccessfullyLoaded = true;
+	SuccessfullyLoaded_ = true;
     }
 
     bool Add(const std::wstring& option_string) override {
@@ -61,6 +58,6 @@ public:
 	return OptionList::Insert(pos, option_string) && Flush();
     }
 
-    const bool HasData = false;
+    const bool IsBookmarkList = false;
     const bool Editable = true;
 };
