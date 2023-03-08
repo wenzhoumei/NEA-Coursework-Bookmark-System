@@ -9,6 +9,7 @@
 class OptionList {
 public:
     bool SuccessfullyLoaded = false;
+
     virtual void Load(std::filesystem::path file_path) = 0;
 
     virtual bool Add(const std::wstring& option_string) {

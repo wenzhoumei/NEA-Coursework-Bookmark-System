@@ -3,9 +3,6 @@
 #include "option_list.hpp"
 #include "menu_tui.hpp"
 
-#include "data_option_list.hpp"
-#include "read_only_data_option_list.hpp"
-
 /*
     static struct DestinationAction {
 	static constexpr std::wstring Directory = L"dir";
@@ -25,24 +22,6 @@
     } ProgramAction;
 */
 
-#define PROGRAM_ACTION_NOTHING L"nothing"
-#define PROGRAM_ACTION_ECHO L"echo"
-#define PROGRAM_ACTION_OPTION_STRING L"option_string"
-
-const std::unordered_map<std::wstring, std::function<int(std::wstring)>> Parser::ProgramAction_String_To_Function {
-    { PROGRAM_ACTION_NOTHING, [](std::wstring data) { std::cout << "hello :)" << std::endl; return 0; }},
-    { PROGRAM_ACTION_ECHO, [](std::wstring data) { std::wcout << data << std::endl; return 0; }},
-    { PROGRAM_ACTION_OPTION_STRING, [](std::wstring data) { return 0; }},
-};
-
-const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(void)>> Parser::DestinationAction_String_To_Function {
-    //{ L"dir", [](std::wstring data) { ; }},
-    //{ L"rdir"::ReadDirectory, [](std::wstring data) { return 0; }},
-    //{ L"bmk", [](std::wstring data) { return 0; }},
-    { L"file", []() { return std::make_unique<DataOptionList>(DataOptionList()); }},
-    { L"rfile", []() { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList()); }},
-};
-
 void Parser::LoadScripts() {
     for (auto script: Config_Directory.Scripts_Retriever->GetData()) {
 	Scripts_.emplace(script);
@@ -51,13 +30,13 @@ void Parser::LoadScripts() {
 
 bool Parser::LoadIdentifierExtensions() {
     for (auto identifier_extension_to_script: Config_Directory.IdentifierExtension_To_Action_Retriever->GetData()) {
-	size_t pos = identifier_extension_to_script.find(Delimiter::Data);
+	size_t pos = identifier_extension_to_script.find(Data.Delimiter);
 
 	std::wstring name;
 	std::wstring data;
 
 	if (pos == std::wstring::npos) {
-	    std::cerr << "Error: Malformed option list - missing \'>\'" << std::endl;
+	    Log::Instance().Error(1) << "Error: Malformed option list - missing \'>\'";
 	    return false;
 	} else {
 	    name = identifier_extension_to_script.substr(0, pos);
@@ -71,33 +50,37 @@ bool Parser::LoadIdentifierExtensions() {
 }
 
 int Parser::ExecuteOptionString(const std::wstring& option_string) {
-    size_t data_pos = option_string.find_first_of(Delimiter::Data);
-    size_t action_pos = option_string.find_first_of(Delimiter.ActionAll);
-
-
     std::wstring data;
-    if (action_pos == std::wstring::npos) {
-	return ExecuteDataDefault(option_string);
-    } else if (data_pos == std::wstring::npos) {
-	data = option_string.substr(0, action_pos);
-	data_pos = option_string.size();
-    } else if (action_pos > data_pos) {
-	return ExecuteDataDefault(option_string);
+    size_t data_pos = option_string.find_first_of(Data::Delimiter);
+
+    std::wstring name;
+    if (data_pos == std::wstring::npos) {
+	name = option_string;
     } else {
+	name = option_string.substr(0, data_pos);
+    }
+
+    size_t action_pos = GetActionPos_(name);
+
+    if (action_pos == std::wstring::npos) {
+	// file.txt
+	return ExecuteDataDefault(option_string);
+    }
+
+    if (data_pos == std::wstring::npos) {
+	// file.txt|text
+	data = option_string.substr(0, action_pos);
+    } else {
+	// file.txt|text>/path/to/file.txt
 	data = option_string.substr(data_pos + 1);
     }
 
-    std::wstring action_string = option_string.substr(action_pos, data_pos - action_pos);
-
-    if (!ValidAction(action_string)) {
-	return ExecuteDataDefault(option_string);
-    } else {
-	return Execute(action_string, data);
-    }
+    std::wstring action_string = name.substr(action_pos);
+    return Execute(action_string, data);
 }
 
 int Parser::ExecuteDataDefault(const std::wstring& option_string) {
-    size_t identifier_extension_pos = option_string.find_first_of(Delimiter::IdentifierExtension);
+    size_t identifier_extension_pos = option_string.find_first_of(IdentifierExtension::Delimiter);
     std::wstring identifier_extension;
 
     if (identifier_extension_pos == std::wstring::npos) {
@@ -110,12 +93,13 @@ int Parser::ExecuteDataDefault(const std::wstring& option_string) {
     if (IdentifierExtension_To_Action_.contains(identifier_extension)) {
 	action = IdentifierExtension_To_Action_[identifier_extension];
     } else {
-	action = std::wstring(1, Delimiter::ProgramAction) + PROGRAM_ACTION_NOTHING;
+	action = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.Nothing;
     }
 
     return Execute(action, option_string);
 }
 
+/*
 bool Parser::ValidAction(const std::wstring& action) {
     char action_delimiter = action[0];
 
@@ -124,46 +108,48 @@ bool Parser::ValidAction(const std::wstring& action) {
     size_t next_action_pos = action_identifier.find_first_of(Delimiter.ActionAll);
 
     switch (action_delimiter) {
-	case (Delimiter::DestinationAction):
+	case (DestinationAction::Delimiter):
 	    if (next_action_pos == std::wstring::npos) { return DestinationAction_String_To_Function.contains(action_identifier); }
 	    else if (!DestinationAction_String_To_Function.contains(action_identifier.substr(0, next_action_pos))) { return false; }
 	    else { return ValidAction(action_identifier.substr(next_action_pos)); }
 	    break;
-	case (Delimiter::ProgramAction):
+	case (ProgramAction::Delimiter):
 	    return ProgramAction_String_To_Function.contains(action_identifier);
 	    break;
-	case (Delimiter::ScriptAction):
+	case (ScriptAction::Delimiter):
 	    return Scripts_.contains(action_identifier);
 	    break;
     }
 
     return false;
 }
+*/
 
 int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     char action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
 
-    Log& log = Log::Instance();
-    log.Info() << L"action: " << action;
-    log.Info() << L"data: " << data;
+    Log::Instance().Info() << L"action: " << action;
+    Log::Instance().Info() << L"data: " << data;
 
     switch (action_delimiter) {
-	case (Delimiter::DestinationAction):
+	case (DestinationAction::Delimiter):
 	{
-	    size_t next_action_pos = action_identifier.find_first_of(Delimiter.ActionAll);
+	    std::wstring action_at_destination = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.OptionString;
 
-	    std::wstring destination_action;
-	    std::wstring action_at_destination = std::wstring(1, Delimiter::ProgramAction) + PROGRAM_ACTION_OPTION_STRING;
+	    size_t i = 0;
+	    std::wstring destination_action_identifier;
+	    for (wchar_t c: action_identifier) {
+		i++;
+		if (IsActionDelimiter_(c)) {
+		    action_at_destination = action_identifier.substr(i);
+		    break;
+		}
 
-	    if (next_action_pos == std::wstring::npos) {
-		destination_action = action_identifier;
-	    } else {
-		destination_action = action_identifier.substr(0, next_action_pos);
-		action_at_destination = action_identifier.substr(next_action_pos);
+		destination_action_identifier += c;
 	    }
 
-	    std::unique_ptr<OptionList> option_list = std::move(DestinationAction_String_To_Function.at(action_identifier)());
+	    std::unique_ptr<OptionList> option_list = std::move(DestinationAction_String_To_Function.at(destination_action_identifier)());
 	    option_list->Load(data);
 
 	    //option_list->Print();
@@ -173,11 +159,10 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    // menu_controller = ...;
 	    break;
 	}
-
-	case (Delimiter::ProgramAction):
+	case (ProgramAction::Delimiter):
 	    ProgramAction_String_To_Function.at(action_identifier)(data);
 	    break;
-	case (Delimiter::MenuAction):
+	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
 		std::cerr << "Error: you can't execute a menu action here" << std::endl;
 	    } else {
@@ -185,7 +170,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    }
 
 	    break;
-	case (Delimiter::ScriptAction):
+	case (ScriptAction::Delimiter):
 	{
 	    // convert wstring data to string
 	    std::string data_str(data.begin(), data.end());
