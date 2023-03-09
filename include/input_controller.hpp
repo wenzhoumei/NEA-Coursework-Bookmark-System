@@ -5,7 +5,7 @@
 
 class InputController: public ComponentController {
 public:
-    InputController(MenuData& menu_data, StatusLogController& status_log_controller, CursorPositionController& cursor_position_controller, OptionListController& options_controller): ComponentController(menu_data, status_log_controller), cursor_position_controller_(cursor_position_controller), options_controller_(options_controller) {}
+    InputController(MenuData& menu_data, StatusLogController& status_log_controller, CursorPositionController& cursor_position_controller, OptionListController& options_controller): ComponentController(menu_data, status_log_controller), Cursor_Position_Controller_(cursor_position_controller), Options_Controller_(options_controller) {}
 
 
     /**
@@ -18,10 +18,10 @@ public:
 	menu_data_.Input.insert(menu_data_.Cursor_Position, 1, c);
 	menu_data_.Changed.Input = true;
 
-	cursor_position_controller_.Right();
+	Cursor_Position_Controller_.Right();
 
 	if (menu_data_.Mode == MenuData::SEARCH) {
-	    options_controller_.Search();
+	    Options_Controller_.Search();
 	}
     }
 
@@ -32,12 +32,12 @@ public:
     void PopChar() {
 	if (menu_data_.Input == L"") return;
 
-	cursor_position_controller_.Left();
+	Cursor_Position_Controller_.Left();
 	menu_data_.Input.pop_back();
 	menu_data_.Changed.Input = true;
 
 	if (menu_data_.Mode == MenuData::SEARCH) {
-	    options_controller_.Search();
+	    Options_Controller_.Search();
 	}
     }
 
@@ -48,11 +48,11 @@ public:
     void SetText(std::wstring input_text) { 
 	menu_data_.Input = input_text;
 	
-	cursor_position_controller_.MoveEnd();
+	Cursor_Position_Controller_.MoveEnd();
 	menu_data_.Changed.Input = true;
 
 	if (menu_data_.Mode == MenuData::SEARCH) {
-	    options_controller_.Search();
+	    Options_Controller_.Search();
 	}
     }
 
@@ -75,6 +75,6 @@ public:
 	SetText(menu_data_.SelectedData());
     }
 protected:
-    CursorPositionController& cursor_position_controller_;
-    OptionListController& options_controller_;
+    CursorPositionController& Cursor_Position_Controller_;
+    OptionListController& Options_Controller_;
 };

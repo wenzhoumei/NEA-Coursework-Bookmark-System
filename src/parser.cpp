@@ -4,25 +4,6 @@
 #include "menu_tui.hpp"
 #include "exit_code.hpp"
 
-/*
-    static struct DestinationAction {
-	static constexpr std::wstring Directory = L"dir";
-	static constexpr std::wstring ReadDirectory = L"rdr";
-	static constexpr std::wstring BookmarkList = L"bmk";
-	static constexpr std::wstring DataList = L"lst";
-    } DestinationAction;
-
-    static struct MenuAction {
-	static constexpr std::wstring Directory = L"add";
-	static constexpr std::wstring ReadDirectory = L"rm";
-    } MenuAction;
-
-    static struct ProgramAction {
-	static constexpr std::wstring Nothing = L"nul";
-	static constexpr std::wstring Echo = L"echo";
-    } ProgramAction;
-*/
-
 bool Parser::LoadScripts() {
     for (auto script: Config_Directory.Scripts_Retriever->GetData()) {
 	Scripts_.emplace(script);
@@ -124,22 +105,18 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    for (wchar_t c: action_identifier) {
 		i++;
 		if (IsActionDelimiter_(c)) {
-		    action_at_destination = action_identifier.substr(i);
+		    action_at_destination = action_identifier.substr(i - 1);
 		    break;
 		}
 
 		destination_action_identifier += c;
 	    }
 
-	    std::unique_ptr<OptionList> option_list = std::move(DestinationAction_String_To_Function.at(destination_action_identifier)());
-	    option_list->Load(data);
-
-	    if (!option_list->SuccessfullyLoaded()) {
-		Log::Instance().Warning() << "Failed to load";
-		break;
+	    if (action_at_destination == L"") {
+		action_at_destination = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.OptionString;
 	    }
 
-	    MenuTUI menu_tui = MenuTUI(std::move(option_list), action_at_destination, data);
+	    MenuTUI menu_tui = MenuTUI(DestinationAction_String_To_Function.at(destination_action_identifier)(action_at_destination, data));
 	    menu_controller_ = menu_tui.GetController();
 
 	    return menu_tui.Open();

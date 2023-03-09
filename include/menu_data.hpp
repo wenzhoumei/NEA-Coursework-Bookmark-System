@@ -8,13 +8,12 @@
 
 class MenuData {
 public:
-    MenuData(std::wstring title, std::wstring action, std::unique_ptr<OptionList> option_list)
-	: Title(title), Action(action), Option_List(std::move(option_list))
+    MenuData(std::wstring title, std::unique_ptr<OptionList> option_list)
+	: Title(title), Option_List(std::move(option_list))
     {
     }
 
     std::wstring Title;
-    std::wstring Action;
 
     std::wstring Input = L"";
     size_t Cursor_Position = 0;
@@ -43,10 +42,6 @@ public:
 
     std::wstring SelectedName() const {
 	return Option_List->NameAt(SelectedOptionPosition);
-    }
-
-    std::wstring SelectedOptionString() const {
-	return Option_List->OptionStringAt(SelectedOptionPosition);
     }
 
     std::wstring SelectedData() const {

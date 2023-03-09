@@ -1,51 +1,21 @@
 #pragma once
-#include "component_controller.hpp"
+#include <stddef.h>
 
-class SelectedOptionPositionController: public ComponentController {
+/** Deals with the logic of going up and down
+ *  In future, can inherit to implement circular navigation
+ **/
+class SelectedOptionPositionController {
 public:
-    SelectedOptionPositionController(MenuData& menu_data, StatusLogController& status_log_controller): ComponentController(menu_data, status_log_controller) {}
-    void Down() {
-	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
-	if (menu_data_.SelectedOptionPosition == Max_()) { return; }
-	if (menu_data_.SelectedOptionPosition > Max_()) {
-	    menu_data_.SelectedOptionPosition = Max_();
-	    return;
-	}
+    void Down(const size_t& max, size_t& selected_option_position) {
+	if (max == 0) { return; }
+	if (selected_option_position == max) { return; }
 
-	ChangePos(menu_data_.SelectedOptionPosition + 1);
+	selected_option_position += 1;
     }
 
-    void Up() {
-	if (menu_data_.SelectedOptionPosition == 0) { return; }
+    void Up(const size_t& max, size_t& selected_option_position) {
+	if (selected_option_position == 0) { return; }
 
-	ChangePos(menu_data_.SelectedOptionPosition - 1);
-    }
-
-    void Reset() {
-	ChangePos(0);
-    }
-
-private:
-    size_t Max_() {
-	if (menu_data_.Mode == MenuData::INSERT) {
-	    return menu_data_.Option_List->GetSearched().size();
-	} else {
-	    return menu_data_.Option_List->GetSearched().size() - 1;
-	}
-    }
-
-    void ChangePos(size_t new_position) {
-	menu_data_.SelectedOptionPosition = new_position;
-
-	if (menu_data_.Mode == MenuData::INSERT) {
-	    menu_data_.Input = menu_data_.SelectedName();
-	    menu_data_.Changed.Option_List = true;
-	    menu_data_.Changed.Input = true;
-	} else if (menu_data_.Mode == MenuData::EDIT) {
-	    menu_data_.Input = menu_data_.SelectedName();
-	    menu_data_.Changed.Input = true;
-	} else if (menu_data_.Editing == MenuData::DATA) {
-	    menu_data_.Editing = MenuData::NAME;
-	}
+	selected_option_position -= 1;
     }
 };

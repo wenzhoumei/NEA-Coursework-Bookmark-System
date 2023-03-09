@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "option_list.hpp"
+#include "data_option_list.hpp"
 #include "bookmark_option_list.hpp"
 #include "read_only_data_option_list.hpp"
 
@@ -29,21 +30,6 @@ public:
 	static Parser INSTANCE;
 	return INSTANCE;
     }
-
-    /*
-    struct Delimiter {
-	static constexpr wchar_t ScriptAction = L'|';
-	static constexpr wchar_t DestinationAction = L'@';
-	static constexpr wchar_t MenuAction = L':';
-
-	const std::wstring ActionAll = L"~@:|";
-
-	static constexpr wchar_t Data = L'>';
-
-	static constexpr wchar_t IdentifierExtension = L'.';
-    } Delimiter;
-    */
-
 
     struct Data {
 	static constexpr wchar_t Delimiter = L'>';
@@ -81,12 +67,15 @@ public:
 	{ ProgramAction.OptionString, [this](std::wstring data) { return ExecuteOptionString(data); }},
     };
 
-    const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(void)>> DestinationAction_String_To_Function {
+    const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring)>> DestinationAction_String_To_Function {
 	//{ L"dir", [](std::wstring data) { ; }},
 	//{ L"rdir"::ReadDirectory, [](std::wstring data) { return 0; }},
-	{ L"bmk", []() { return std::make_unique<BmkOptionList>(BmkOptionList()); }},
-	{ L"file", []() { return std::make_unique<DataOptionList>(DataOptionList()); }},
-	{ L"rfile", []() { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList()); }},
+	{ L"bmk", [](std::wstring action, std::wstring location) { return std::make_unique<BmkOptionList>(BmkOptionList(action, location)); }},
+	{ L"file", [](std::wstring action, std::wstring location) { return std::make_unique<DataOptionList>(DataOptionList(action, location)); }},
+	{ L"rfile", [](std::wstring action, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action, location)); }},
+    };
+
+    const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring)>> MenuAction_String_To_Function {
     };
 
     ConfigDirectory& Config_Directory = ConfigDirectory::Instance();
@@ -159,9 +148,12 @@ private:
 	    case (ScriptAction::Delimiter):
 		return Scripts_.contains(action_identifier);
 		break;
+	    case (MenuAction::Delimiter):
+		return MenuAction_String_To_Function.contains(action_identifier);
+		break;
 	}
 
-	Log::Instance().Error(9) << "Invalid action delimiter";
+	Log::Instance().Error(9) << "Invalid action delimiter: " << action_del;
 	return false;
     }
 };

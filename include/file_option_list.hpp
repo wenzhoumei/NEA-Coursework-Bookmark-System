@@ -4,25 +4,39 @@
 
 class FileOptionList: public OptionList {
 protected:
-    std::filesystem::path File_Path_;
     std::unique_ptr<FileRetriever> File_Retriever_ = nullptr;
 
+    virtual bool Flush_() = 0; // Writes to backend
+			       // Returns true if successful else false
+
+
 public:
-    virtual bool Flush() = 0;
-
-    bool Add(const std::wstring& option_string) override {
-	return OptionList::Add(option_string) && Flush();
+    FileOptionList(std::wstring action, std::wstring location)
+	: OptionList(action, location)
+    {
     }
 
-    bool Remove(size_t pos) override {
-	return OptionList::Remove(pos) && Flush();
+    ModifyStatus Add(const std::wstring& option_string) override {
+	ModifyStatus m_s = OptionList::Add(option_string);
+	m_s.BackendError = m_s.BackendError || !Flush_();
+	return m_s;
     }
 
-    bool Update(size_t pos, const std::wstring& new_option_string) override {
-	return OptionList::Update(pos, new_option_string) && Flush();
+    ModifyStatus Remove(size_t pos) override {
+	ModifyStatus m_s = OptionList::Remove(pos);
+	m_s.BackendError = m_s.BackendError || !Flush_();
+	return m_s;
     }
 
-    bool Insert(size_t pos, const std::wstring& option_string) override {
-	return OptionList::Insert(pos, option_string) && Flush();
+    ModifyStatus Update(size_t pos, const std::wstring& new_option_string) override {
+	ModifyStatus m_s = OptionList::Update(pos, new_option_string);
+	m_s.BackendError = m_s.BackendError || !Flush_();
+	return m_s;
+    }
+
+    ModifyStatus Insert(size_t pos, const std::wstring& option_string) override {
+	ModifyStatus m_s = OptionList::Insert(pos, option_string);
+	m_s.BackendError = m_s.BackendError || !Flush_();
+	return m_s;
     }
 };

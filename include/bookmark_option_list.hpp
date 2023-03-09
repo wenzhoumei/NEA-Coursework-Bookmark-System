@@ -10,27 +10,33 @@
 
 class BmkOptionList: public FileOptionList {
 public:
-    void Load(const std::filesystem::path& file_path) override;
+    BmkOptionList(std::wstring action, std::wstring location)
+	: FileOptionList(action, location)
+    {
+    }
 
-    bool Flush() override;
-    bool Add(const std::wstring& option_string) override;
-    bool Insert(size_t pos, const std::wstring& option_string) override;
-    bool Remove(size_t pos) override;
-    bool Update(size_t pos, const std::wstring& new_option_string) override;
+    bool Load() override;
+
+    ModifyStatus Add(const std::wstring& option_string) override;
+    ModifyStatus Insert(size_t pos, const std::wstring& option_string) override;
+    ModifyStatus Remove(size_t pos) override;
+    ModifyStatus Update(size_t pos, const std::wstring& new_option_string) override;
+    ModifyStatus UpdateData(size_t pos, const std::wstring& new_option_string) override;
+
     bool Contains(const std::wstring& option_string) const override;
+    bool Search(const std::wstring& option_string) override;
 
-    bool UpdateData(size_t pos, const std::wstring& new_option_string) override;
-    void Search(const std::wstring& option_string) override;
-
-    std::wstring NameAt(size_t i) override;
-    std::wstring OptionStringAt(size_t i) override;
-    std::wstring DataAt(size_t i) override;
+    std::wstring NameAt(size_t i) const override;
+    std::wstring DataAt(size_t i) const override;
 
     const bool IsBookmarkList = true;
     const bool Editable = true;
 
 protected:
-    std::unordered_map<std::wstring, std::wstring> names_to_data_;
+    bool Flush_() override;
+
     void SplitStringToNameAndData_(const std::wstring& option_string, std::wstring& name, std::wstring& data);
-    void RemoveName_(const std::wstring& name);
+    void RemoveNameInMap_(const std::wstring& name);
+
+    std::unordered_map<std::wstring, std::wstring> Names_To_Data_;
 };

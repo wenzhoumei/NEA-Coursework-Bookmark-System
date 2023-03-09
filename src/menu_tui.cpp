@@ -1,18 +1,22 @@
 #include "menu_tui.hpp"
 #include "exit_code.hpp"
 
-MenuTUI::MenuTUI(std::unique_ptr<OptionList> option_list, const std::wstring& action, const std::wstring& data)
+MenuTUI::MenuTUI(std::unique_ptr<OptionList> option_list)
 {
-    menu_data_ = std::make_unique<MenuData>(MenuData(data + action, action, std::move(option_list)));
+    std::wstring action = option_list->GetAction();
+    std::wstring location = option_list->GetLocation();
+
+    menu_data_ = std::make_unique<MenuData>(MenuData(location + action, std::move(option_list)));
 }
 
 int MenuTUI::Open() {
     menu_view_ = std::make_unique<MenuView>(MenuView(menu_data_.get()));
-    if (menu_data_->Option_List->SuccessfullyLoaded()) {
-	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
+
+    if (!menu_data_->Option_List->Load()) {
+	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_, *menu_view_));
     } else {
 	//TODO
-	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
+	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_, *menu_view_));
 	//menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
 	//menu_controller_ = std::make_unique<FailedMenuController>(FailedMenuController(*menu_data_));
     }
@@ -77,6 +81,9 @@ int MenuTUI::GetChar_() {
 	    } else {
 		return 0;
 	    }
+	    break;
+	case CTRL_MASK(KEY_ENTER):
+	    return menu_controller_->CtrlEnter();
 	    break;
 	case KEY_ENTER:
 	case '\n':

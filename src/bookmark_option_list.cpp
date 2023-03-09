@@ -7,135 +7,134 @@
 #include "bookmark_option_list.hpp"
 #include "parser.hpp"
 
-void BmkOptionList::Load(const std::filesystem::path& file_path) {
-    File_Path_ = file_path;
-    File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(file_path));
+bool BmkOptionList::Load() {
+    File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(Location_));
 
     if (!File_Retriever_->Load()) {
-	SuccessfullyLoaded_ = false;
-	return;
+	return false;
     }
 
     for (auto option_string: File_Retriever_->GetData()) {
 	std::wstring name;
 	std::wstring data;
 	SplitStringToNameAndData_(option_string, name, data);
-	options_.push_back(name);
-	names_to_data_[name] = data;
-    }
-
-    SuccessfullyLoaded_ = true;
-}
-
-bool BmkOptionList::Flush() {
-    std::wofstream file(File_Path_);
-
-    if (!file) {
-	Log::Instance().Error(1) << "Unable to open file for writing: " << File_Path_;
-	return false;
-    }
-
-    for (const std::wstring& option_name : options_) {
-	file << option_name << Parser::Instance().Data.Delimiter << names_to_data_[option_name] << std::endl;
-
-	//Log::Instance().Debug() << "name:" << option_name;
-	//Log::Instance().Debug() << "data:" << names_to_data_[option_name];
+	Options_All_.push_back(name);
+	Names_To_Data_[name] = data;
     }
 
     return true;
 }
 
-bool BmkOptionList::Add(const std::wstring& option_string) {
+bool BmkOptionList::Flush_() {
+    // Constructor of wofstream object doesn't take wstring as argument
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::string narrow_location = converter.to_bytes(Location_);
+    std::wofstream file(narrow_location);
+
+    if (!file) {
+	Log::Instance().Error(1) << "Unable to open file for writing: " << Location_;
+	return false;
+    }
+
+    for (const std::wstring& option_name : Options_All_) {
+	file << option_name << Parser::Instance().Data.Delimiter << Names_To_Data_[option_name] << std::endl;
+    }
+
+    return true;
+}
+
+OptionList::ModifyStatus BmkOptionList::Add(const std::wstring& option_string) {
     std::wstring name;
     std::wstring data;
     SplitStringToNameAndData_(option_string, name, data);
 
-    Log::Instance().Debug() << "adding name:" << name;
-    Log::Instance().Debug() << "data:" << data;
+    OptionList::ModifyStatus m_s = OptionList::Add(name);
 
-    bool successfully_added = OptionList::Add(name);
-
-    if (!successfully_added) {
-	Log::Instance().Debug() << "Not successfully_added";
-	return false;
+    if (m_s.BackendError) {
+	return { m_s.Modified, true };
     } else {
-	names_to_data_[name] = data;
-	return Flush();
+	Names_To_Data_[name] = data;
+	m_s.BackendError = !Flush_();
+	return m_s;
     }
 }
 
-bool BmkOptionList::Insert(size_t pos, const std::wstring& option_string) {
+OptionList::ModifyStatus BmkOptionList::Insert(size_t pos, const std::wstring& option_string) {
     std::wstring name;
     std::wstring data;
     SplitStringToNameAndData_(option_string, name, data);
 
-    bool successfully_inserted = OptionList::Insert(pos, name);
+    OptionList::ModifyStatus m_s = OptionList::Insert(pos, name);
 
-    if (!successfully_inserted) {
-	Log::Instance().Debug() << "Not successfully_added";
-	return false;
+    if (m_s.BackendError) {
+	return { m_s.Modified, true };
     } else {
-	names_to_data_[name] = data;
-	return Flush();
+	Names_To_Data_[name] = data;
+	m_s.BackendError = !Flush_();
+	return m_s;
     }
 }
 
-bool BmkOptionList::Remove(size_t pos) {
-    std::wstring name = NameAt(pos);
-    bool successfully_removed = FileOptionList::Remove(pos);
+OptionList::ModifyStatus BmkOptionList::Remove(size_t pos) {
+    RemoveNameInMap_(NameAt(pos));
+    OptionList::ModifyStatus m_s = OptionList::Remove(pos);
 
-    if (successfully_removed) {
-	RemoveName_(name);
-	return false;
-    }
-
-    return successfully_removed;
-}
-
-bool BmkOptionList::Update(size_t pos, const std::wstring& new_option_string) {
-    //TODO wrong should be new name
-    std::wstring name;
-    std::wstring data;
-    SplitStringToNameAndData_(new_option_string, name, data);
-
-    bool successfully_updated = OptionList::Update(pos, name); // Won't do anything it failed
-
-    if (successfully_updated) {
-	names_to_data_[name] = data;
-	return Flush();
+    if (m_s.BackendError) {
+	return { true, true };
     } else {
-	return false;
+	m_s.BackendError = !Flush_();
+	return m_s;
     }
 }
 
-bool BmkOptionList::UpdateData(size_t pos, const std::wstring& new_data) {
-    names_to_data_[NameAt(pos)] = new_data;
-    return Flush();
+OptionList::ModifyStatus BmkOptionList::Update(size_t pos, const std::wstring& new_option_string) {
+    if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't remove, out of range"; }
+
+    std::wstring new_name;
+    std::wstring tmp_data;
+
+    SplitStringToNameAndData_(new_option_string, new_name, tmp_data);
+    if (tmp_data != L"") { return { false, true }; } // Contains >
+
+    // Check if the new option string already exists
+    auto it = std::find(Options_All_.begin(), Options_All_.end(), new_name);
+    if (it != Options_All_.end()) {
+	// New name already exists, swap with the old one
+	std::swap(Options_All_[pos], *it);
+    } else {
+	std::wstring data = DataAt(pos);
+	// Replace the option string at the specified position with the new one
+	Options_All_[pos] = new_option_string;
+	Names_To_Data_[new_option_string] = data;
+    }
+
+    return { true, !Flush_() };
+}
+
+OptionList::ModifyStatus BmkOptionList::UpdateData(size_t pos, const std::wstring& new_data) {
+    Names_To_Data_[NameAt(pos)] = new_data;
+
+    return { true, !Flush_() };
 }
 
 bool BmkOptionList::Contains(const std::wstring& option_string) const {
-    return names_to_data_.contains(option_string);
+    return Names_To_Data_.contains(option_string);
 }
 
-void BmkOptionList::Search(const std::wstring& option_string) {
+bool BmkOptionList::Search(const std::wstring& option_string) {
     std::wstring name;
     std::wstring data;
     SplitStringToNameAndData_(option_string, name, data);
 
-    OptionList::Search(name);
+    return OptionList::Search(name);
 }
 
-std::wstring BmkOptionList::NameAt(size_t i) {
-    return options_[searched_[i]];
+std::wstring BmkOptionList::NameAt(size_t i) const {
+    return Options_All_.at(Options_Indexes_Searched[i]);
 }
 
-
-std::wstring BmkOptionList::OptionStringAt(size_t i) {
-    return NameAt(i) + Parser::Instance().Data.Delimiter + names_to_data_[NameAt(i)];
-}
-
-std::wstring BmkOptionList::DataAt(size_t i) {
-    return names_to_data_[NameAt(i)];
+std::wstring BmkOptionList::DataAt(size_t i) const {
+    return Names_To_Data_.at(NameAt(i));
 }
 
 void BmkOptionList::SplitStringToNameAndData_(const std::wstring& option_string, std::wstring& name, std::wstring& data) {
@@ -149,9 +148,9 @@ void BmkOptionList::SplitStringToNameAndData_(const std::wstring& option_string,
     }
 }
 
-void BmkOptionList::RemoveName_(const std::wstring& name) {
-    auto it = names_to_data_.find(name);
+void BmkOptionList::RemoveNameInMap_(const std::wstring& name) {
+    auto it = Names_To_Data_.find(name);
 
-    names_to_data_.erase(it);
-    options_.erase(std::remove(options_.begin(), options_.end(), name), options_.end());
+    Names_To_Data_.erase(it);
+    Options_All_.erase(std::remove(Options_All_.begin(), Options_All_.end(), name), Options_All_.end());
 }

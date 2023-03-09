@@ -22,7 +22,7 @@ class MenuTUI {
     std::unique_ptr<MenuController> menu_controller_;
     std::unique_ptr<MenuView> menu_view_;
 public:
-    MenuTUI(std::unique_ptr<OptionList> option_list, const std::wstring& action, const std::wstring& data);
+    MenuTUI(std::unique_ptr<OptionList> option_list);
 
     int Open();
 

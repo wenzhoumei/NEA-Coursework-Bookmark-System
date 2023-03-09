@@ -5,102 +5,106 @@
 #include <iostream>
 #include <algorithm>
 #include <filesystem>
+#include <assert.h>
+#include "log.hpp"
 
 class OptionList {
 public:
-    virtual void Load(const std::filesystem::path& file_path) = 0;
+    OptionList(std::wstring action, std::wstring location)
+	: Action_(action), Location_(location)
+    {
+    }
 
-    bool SuccessfullyLoaded() { return SuccessfullyLoaded_; }
+    virtual bool Load() = 0;
 
-    virtual bool Add(const std::wstring& option_string) {
-	if (Contains(option_string)) { return false; }
-
-	options_.push_back(option_string);
-	return true;
+    struct ModifyStatus {
+	bool Modified; // Has Options_All_ been changed
+	bool BackendError; // Has error occurred in backend, i.e. writing to file/directory
     };
 
-    virtual bool Insert(size_t pos, const std::wstring& option_string) {
-	if (pos > options_.size()) {
-	    // Position out of range
-	    return false;
-	}
+    virtual ModifyStatus Add(const std::wstring& option_string) {
+	if (Contains(option_string)) { return { false, false }; }
 
-	if (Contains(option_string)) { return false; }
+	Options_All_.push_back(option_string);
+	return { true, false };
+    };
+
+    virtual ModifyStatus Insert(size_t pos, const std::wstring& option_string) {
+	if (pos > Options_All_.size()) { Log::Instance().Error(9) << "Can't insert, out of range"; }
+
+	if (Contains(option_string)) { return { false, false }; }
 
 	// Insert at the specified position
-	options_.insert(options_.begin() + pos, option_string);
-	return true;
+	Options_All_.insert(Options_All_.begin() + pos, option_string);
+	return { true, false };
     }
 
-    virtual bool Remove(size_t pos) {
-	if (pos >= options_.size()) {
-	    // Position out of range
-	    return false;
-	}
+    virtual ModifyStatus Remove(size_t pos) {
+	if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't remove, out of range"; }
 
-	options_.erase(options_.begin() + pos);
-	return true;
+	Options_All_.erase(Options_All_.begin() + pos);
+	return { true, false };
     };
 
-    virtual bool Update(size_t pos, const std::wstring& new_option_string) {
-	if (pos >= options_.size()) {
-	    // Position out of range
-	    return false;
-	}
+    virtual ModifyStatus Update(size_t pos, const std::wstring& new_option_string) {
+	if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't update, out of range"; }
 
 	// Check if the new option string already exists
-	auto it = std::find(options_.begin(), options_.end(), new_option_string);
-	if (it != options_.end()) {
+	auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);
+	if (it != Options_All_.end()) {
 	    // New option string already exists, swap with the old one
-	    std::swap(options_[pos], *it);
-	    return true;
+	    std::swap(Options_All_[pos], *it);
+	} else {
+	    // Replace the option string at the specified position with the new one
+	    Options_All_[pos] = new_option_string;
 	}
 
-	// Replace the option string at the specified position with the new one
-	options_[pos] = new_option_string;
-	return true;
+	return { true, false };
     }
 
+    virtual ModifyStatus UpdateData(size_t pos, const std::wstring& new_data) { 
+	Log::Instance().Error(9) << "This should not be called";
+	return { false, false }; // Doesn't matter
+    };
+
     virtual bool Contains(const std::wstring& option_string) const {
-	auto it = std::find(options_.begin(), options_.end(), option_string);
-	if (it != options_.end()) {
+	auto it = std::find(Options_All_.begin(), Options_All_.end(), option_string);
+	if (it != Options_All_.end()) {
 	    return true;
 	} else {
 	    return false;
 	}
     }
 
-    virtual void Search(const std::wstring& input_text);
+    virtual bool Search(const std::wstring& input_text);
 
-    const std::vector<int>& GetSearched() { return searched_; }
+    const std::vector<int>& GetSearched() { return Options_Indexes_Searched; }
 
-    size_t SearchedSize() { return searched_.size(); }
+    size_t SearchedSize() { return Options_Indexes_Searched.size(); }
 
-    virtual std::wstring NameAt(size_t i) {
-	return options_[searched_[i]];
+    virtual std::wstring NameAt(size_t i) const {
+	return Options_All_[Options_Indexes_Searched[i]];
     }
 
-    virtual std::wstring OptionStringAt(size_t i) {
-	return options_[searched_[i]];
+    virtual std::wstring DataAt(size_t i) const {
+	return Options_All_[Options_Indexes_Searched[i]];
     }
-
-    virtual std::wstring DataAt(size_t i) {
-	return options_[searched_[i]];
-    }
-
-    virtual bool UpdateData(size_t pos, const std::wstring& new_data) { return false; };
 
     void Print() {
 	std::cout << "-------------" << std::endl;
-	for (const auto& option: options_) {
+	for (const auto& option: Options_All_) {
 	    std::wcout << option << std::endl;
 	}
     }
 
+    std::wstring GetAction() const { return Action_; };
+    std::wstring GetLocation() const { return Location_; };
+
     const bool IsBookmarkList = false;
     const bool Editable = false;
 protected:
-    std::vector<std::wstring> options_;
-    std::vector<int> searched_;
-    bool SuccessfullyLoaded_ = false;
+    std::vector<std::wstring> Options_All_;
+    std::vector<int> Options_Indexes_Searched;
+    std::wstring Action_;
+    std::wstring Location_;
 };

@@ -9,42 +9,56 @@ public:
 
     void Search() {
 	if (!(menu_data_.Mode == MenuData::SEARCH)) { return; }
-	menu_data_.Option_List->Search(menu_data_.Input);
-	selected_position_controller_.Reset();
+	if (!menu_data_.Option_List->Search(menu_data_.Input)) { return; }
 
+	selected_position_controller_.Reset();
 	menu_data_.Changed.Option_List = true;
     }
 
     void Add() {
-	if (!menu_data_.Option_List->Add(menu_data_.Input)) { return; }
-	menu_data_.Option_List->Search(menu_data_.Input);
-	selected_position_controller_.Reset();
+	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(menu_data_.Input);
 
-	menu_data_.Changed.Option_List = true;
+	Search();
+	if (m_s.BackendError) {
+	    // TODO
+	} else if (m_s.Modified) {
+	    Search();
+	}
     }
 
     void Remove() {
-	if (!menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition)) { return; }
-	menu_data_.Option_List->Search(menu_data_.Input);
+	OptionList::ModifyStatus m_s = menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition);
 
-	menu_data_.Changed.Option_List = true;
+	if (m_s.BackendError) {
+	    // TODO
+	} else if (m_s.Modified) {
+	    Search();
+	}
     }
 
     void Update() {
-	menu_data_.Changed.Option_List = true;
+	OptionList::ModifyStatus m_s;
 	if (menu_data_.Editing == MenuData::NAME) {
-	    if (!menu_data_.Option_List->Update(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
-	    menu_data_.Option_List->Search(menu_data_.Input);
+	    m_s = menu_data_.Option_List->Update(menu_data_.SelectedOptionPosition, menu_data_.Input);
 	} else {
-	    if (!menu_data_.Option_List->UpdateData(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
+	    m_s = menu_data_.Option_List->UpdateData(menu_data_.SelectedOptionPosition, menu_data_.Input);
+	}
+
+	if (m_s.BackendError) {
+	    // TODO
+	} else if (m_s.Modified) {
+	    Search();
 	}
     }
 
     void Insert() {
-	if (!menu_data_.Option_List->Insert(menu_data_.SelectedOptionPosition, menu_data_.Input)) { return; }
-	menu_data_.Option_List->Search(menu_data_.Input);
+	OptionList::ModifyStatus m_s = menu_data_.Option_List->Insert(menu_data_.SelectedOptionPosition, menu_data_.Input);
 
-	menu_data_.Changed.Option_List = true;
+	if (m_s.BackendError) {
+	    // TODO
+	} else if (m_s.Modified) {
+	    Search();
+	}
     }
 
 protected:

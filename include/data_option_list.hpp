@@ -13,7 +13,12 @@ protected:
     std::filesystem::path File_Path_;
 
 public:
-    bool Flush() override {
+    DataOptionList(std::wstring action, std::wstring location)
+	: FileOptionList(action, location)
+    {
+    }
+
+    bool Flush_() override {
         std::wofstream file(File_Path_);
 
         if (!file) {
@@ -21,41 +26,23 @@ public:
             return false;
         }
 
-        for (const std::wstring& option_name : options_) {
+        for (const std::wstring& option_name : Options_All_) {
             file << option_name << std::endl;
         }
 
         return true;
     }
 
-    void Load(const std::filesystem::path& file_path) override {
-	File_Path_ = file_path;
-	File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(file_path));
+    bool Load() override {
+	File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(Location_));
 
 	if (!File_Retriever_->Load()) {
-	    SuccessfullyLoaded_ = false;
-	    return;
+	    return false;
 	}
 
-	options_ = File_Retriever_->GetData();
+	Options_All_ = File_Retriever_->GetData();
 
-	SuccessfullyLoaded_ = true;
-    }
-
-    bool Add(const std::wstring& option_string) override {
-	return OptionList::Add(option_string) && Flush();
-    }
-
-    bool Remove(size_t pos) override {
-	return OptionList::Remove(pos) && Flush();
-    }
-
-    bool Update(size_t pos, const std::wstring& new_option_string) override {
-	return OptionList::Update(pos, new_option_string) && Flush();
-    }
-
-    bool Insert(size_t pos, const std::wstring& option_string) override {
-	return OptionList::Insert(pos, option_string) && Flush();
+	return true;
     }
 
     const bool IsBookmarkList = false;
