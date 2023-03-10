@@ -5,7 +5,7 @@
 
 class OptionListController: public ComponentController {
 public:
-    OptionListController(MenuData& menu_data, StatusLogController& status_log_controller, SelectedOptionPositionController& selected_option_position_controller): ComponentController(menu_data, status_log_controller), selected_position_controller_(selected_option_position_controller) {}
+    OptionListController(MenuData& menu_data, SelectedOptionPositionController& selected_option_position_controller): ComponentController(menu_data), selected_position_controller_(selected_option_position_controller) {}
 
     void Search() {
 	if (!(menu_data_.Mode == MenuData::SEARCH)) { return; }
@@ -18,7 +18,6 @@ public:
     void Add() {
 	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(menu_data_.Input);
 
-	Search();
 	if (m_s.BackendError) {
 	    // TODO
 	} else if (m_s.Modified) {

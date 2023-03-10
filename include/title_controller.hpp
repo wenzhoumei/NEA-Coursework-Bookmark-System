@@ -3,7 +3,7 @@
 
 class TitleController: public ComponentController {
 public:
-    TitleController(MenuData& menu_data, StatusLogController& status_log_controller): ComponentController(menu_data, status_log_controller) {}
+    TitleController(MenuData& menu_data): ComponentController(menu_data) {}
 
     /**
      * Sets text of title

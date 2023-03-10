@@ -12,9 +12,6 @@
 #include "menu_view.hpp"
 #include "menu_controller.hpp"
 
-#define CTRL_MASK(c) ((c) & 0x1f)
-#define KEY_ESCAPE 27
-
 // Handles display of MenuData
 // Recieves events and execute appropriate Controller function
 class MenuTUI {
@@ -23,7 +20,6 @@ class MenuTUI {
     std::unique_ptr<MenuView> menu_view_;
 public:
     MenuTUI(std::unique_ptr<OptionList> option_list);
-
     int Open();
 
     MenuController* GetController();

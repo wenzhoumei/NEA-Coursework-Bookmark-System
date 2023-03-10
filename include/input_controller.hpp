@@ -5,7 +5,7 @@
 
 class InputController: public ComponentController {
 public:
-    InputController(MenuData& menu_data, StatusLogController& status_log_controller, CursorPositionController& cursor_position_controller, OptionListController& options_controller): ComponentController(menu_data, status_log_controller), Cursor_Position_Controller_(cursor_position_controller), Options_Controller_(options_controller) {}
+    InputController(MenuData& menu_data, CursorPositionController& cursor_position_controller, OptionListController& options_controller): ComponentController(menu_data), Cursor_Position_Controller_(cursor_position_controller), Options_Controller_(options_controller) {}
 
 
     /**

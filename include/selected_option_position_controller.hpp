@@ -3,7 +3,7 @@
 
 class SelectedOptionPositionController: public ComponentController {
 public:
-    SelectedOptionPositionController(MenuData& menu_data, StatusLogController& status_log_controller): ComponentController(menu_data, status_log_controller) {}
+    SelectedOptionPositionController(MenuData& menu_data): ComponentController(menu_data) {}
     void Down() {
 	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
 	if (menu_data_.SelectedOptionPosition == Max_()) { return; }

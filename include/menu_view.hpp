@@ -10,6 +10,7 @@ public:
 	initscr(); // Start ncurses mode
 	noecho(); // Don't echo keystrokes
 	cbreak(); // Disable line buffering
+	set_escdelay(0);
 
 	raw();
 	keypad(stdscr, TRUE);

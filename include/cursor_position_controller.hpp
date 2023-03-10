@@ -3,7 +3,7 @@
 
 class CursorPositionController: public ComponentController {
 public:
-    CursorPositionController(MenuData& menu_data, StatusLogController& status_log_controller): ComponentController(menu_data, status_log_controller) {}
+    CursorPositionController(MenuData& menu_data): ComponentController(menu_data) {}
 
     /**
      * Moves cursor to the right if possible

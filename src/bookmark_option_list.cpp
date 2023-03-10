@@ -22,6 +22,7 @@ bool BmkOptionList::Load() {
 	Names_To_Data_[name] = data;
     }
 
+    Search(L"");
     return true;
 }
 
@@ -53,8 +54,11 @@ OptionList::ModifyStatus BmkOptionList::Add(const std::wstring& option_string) {
     if (m_s.BackendError) {
 	return { m_s.Modified, true };
     } else {
-	Names_To_Data_[name] = data;
-	m_s.BackendError = !Flush_();
+	if (m_s.Modified) {
+	    Names_To_Data_[name] = data;
+	    m_s.BackendError = !Flush_();
+	}
+
 	return m_s;
     }
 }
@@ -69,8 +73,11 @@ OptionList::ModifyStatus BmkOptionList::Insert(size_t pos, const std::wstring& o
     if (m_s.BackendError) {
 	return { m_s.Modified, true };
     } else {
-	Names_To_Data_[name] = data;
-	m_s.BackendError = !Flush_();
+	if (m_s.Modified) {
+	    Names_To_Data_[name] = data;
+	    m_s.BackendError = !Flush_();
+	}
+
 	return m_s;
     }
 }
@@ -82,7 +89,10 @@ OptionList::ModifyStatus BmkOptionList::Remove(size_t pos) {
     if (m_s.BackendError) {
 	return { true, true };
     } else {
-	m_s.BackendError = !Flush_();
+	if (m_s.Modified) {
+	    m_s.BackendError = !Flush_();
+	}
+
 	return m_s;
     }
 }
@@ -141,7 +151,7 @@ void BmkOptionList::SplitStringToNameAndData_(const std::wstring& option_string,
     size_t data_del_pos = option_string.find_first_of(Parser::Instance().Data.Delimiter);
     if (data_del_pos == std::wstring::npos) {
 	name = option_string;
-	data = L"";
+	data = option_string;
     } else {
 	name = option_string.substr(0, data_del_pos);
 	data = option_string.substr(data_del_pos + 1);

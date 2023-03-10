@@ -42,6 +42,7 @@ public:
 
 	Options_All_ = File_Retriever_->GetData();
 
+	Search(L"");
 	return true;
     }
 
