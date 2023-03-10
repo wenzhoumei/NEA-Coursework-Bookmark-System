@@ -13,10 +13,10 @@ int MenuTUI::Open() {
     menu_view_ = std::make_unique<MenuView>(MenuView(menu_data_.get()));
 
     if (!menu_data_->Option_List->Load()) {
-	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_, *menu_view_));
+	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
     } else {
 	//TODO
-	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_, *menu_view_));
+	menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
 	//menu_controller_ = std::make_unique<MenuController>(MenuController(*menu_data_));
 	//menu_controller_ = std::make_unique<FailedMenuController>(FailedMenuController(*menu_data_));
     }
