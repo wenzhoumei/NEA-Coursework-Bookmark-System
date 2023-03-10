@@ -17,6 +17,7 @@ MenuController::PossibleExit EditableMenuController::ProcessPossibleExit_(const 
 	case '\n':
 	{
 	    if (Menu_Data_.Mode == MenuData::SEARCH) {
+		return ReadOnlyMenuController::ProcessPossibleExit_(c);
 		break;
 	    } else if (Menu_Data_.Mode == MenuData::EDIT) {
 		Option_List_.Update();

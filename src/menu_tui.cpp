@@ -18,9 +18,11 @@ int MenuTUI::Open() {
 	// TODO
 	Log::Instance().Warning() << "Failed to load, opening read only menu";
 	menu_controller_ = std::make_unique<ReadOnlyMenuController>(ReadOnlyMenuController(*menu_data_));
-    } else if (!menu_data_->Option_List->Editable) {
+    } else if (!menu_data_->Option_List->Editable()) {
+	Log::Instance().Debug() << "opening not editable";
 	menu_controller_ = std::make_unique<ReadOnlyMenuController>(ReadOnlyMenuController(*menu_data_));
     } else {
+	Log::Instance().Debug() << "opening editable";
 	menu_controller_ = std::make_unique<EditableMenuController>(EditableMenuController(*menu_data_));
     }
 

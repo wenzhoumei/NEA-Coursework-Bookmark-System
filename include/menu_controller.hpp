@@ -8,7 +8,6 @@ protected:
 
 public:
     MenuController(MenuData& menu_data);
-
     int ProcessChar(const wchar_t& c);
 
     virtual void SetTitle();

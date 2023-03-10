@@ -6,12 +6,8 @@
 #include <vector>
 
 #include "file_option_list.hpp"
-#include "log.hpp"
 
 class DataOptionList: public FileOptionList {
-protected:
-    std::filesystem::path File_Path_;
-
 public:
     DataOptionList(std::wstring action, std::wstring location)
 	: FileOptionList(action, location)
@@ -19,10 +15,10 @@ public:
     }
 
     bool Flush_() override {
-        std::wofstream file(File_Path_);
+	std::filesystem::path path(Location_);
+        std::wofstream file(path);
 
         if (!file) {
-	    Log::Instance().Error(1) << "Unable to open file for writing: " << File_Path_;
             return false;
         }
 
@@ -46,6 +42,5 @@ public:
 	return true;
     }
 
-    const bool IsBookmarkList = false;
-    const bool Editable = true;
+    bool Editable() override { return true; }
 };

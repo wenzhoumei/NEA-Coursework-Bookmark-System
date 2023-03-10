@@ -19,6 +19,7 @@ public:
 	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(menu_data_.Input);
 
 	if (m_s.BackendError) {
+	    Log::Instance().Error(2) << "Backend error";
 	    // TODO
 	} else if (m_s.Modified) {
 	    Search();
@@ -29,6 +30,7 @@ public:
 	OptionList::ModifyStatus m_s = menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition);
 
 	if (m_s.BackendError) {
+	    Log::Instance().Error(2) << "Backend error";
 	    // TODO
 	} else if (m_s.Modified) {
 	    Search();
@@ -44,6 +46,7 @@ public:
 	}
 
 	if (m_s.BackendError) {
+	    Log::Instance().Error(2) << "Backend error";
 	    // TODO
 	} else if (m_s.Modified) {
 	    Search();
@@ -54,6 +57,7 @@ public:
 	OptionList::ModifyStatus m_s = menu_data_.Option_List->Insert(menu_data_.SelectedOptionPosition, menu_data_.Input);
 
 	if (m_s.BackendError) {
+	    Log::Instance().Error(2) << "Backend error";
 	    // TODO
 	} else if (m_s.Modified) {
 	    Search();

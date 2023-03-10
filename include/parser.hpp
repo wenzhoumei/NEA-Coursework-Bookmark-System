@@ -11,6 +11,8 @@
 #include "data_option_list.hpp"
 #include "bookmark_option_list.hpp"
 #include "read_only_data_option_list.hpp"
+#include "read_directory_option_list.hpp"
+#include "directory_option_list.hpp"
 
 class MenuController;
 
@@ -41,7 +43,7 @@ public:
 
     struct ProgramAction {
 	static constexpr wchar_t Delimiter = L'~';
-	const std::wstring Nothing = L"nul";
+	const std::wstring Nothing = L"nothing";
 	const std::wstring Echo = L"echo";
 	const std::wstring OptionString = L"option_string";
     } ProgramAction;
@@ -68,8 +70,8 @@ public:
     };
 
     const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring)>> DestinationAction_String_To_Function {
-	//{ L"dir", [](std::wstring data) { ; }},
-	//{ L"rdir"::ReadDirectory, [](std::wstring data) { return 0; }},
+	{ L"rdir", [](std::wstring action, std::wstring location) { return std::make_unique<ReadDirectoryOptionList>(ReadDirectoryOptionList(action, location)); }},
+	{ L"dir", [](std::wstring action, std::wstring location) { return std::make_unique<DirectoryOptionList>(DirectoryOptionList(action, location)); }},
 	{ L"bmk", [](std::wstring action, std::wstring location) { return std::make_unique<BmkOptionList>(BmkOptionList(action, location)); }},
 	{ L"file", [](std::wstring action, std::wstring location) { return std::make_unique<DataOptionList>(DataOptionList(action, location)); }},
 	{ L"rfile", [](std::wstring action, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action, location)); }},

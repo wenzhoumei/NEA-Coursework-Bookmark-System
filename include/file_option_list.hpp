@@ -9,7 +9,6 @@ protected:
     virtual bool Flush_() = 0; // Writes to backend
 			       // Returns true if successful else false
 
-
 public:
     FileOptionList(std::wstring action, std::wstring location)
 	: OptionList(action, location)

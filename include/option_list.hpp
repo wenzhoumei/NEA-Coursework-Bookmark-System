@@ -41,6 +41,7 @@ public:
 
     virtual ModifyStatus Remove(size_t pos) {
 	if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't remove, out of range"; }
+	if (Options_All_.size() == 0) { return { false, false}; } // Can't remove if empty
 
 	Options_All_.erase(Options_All_.begin() + pos);
 	return { true, false };
@@ -100,8 +101,8 @@ public:
     std::wstring GetAction() const { return Action_; };
     std::wstring GetLocation() const { return Location_; };
 
-    const bool IsBookmarkList = false;
-    const bool Editable = false;
+    virtual bool IsBookmarkList() { return false; }
+    virtual bool Editable() { return false; }
 protected:
     std::vector<std::wstring> Options_All_;
     std::vector<int> Options_Indexes_Searched;

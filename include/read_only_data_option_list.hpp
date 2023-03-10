@@ -9,6 +9,5 @@ public:
     ReadOnlyDataOptionList(std::wstring action, std::wstring location)
 	: DataOptionList(action, location) {}
 
-    const bool HasData = false;
-    const bool Editable = false;
+    bool Editable() override { return true; }
 };
