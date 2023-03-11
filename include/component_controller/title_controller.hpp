@@ -8,5 +8,8 @@ public:
     /**
      * Sets text of title
      */
-    void SetText();
+    void SetText(const std::wstring& new_title) {
+	menu_data_.Title = new_title;
+	menu_data_.Changed.Title = true;
+    }
 };

@@ -1,6 +1,6 @@
 #pragma once
 #include "option_list.hpp"
-#include "file_retriever.hpp"
+#include "retriever/file_retriever.hpp"
 
 class FileOptionList: public OptionList {
 protected:
@@ -10,10 +10,7 @@ protected:
 			       // Returns true if successful else false
 
 public:
-    FileOptionList(std::wstring action, std::wstring location)
-	: OptionList(action, location)
-    {
-    }
+    using OptionList::OptionList;
 
     ModifyStatus Add(const std::wstring& option_string) override {
 	ModifyStatus m_s = OptionList::Add(option_string);

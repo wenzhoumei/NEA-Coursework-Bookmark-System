@@ -13,19 +13,16 @@ int main(int argc, char* argv[]) {
     ConfigDirectory& config_directory = ConfigDirectory::Instance();
     config_directory.Initialize(config_file_path);
 
+    std::atexit([]() { my::log.FlushSession(); });
+    my::log.Time();
+    my::log.SetLogPath(config_directory.GetLogFilePath());
+
     Parser& parser = Parser::Instance();
-
-    std::atexit([]() { Log::Instance().FlushSession(); });
-
-    Log& log = Log::Instance();
-    log.Time();
-
-    //std::atexit([]() { Log::Instance().PrintSession(); });
 
     ParameterProcessor parameter_processor(argc, argv);
 
     if (!parameter_processor.IsNumParametersValid()) {
-	log.Error(1) << "Usage - " << argv[0] << " option_string";
+	my::log.Error(1) << "Usage - " << argv[0] << " option_string";
     }
 
     std::wstring argument = parameter_processor.GetOptionString();

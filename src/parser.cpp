@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-#include "option_list.hpp"
+#include "option_list/option_list.hpp"
 #include "menu_tui.hpp"
 #include "exit_code.hpp"
 
@@ -20,14 +20,14 @@ bool Parser::LoadIdentifierExtensions() {
 	std::wstring data;
 
 	if (pos == std::wstring::npos) {
-	    Log::Instance().Error(1) << "Malformed option list - missing \'>\'";
+	    my::log.Error(1) << "Malformed option list - missing \'>\'";
 	    return false;
 	} else {
 	    name = identifier_extension_to_script.substr(0, pos);
 	    data = identifier_extension_to_script.substr(pos + 1);
 
 	    if (GetActionPos_(data) != 0) {
-		Log::Instance().Warning() << "Ignoring invalid action assigned to file extension: " << data;
+		my::log.Warning() << "Ignoring invalid action assigned to file extension: " << data;
 	    } else {
 		IdentifierExtension_To_Action_[name] = data;
 	    }
@@ -88,12 +88,15 @@ int Parser::ExecuteDataDefault(const std::wstring& option_string) {
     return Execute(action, option_string);
 }
 
+void Parser::SetMenuController(MenuController* menu_controller) {
+    menu_controller_ = menu_controller;
+}
 int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     char action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
 
-    Log::Instance().Info() << L"action: " << action;
-    Log::Instance().Info() << L"data: " << data;
+    my::log.Info() << L"action: " << action;
+    my::log.Info() << L"data: " << data;
 
     switch (action_delimiter) {
 	case (DestinationAction::Delimiter):
@@ -116,8 +119,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 		action_at_destination = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.OptionString;
 	    }
 
-	    MenuTUI menu_tui = MenuTUI(DestinationAction_String_To_Function.at(destination_action_identifier)(action_at_destination, data));
-	    menu_controller_ = menu_tui.GetController();
+	    MenuTUI menu_tui = MenuTUI(DestinationAction_String_To_Function.at(destination_action_identifier)(action_at_destination, action, data));
 
 	    return menu_tui.Open();
 
@@ -128,7 +130,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
-		Log::Instance().Error(1) << "You can't execute a menu action here";
+		my::log.Error(1) << "You can't execute a menu action here";
 	    } else {
 		return ExitCode::DontExit;
 	    }

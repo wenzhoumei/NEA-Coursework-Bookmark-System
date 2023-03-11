@@ -8,7 +8,7 @@
 
 class DirectoryRetriever: public Retriever {
 public:
-    DirectoryRetriever(std::filesystem::path directory_path): directory_path_(directory_path) {}
+    DirectoryRetriever(const std::filesystem::path& directory_path): directory_path_(directory_path) {}
 
     bool Load() override {
 	// Clear any existing options

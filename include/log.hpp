@@ -2,13 +2,23 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <vector>
+#include <deque>
 #include <chrono>
 #include <iomanip>
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <stack>
 
+enum LogColor {
+    Info = 1, 
+    Warning = 2, 
+    Error = 3, 
+    Debug = 4, 
+    Normal = 5, 
+};
+
+class MenuTUI;
 class Log {
     Log() {}; // Private constructor to prevent instantiation
     Log(const Log&) = delete; // Delete copy constructor
@@ -16,8 +26,8 @@ class Log {
 							     
     class LogStream {
     public:
-	LogStream(const std::wstring& prefix, Log& log, bool exit_after=false, int exit_code=0)
-	    : log_(log), exit_after_(exit_after), exit_code_(exit_code)
+	LogStream(const std::wstring& prefix, enum LogColor color, Log& log, bool exit_after=false, int exit_code=0)
+	    : color_(color), log_(log), exit_after_(exit_after), exit_code_(exit_code)
 	{
 	    if (exit_after) {
 		os_ << prefix << " (" << exit_code << ") : ";
@@ -32,31 +42,28 @@ class Log {
 	    return *this;
 	}
 
-	~LogStream() {
-	    log_.entries_.insert(log_.entries_.begin(), os_.str());
-	    log_.NumAddedOptionsSession++;
-
-	    while (log_.entries_.size() > 200) {
-		log_.entries_.pop_back();
-		log_.NumAddedOptionsSession--;
-	    }
-
-	    log_.Changed = true;
-
-	    if (exit_after_) { exit(exit_code_); }
-	}
+	// Define a custom std::ostream& operator for std::endl
+	void operator<<(std::ostream& (*manipulator)(std::ostream&));
 
     private:
 	std::wostringstream os_;
+	enum LogColor color_;
 	Log& log_;
 	int exit_after_;
 	int exit_code_;
     };
 
-    std::vector<std::wstring> entries_;
+    // back is most recent
+    std::deque<std::wstring> entries_;
 
+    std::filesystem::path log_path_;
+    bool log_path_set_ = false;
+
+    MenuTUI* menu_tui_;
+
+    enum LogColor color_ = LogColor::Info;
 public:
-    bool Changed = false;
+    const size_t MAX_LINES = 20;
 
     int NumAddedOptionsSession = 0;
 
@@ -65,6 +72,16 @@ public:
 	static Log INSTANCE;
 	return INSTANCE;
     }
+
+    enum LogColor GetCurrentColorForMenu() {
+	return color_;
+    }
+    void SetLogPath(std::filesystem::path log_path) {
+	log_path_ = log_path;
+	log_path_set_ = true;
+    }
+
+    void SetMenuTUI(MenuTUI* menu_tui);
 
     void Time() {
 	// Get the current time
@@ -82,29 +99,16 @@ public:
 	entries_.insert(entries_.begin(), time_str);
 	NumAddedOptionsSession++;
 
-	while (entries_.size() > 200) {
+	while (entries_.size() > MAX_LINES) {
 	    entries_.pop_back();
 	    NumAddedOptionsSession--;
 	}
-
-	Changed = true;
     }
 
-    LogStream Warning() {
-        return LogStream(L"Warning", *this);
-    }
-
-    LogStream Error(int exit_code) {
-        return LogStream(L"Error", *this, true, exit_code);
-    }
-
-    LogStream Info() {
-        return LogStream(L"Info", *this);
-    }
-
-    LogStream Debug() {
-        return LogStream(L"Debug", *this);
-    }
+    LogStream Warning();
+    LogStream Error(int exit_code);
+    LogStream Info();
+    LogStream Debug();
 
     void PrintSession() {
 	for (auto entry: entries_) {
@@ -112,5 +116,13 @@ public:
 	}
     }
 
+    const std::wstring& Peek() {
+	return entries_.back();
+    }
+
     void FlushSession();
 };
+
+namespace my {
+    extern Log& log;
+}

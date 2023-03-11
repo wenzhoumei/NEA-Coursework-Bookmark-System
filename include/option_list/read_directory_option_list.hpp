@@ -1,7 +1,7 @@
 #pragma once
 
 #include "option_list.hpp"
-#include "directory_retriever.hpp"
+#include "retriever/directory_retriever.hpp"
 
 #include <filesystem>
 #include <string>

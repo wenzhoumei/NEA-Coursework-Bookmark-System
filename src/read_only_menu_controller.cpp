@@ -1,4 +1,4 @@
-#include "read_only_menu_controller.hpp"
+#include "menu_controller/read_only_menu_controller.hpp"
 #include "exit_code.hpp"
 #include "parser.hpp"
 
@@ -72,7 +72,7 @@ void ReadOnlyMenuController::ToggleData_() {
 
 int ReadOnlyMenuController::ExecuteInput_() {
     if (Menu_Data_.Input == L"") { return ExitCode::DontExit; }
-    return Parser::Instance().Execute(Menu_Data_.Option_List->GetAction(), Menu_Data_.Input);
+    return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), Menu_Data_.Input);
 }
 
 int ReadOnlyMenuController::ExecuteSelected_() {
@@ -84,5 +84,9 @@ int ReadOnlyMenuController::ExecuteSelected_() {
 	    chosen_input = Menu_Data_.SelectedName();
 	}
 
-	return Parser::Instance().Execute(Menu_Data_.Option_List->GetAction(), chosen_input);
+	return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), chosen_input);
+}
+
+void ReadOnlyMenuController::SetTitle() {
+    Title_.SetText(L"(S) " + Menu_Data_.Option_List->GetLocation() + Menu_Data_.Option_List->GetActionToHere());
 }

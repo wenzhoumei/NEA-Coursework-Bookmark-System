@@ -7,15 +7,14 @@
 #include <string>
 #include <functional>
 
-#include "option_list.hpp"
-#include "data_option_list.hpp"
-#include "bookmark_option_list.hpp"
-#include "read_only_data_option_list.hpp"
-#include "read_directory_option_list.hpp"
-#include "directory_option_list.hpp"
+#include "option_list/option_list.hpp"
+#include "option_list/data_option_list.hpp"
+#include "option_list/bookmark_option_list.hpp"
+#include "option_list/read_directory_option_list.hpp"
+#include "option_list/editable_directory_option_list.hpp"
+#include "option_list/read_only_data_option_list.hpp"
 
 class MenuController;
-
 class Parser {
     std::set<std::wstring> Scripts_;
     std::unordered_map<std::wstring, std::wstring> IdentifierExtension_To_Action_;
@@ -69,12 +68,12 @@ public:
 	{ ProgramAction.OptionString, [this](std::wstring data) { return ExecuteOptionString(data); }},
     };
 
-    const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring)>> DestinationAction_String_To_Function {
-	{ L"rdir", [](std::wstring action, std::wstring location) { return std::make_unique<ReadDirectoryOptionList>(ReadDirectoryOptionList(action, location)); }},
-	{ L"dir", [](std::wstring action, std::wstring location) { return std::make_unique<DirectoryOptionList>(DirectoryOptionList(action, location)); }},
-	{ L"bmk", [](std::wstring action, std::wstring location) { return std::make_unique<BmkOptionList>(BmkOptionList(action, location)); }},
-	{ L"file", [](std::wstring action, std::wstring location) { return std::make_unique<DataOptionList>(DataOptionList(action, location)); }},
-	{ L"rfile", [](std::wstring action, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action, location)); }},
+    const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring, std::wstring)>> DestinationAction_String_To_Function {
+	{ L"rdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadDirectoryOptionList>(ReadDirectoryOptionList(action_out_of_here, action_to_here, location)); }},
+	{ L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<DirectoryOptionList>(DirectoryOptionList(action_out_of_here, action_to_here, location)); }},
+	{ L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<BmkOptionList>(BmkOptionList(action_out_of_here, action_to_here, location)); }},
+	{ L"file", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<DataOptionList>(DataOptionList(action_out_of_here, action_to_here, location)); }},
+	{ L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action_out_of_here, action_to_here, location)); }},
     };
 
     const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring)>> MenuAction_String_To_Function {
@@ -84,6 +83,8 @@ public:
 
     bool LoadScripts();
     bool LoadIdentifierExtensions();
+
+    void SetMenuController(MenuController* menu_controller_);
 
     int ExecuteOptionString(const std::wstring& option_string);
     int ExecuteDataDefault(const std::wstring& option_string);

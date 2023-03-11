@@ -8,7 +8,8 @@
 
 class FileRetriever: public Retriever {
 public:
-    FileRetriever(std::filesystem::path file_path): file_path_(file_path) {}
+    FileRetriever(const std::filesystem::path& file_path): file_path_(file_path) {}
+
     bool Load() override {
 	if (!std::filesystem::exists(file_path_)) {
 	    return false;

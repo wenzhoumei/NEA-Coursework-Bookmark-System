@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "bookmark_option_list.hpp"
+#include "option_list/bookmark_option_list.hpp"
 #include "parser.hpp"
 
 bool BmkOptionList::Load() {

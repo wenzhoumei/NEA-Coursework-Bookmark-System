@@ -6,14 +6,11 @@
 #include <vector>
 #include <unordered_map>
 
-#include "file_option_list.hpp"
+#include "option_list/file_option_list.hpp"
 
 class BmkOptionList: public FileOptionList {
 public:
-    BmkOptionList(std::wstring action, std::wstring location)
-	: FileOptionList(action, location)
-    {
-    }
+    using FileOptionList::FileOptionList;
 
     bool Load() override;
 

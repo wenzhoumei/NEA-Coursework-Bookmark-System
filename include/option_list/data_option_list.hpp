@@ -9,10 +9,7 @@
 
 class DataOptionList: public FileOptionList {
 public:
-    DataOptionList(std::wstring action, std::wstring location)
-	: FileOptionList(action, location)
-    {
-    }
+    using FileOptionList::FileOptionList;
 
     bool Flush_() override {
 	std::filesystem::path path(Location_);

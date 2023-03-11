@@ -45,11 +45,17 @@ public:
     }
 
     ModifyStatus Remove(size_t pos) override {
-	std::filesystem::path path(Location_);
-	path /= Options_All_[pos];
+	if (Options_All_.size() == 0) {
+	    my::log.Info() << "Can't remove, out of range";
+	    return { false, false };
+	}
+
+	std::filesystem::path path = std::filesystem::path(Location_)/std::filesystem::path(Options_All_[pos]);
+
 	ModifyStatus m_s = OptionList::Remove(pos);
 
 	if (m_s.Modified) {
+
 	    // Remove file
 	    bool success = std::filesystem::remove(path);
 	    if (!success) {
@@ -62,7 +68,7 @@ public:
 
     ModifyStatus Update(size_t pos, const std::wstring& new_option_string) override {
 
-	if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't remove, out of range"; }
+	if (pos >= Options_All_.size() || Options_All_.size() == 0) { Log::Instance().Error(9) << "Can't update, out of range"; }
 
 	// Check if the new option string already exists
 	auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);

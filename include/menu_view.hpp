@@ -1,5 +1,6 @@
 #pragma once
 #include "menu_data.hpp"
+#include <curses.h>
 #include <ncurses.h>
 
 class MenuView {
@@ -11,6 +12,13 @@ public:
 	noecho(); // Don't echo keystrokes
 	cbreak(); // Disable line buffering
 	set_escdelay(0);
+	start_color();
+
+	init_pair(LogColor::Info, COLOR_BLACK, COLOR_WHITE);
+	init_pair(LogColor::Warning, COLOR_BLACK, COLOR_YELLOW);
+	init_pair(LogColor::Error, COLOR_BLACK, COLOR_RED);
+	init_pair(LogColor::Debug, COLOR_BLACK, COLOR_GREEN);
+	init_pair(LogColor::Normal, COLOR_WHITE, COLOR_BLACK);
 
 	raw();
 	keypad(stdscr, TRUE);
@@ -26,25 +34,32 @@ public:
 	int rows, cols;
 	getmaxyx(stdscr, rows, cols);
 
+	if (rows < 3) { return; }
+
 	UpdateRowInformation(rows);
 
 	if (Start_Option_ != Previous_Start_Option_) { menu_data_->Changed.Option_List = true; }
 
-	if (menu_data_->Changed.Title == true) {
+	if (menu_data_->Changed.Title) {
 	    UpdateTitle(cols);
 	}
 
-	if (menu_data_->Changed.Input == true) {
+	if (menu_data_->Changed.Input) {
 	    UpdateInput(cols);
 	}
 
-	if (menu_data_->Changed.Option_List == true ) {
+	if (menu_data_->Changed.Option_List) {
 	    UpdateMenuOptions(rows, cols);
 	}
 
 	UpdateSelectedOption(cols);
 
+	if (menu_data_->Changed.Status_Log) {
+	    UpdateStatusLog(rows, cols);
+	}
+
 	UpdateCursorPosition();
+
 	menu_data_->Changed.Reset();
 
 	if (menu_data_->Mode == MenuData::SEARCH) {
@@ -55,27 +70,26 @@ public:
     }
 
     void UpdateTitle(int cols) {
+	attron(A_BOLD);
 	mvprintw(0, 0, "%-*ls", cols, menu_data_->Title.c_str());
+	attroff(A_BOLD);
     }
 
     void UpdateRowInformation(int rows) {
 	enum MenuData::Mode mode = menu_data_->Mode;
 
-	size_t menu_rows = rows - 2;
+	size_t menu_rows = rows - 3;
 	size_t menu_total_size = menu_data_->Option_List->GetSearched().size();
 	size_t selected_index = menu_data_->SelectedOptionPosition;
 
 	if (mode == MenuData::INSERT) { menu_rows -= 1; }
 
 	Previous_Start_Option_ = Start_Option_;
-
 	Start_Option_ = selected_index > menu_rows - 1 ? selected_index - menu_rows + 1: 0;
 	Num_Options_ = std::min(menu_total_size, Start_Option_ + menu_rows);
     }
 
     void UpdateMenuOptions(int rows, int cols) {
-	if (rows < 2) { return; }
-
 	enum MenuData::Mode mode = menu_data_->Mode;
 	size_t selected_index = menu_data_->SelectedOptionPosition;
 
@@ -91,7 +105,7 @@ public:
 	    }
 
 	    // Fill out remaining empty rows
-	    for (size_t i = Num_Options_ + 1; i < (size_t)rows; i++) {
+	    for (size_t i = Num_Options_ + 1; i < (size_t)rows - 3; i++) {
 		mvprintw(i - Start_Option_ + 2, 0, "%-*ls", cols, L"");
 	    }
 
@@ -104,7 +118,7 @@ public:
 	    }
 
 	    // Fill out remaining empty rows
-	    for (size_t i = Num_Options_; i < (size_t)rows; i++) {
+	    for (size_t i = Num_Options_; i < (size_t)rows - 3; i++) {
 		mvprintw(i - Start_Option_ + 2, 0, "%-*ls", cols, L"");
 	    }
 
@@ -115,7 +129,6 @@ public:
     void UpdateInput(int cols) {
 	enum MenuData::Mode mode = menu_data_->Mode;
 
-	mvprintw(0, 0, "%zu", menu_data_->SelectedOptionPosition);
 	// Print input row
 	std::wstring input_text = menu_data_->Input;
 	mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
@@ -159,6 +172,12 @@ public:
 
     void UpdateCursorPosition() {
 	move(1, menu_data_->Cursor_Position);
+    }
+
+    void UpdateStatusLog(int rows, int cols) {
+	attron(COLOR_PAIR(my::log.GetCurrentColorForMenu()));
+	mvprintw(rows - 1, 0, "%-*ls", cols, my::log.Peek().c_str());
+	attron(COLOR_PAIR(LogColor::Normal));
     }
 
 private:

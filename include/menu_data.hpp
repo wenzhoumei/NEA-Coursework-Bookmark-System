@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 
-#include "option_list.hpp"
+#include "option_list/option_list.hpp"
 
 class MenuData {
 public:
-    MenuData(std::wstring title, std::unique_ptr<OptionList> option_list)
-	: Title(title), Option_List(std::move(option_list))
+    MenuData(std::unique_ptr<OptionList> option_list)
+	: Option_List(std::move(option_list))
     {
     }
 

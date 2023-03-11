@@ -6,8 +6,7 @@
 
 class ReadOnlyDataOptionList: public DataOptionList {
 public:
-    ReadOnlyDataOptionList(std::wstring action, std::wstring location)
-	: DataOptionList(action, location) {}
+    using DataOptionList::DataOptionList;
 
     bool Editable() override { return true; }
 };

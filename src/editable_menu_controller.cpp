@@ -1,4 +1,4 @@
-#include "editable_menu_controller.hpp"
+#include "menu_controller/editable_menu_controller.hpp"
 #include "exit_code.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
@@ -63,6 +63,7 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 }
 
 void EditableMenuController::SetMode_(enum MenuData::Mode m) {
+    Menu_Data_.Changed.Title = true;
     if (m == MenuData::EDIT) {
 	Menu_Data_.Mode = m;
 	if (Menu_Data_.Editing == MenuData::NAME) {
@@ -80,5 +81,15 @@ void EditableMenuController::SetMode_(enum MenuData::Mode m) {
 	    Menu_Data_.Mode = MenuData::SEARCH;
 	    Input_.SetText(L"");
 	}
+    }
+}
+
+void EditableMenuController::SetTitle() {
+    if (Menu_Data_.Mode == MenuData::SEARCH) {
+	Title_.SetText(L"[S] " + Menu_Data_.Option_List->GetLocation() + Menu_Data_.Option_List->GetActionToHere());
+    } else if (Menu_Data_.Mode == MenuData::EDIT) {
+	Title_.SetText(L"[E] " + Menu_Data_.Option_List->GetLocation() + Menu_Data_.Option_List->GetActionToHere());
+    } else if (Menu_Data_.Mode == MenuData::INSERT) {
+	Title_.SetText(L"[I] " + Menu_Data_.Option_List->GetLocation() + Menu_Data_.Option_List->GetActionToHere());
     }
 }

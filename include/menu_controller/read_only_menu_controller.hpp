@@ -1,10 +1,10 @@
 #pragma once
 
-#include "title_controller.hpp"
-#include "selected_option_position_controller.hpp"
-#include "option_list_controller.hpp"
-#include "cursor_position_controller.hpp"
-#include "input_controller.hpp"
+#include "component_controller/title_controller.hpp"
+#include "component_controller/selected_option_position_controller.hpp"
+#include "component_controller/option_list_controller.hpp"
+#include "component_controller/cursor_position_controller.hpp"
+#include "component_controller/input_controller.hpp"
 
 #include "menu_controller.hpp"
 
@@ -20,6 +20,7 @@ protected:
     OptionListController Option_List_ = OptionListController(Menu_Data_, Selected_Option_Position_);
     InputController Input_ = InputController(Menu_Data_, Cursor_Position_, Option_List_);
 
+    void SetTitle() override;
 
     PossibleExit ProcessPossibleExit_(const wchar_t& c) override;
     SpecialChar ProcessSpecialChars_(const wchar_t& c) override;

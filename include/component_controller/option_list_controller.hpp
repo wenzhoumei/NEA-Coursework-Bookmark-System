@@ -1,7 +1,7 @@
 #pragma once
 
-#include "component_controller.hpp"
-#include "selected_option_position_controller.hpp"
+#include "component_controller/component_controller.hpp"
+#include "component_controller/selected_option_position_controller.hpp"
 
 class OptionListController: public ComponentController {
 public:
@@ -15,26 +15,47 @@ public:
 	menu_data_.Changed.Option_List = true;
     }
 
-    void Add() {
-	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(menu_data_.Input);
+    void Add(const std::wstring& option_string) {
+	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(option_string);
 
 	if (m_s.BackendError) {
-	    Log::Instance().Error(2) << "Backend error";
-	    // TODO
+	    my::log.Error(2) << "Backend failed to add string" << std::endl;
 	} else if (m_s.Modified) {
+	    Search();
+	    my::log.Info() << "Added string: " << menu_data_.Input << std::endl;
+	} else {
+	    my::log.Info() << "String already exists: " << menu_data_.Input << std::endl;
+	}
+    }
+
+    void Add() {
+	Add(menu_data_.Input);
+    }
+
+    void Remove(const size_t& pos) {
+	std::wstring name = menu_data_.Option_List->NameAt(menu_data_.SelectedOptionPosition);
+	OptionList::ModifyStatus m_s = menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition);
+
+	if (m_s.BackendError) {
+	    my::log.Error(2) << "Backend failed to remove string" << std::endl;
+	} else if (m_s.Modified) {
+	    my::log.Info() << "Removed string: " << name << std::endl;
 	    Search();
 	}
     }
 
-    void Remove() {
-	OptionList::ModifyStatus m_s = menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition);
-
-	if (m_s.BackendError) {
-	    Log::Instance().Error(2) << "Backend error";
-	    // TODO
-	} else if (m_s.Modified) {
-	    Search();
+    void Remove(const std::wstring& name) {
+	size_t pos = menu_data_.Option_List->GetNamePos(name);
+	if (pos == std::wstring::npos) { 
+	    my::log.Info() << "String doesn't exist, can't remove" << std::endl;
+	    return;
 	}
+
+	Remove(pos);
+    }
+
+    void Remove() {
+	Remove(menu_data_.SelectedOptionPosition);
     }
 
     void Update() {
@@ -46,8 +67,7 @@ public:
 	}
 
 	if (m_s.BackendError) {
-	    Log::Instance().Error(2) << "Backend error";
-	    // TODO
+	    my::log.Error(2) << "Update backend error" << std::endl;
 	} else if (m_s.Modified) {
 	    Search();
 	}
@@ -57,13 +77,11 @@ public:
 	OptionList::ModifyStatus m_s = menu_data_.Option_List->Insert(menu_data_.SelectedOptionPosition, menu_data_.Input);
 
 	if (m_s.BackendError) {
-	    Log::Instance().Error(2) << "Backend error";
-	    // TODO
+	    my::log.Error(2) << "Insertion backend error" << std::endl;
 	} else if (m_s.Modified) {
 	    Search();
 	}
     }
-
 protected:
     SelectedOptionPositionController& selected_position_controller_;
 };

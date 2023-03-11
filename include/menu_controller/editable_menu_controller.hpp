@@ -6,6 +6,8 @@ public:
     using ReadOnlyMenuController::ReadOnlyMenuController;
 
 protected:
+    void SetTitle() override;
+
     PossibleExit ProcessPossibleExit_(const wchar_t& c) override;
     SpecialChar ProcessSpecialChars_(const wchar_t& c) override;
 
