@@ -11,6 +11,7 @@ public:
     FileRetriever(const std::filesystem::path& file_path): file_path_(file_path) {}
 
     bool Load() override {
+	data_.clear();
 	if (!std::filesystem::exists(file_path_)) {
 	    std::ofstream create_file(file_path_);
 	    if (!create_file.is_open()) {

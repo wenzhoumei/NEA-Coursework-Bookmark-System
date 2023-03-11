@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <string>
 
-class DirectoryOptionList: public ReadDirectoryOptionList {
+class EditableDirectoryOptionList: public ReadDirectoryOptionList {
 public:
     using ReadDirectoryOptionList::ReadDirectoryOptionList;
 
@@ -95,6 +95,4 @@ public:
 
     bool IsBookmarkList() override { return false; }
     bool Editable() override { return true; }
-protected:
-    std::filesystem::path dir_path;
 };

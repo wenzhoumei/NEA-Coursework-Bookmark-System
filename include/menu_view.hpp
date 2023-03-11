@@ -62,7 +62,7 @@ public:
 	    UpdateStatusLog(rows, cols);
 	}
 
-	UpdateCursorPosition();
+	UpdateCursorPosition(cols);
 
 	menu_data_.Changed.Reset();
 
@@ -133,12 +133,17 @@ public:
     void UpdateInput(int cols) {
 	enum MenuData::Mode mode = menu_data_.Mode;
 
-	// Print input row
-	std::wstring input_text = menu_data_.Input;
-	mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
+	std::wstring drawn_input_text;
+	if ((int)menu_data_.Cursor_Position >= cols) {
+	    drawn_input_text = menu_data_.Input.substr(menu_data_.Cursor_Position - cols);
+	} else {
+	    drawn_input_text = menu_data_.Input;
+	}
+
+	mvprintw(1, 0, "%-*ls", cols, drawn_input_text.c_str());
 
 	if (mode == MenuData::EDIT || mode == MenuData::INSERT) {
-	    mvprintw(menu_data_.SelectedOptionPosition - Start_Option_ + 2, 0, "%-*ls", cols, input_text.c_str());
+	    mvprintw(menu_data_.SelectedOptionPosition - Start_Option_ + 2, 0, "%-*ls", cols, drawn_input_text.c_str());
 	}
     }
 
@@ -182,8 +187,15 @@ public:
 	Previous_Selected_Name_ = new_name;
     }
 
-    void UpdateCursorPosition() {
-	move(1, menu_data_.Cursor_Position);
+    void UpdateCursorPosition(int cols) {
+	int drawn_cur_pos;
+	if ((int)menu_data_.Cursor_Position >= cols) {
+	     drawn_cur_pos = cols - 1;
+	} else {
+	     drawn_cur_pos = menu_data_.Cursor_Position;
+	}
+
+	move(1, drawn_cur_pos);
     }
 
     void UpdateStatusLog(int rows, int cols) {

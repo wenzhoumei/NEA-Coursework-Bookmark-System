@@ -19,6 +19,8 @@ public:
 	    return false;
 	}
 
+	std::filesystem::current_path(Location_); //setting path
+
 	Options_All_ = Directory_Retriever_->GetData();
 
 	Search(L"");

@@ -13,6 +13,7 @@
 #include "option_list/read_directory_option_list.hpp"
 #include "option_list/editable_directory_option_list.hpp"
 #include "option_list/read_only_data_option_list.hpp"
+#include "option_list/scripts_directory_option_list.hpp"
 #include "menu_controller/menu_controller.hpp"
 
 const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function = {
@@ -22,13 +23,15 @@ const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Par
 
 const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function = {
     { L"rdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadDirectoryOptionList(action_out_of_here, action_to_here, location); }},
-    { L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DirectoryOptionList(action_out_of_here, action_to_here, location); }},
+    { L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new EditableDirectoryOptionList(action_out_of_here, action_to_here, location); }},
+    { L"sdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ScriptsDirectoryOptionList(action_out_of_here, action_to_here, location); }},
     { L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new BmkOptionList(action_out_of_here, action_to_here, location); }},
     { L"file", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DataOptionList(action_out_of_here, action_to_here, location); }},
     { L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadOnlyDataOptionList(action_out_of_here, action_to_here, location); }},
 };
 
 bool Parser::LoadScripts() {
+    Scripts_.clear();
     for (auto script: Config_Directory.Scripts_Retriever->GetData()) {
 	Scripts_.insert(script);
     }
@@ -37,6 +40,8 @@ bool Parser::LoadScripts() {
 }
 
 bool Parser::LoadIdentifierExtensions() {
+    IdentifierExtension_To_Action_.clear();
+
     for (auto identifier_extension_to_script: Config_Directory.IdentifierExtension_To_Action_Retriever->GetData()) {
 	size_t pos = identifier_extension_to_script.find(Data.Delimiter);
 
@@ -44,14 +49,14 @@ bool Parser::LoadIdentifierExtensions() {
 	std::wstring data;
 
 	if (pos == std::wstring::npos) {
-	    my::log.Error(1) << "Malformed option list - missing \'>\'";
+	    my::log.Error(1) << "Malformed option list - missing \'>\'" << std::endl;
 	    return false;
 	} else {
 	    name = identifier_extension_to_script.substr(0, pos);
 	    data = identifier_extension_to_script.substr(pos + 1);
 
 	    if (GetActionPos_(data) != 0) {
-		my::log.Warning() << "Ignoring invalid action assigned to file extension: " << data;
+		my::log.Warning() << "Ignoring invalid action assigned to file extension: " << data << std::endl;
 	    } else {
 		IdentifierExtension_To_Action_[name] = data;
 	    }

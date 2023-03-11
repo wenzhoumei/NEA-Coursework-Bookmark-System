@@ -59,6 +59,9 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	case CTRL_MASK('e'):
 	    my::log.Info() << "Can't enter edit mode, read only" << std::endl;
 	    break;
+	case CTRL_MASK('v'):
+	    Input_.Paste();
+	    break;
 	case KEY_DOWN:
 	    Selected_Option_Position_.Down();
 	    break;
