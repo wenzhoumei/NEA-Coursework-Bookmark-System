@@ -140,6 +140,8 @@ public:
 
     void UpdateSelectedOption(int cols) {
 	static size_t previous_position = 0;
+	static std::wstring previous_name = L"";
+
 	size_t new_position = menu_data_->SelectedOptionPosition - Start_Option_ + 2;
 
 
@@ -152,22 +154,27 @@ public:
 
 	enum MenuData::Mode mode = menu_data_->Mode;
 	enum MenuData::Editing editing = menu_data_->Editing;
+	
+	std::wstring new_name = menu_data_->SelectedName();
 
+	int attr_selected = A_REVERSE;
 	if (mode == MenuData::INSERT || mode == MenuData::EDIT) {
 	    mvprintw(new_position, 0, "%-*ls", cols, menu_data_->Input.c_str());
 	} else if (mode == MenuData::SEARCH) {
 	    if (editing == MenuData::NAME) {
-		mvprintw(new_position, 0, "%-*ls", cols, menu_data_->SelectedName().c_str());
+		mvprintw(new_position, 0, "%-*ls", cols, new_name.c_str());
+		mvprintw(previous_position, 0, "%-*ls", cols, previous_name.c_str());
 	    } else {
 		mvprintw(new_position, 0, "%-*ls", cols, menu_data_->SelectedData().c_str());
+		attr_selected |= A_BOLD; // Show data as bold
 	    }
 	}
 
 	// Reverse foreground and background of selected line
-	mvchgat(previous_position, 0, cols, A_NORMAL, 0, NULL);
-	mvchgat(new_position, 0, cols, A_REVERSE, 0, NULL);
+	mvchgat(new_position, 0, cols, attr_selected, 0, NULL);
 
 	previous_position = new_position;
+	previous_name = new_name;
     }
 
     void UpdateCursorPosition() {

@@ -15,8 +15,8 @@ public:
 	menu_data_.Changed.Option_List = true;
     }
 
-    void Add(const std::wstring& option_string) {
-	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(option_string);
+    void Add() {
+	OptionList::ModifyStatus m_s = menu_data_.Option_List->Add(menu_data_.Input);
 
 	if (m_s.BackendError) {
 	    my::log.Error(2) << "Backend failed to add string" << std::endl;
@@ -28,11 +28,7 @@ public:
 	}
     }
 
-    void Add() {
-	Add(menu_data_.Input);
-    }
-
-    void Remove(const size_t& pos) {
+    void Remove() {
 	std::wstring name = menu_data_.Option_List->NameAt(menu_data_.SelectedOptionPosition);
 	OptionList::ModifyStatus m_s = menu_data_.Option_List->Remove(menu_data_.SelectedOptionPosition);
 
@@ -41,21 +37,9 @@ public:
 	} else if (m_s.Modified) {
 	    my::log.Info() << "Removed string: " << name << std::endl;
 	    Search();
+	} else {
+	    my::log.Info() << "Can't remove string, probably already exists: " << name << std::endl;
 	}
-    }
-
-    void Remove(const std::wstring& name) {
-	size_t pos = menu_data_.Option_List->GetNamePos(name);
-	if (pos == std::wstring::npos) { 
-	    my::log.Info() << "String doesn't exist, can't remove" << std::endl;
-	    return;
-	}
-
-	Remove(pos);
-    }
-
-    void Remove() {
-	Remove(menu_data_.SelectedOptionPosition);
     }
 
     void Update() {

@@ -76,8 +76,7 @@ public:
 	{ L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action_out_of_here, action_to_here, location)); }},
     };
 
-    const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring)>> MenuAction_String_To_Function {
-    };
+    static const std::unordered_map<std::wstring, std::function<void(MenuController*)>> MenuAction_String_To_Function;
 
     ConfigDirectory& Config_Directory = ConfigDirectory::Instance();
 

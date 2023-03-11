@@ -7,25 +7,24 @@
 #include <ncurses.h>
 
 MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const wchar_t& c) {
-    bool matched = true;
-    int ret;
+    MenuController::PossibleExit p_e { true, 0 };
 
     switch (c) {
 	case CTRL_MASK(KEY_ENTER):
-	    ret = ExecuteInput_();
+	    p_e.ReturnCode = ExecuteInput_();
 	    break;
 	case KEY_ENTER:
 	case '\n':
-	    ret = ExecuteSelected_();
+	    p_e.ReturnCode = ExecuteSelected_();
 	    break;
 	case KEY_ESCAPE:
-	    ret = ExitCode::Success;
+	    p_e.ReturnCode = ExitCode::Success;
 	    break;
 	default:
-	    matched = false;
+	    p_e.Matched = false;
     }
 
-    return { matched, ret };
+    return p_e;
 }
 
 MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const wchar_t& c) {

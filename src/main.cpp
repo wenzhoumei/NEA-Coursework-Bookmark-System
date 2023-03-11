@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
     config_directory.Initialize(config_file_path);
 
     std::atexit([]() { my::log.FlushSession(); });
+
     my::log.Time();
     my::log.SetLogPath(config_directory.GetLogFilePath());
 
@@ -22,11 +23,10 @@ int main(int argc, char* argv[]) {
     ParameterProcessor parameter_processor(argc, argv);
 
     if (!parameter_processor.IsNumParametersValid()) {
-	my::log.Error(1) << "Usage - " << argv[0] << " option_string";
+	my::log.Error(1) << "Usage - " << argv[0] << " option_string" << std::endl;
     }
 
     std::wstring argument = parameter_processor.GetOptionString();
-
 
     parser.LoadScripts();
 

@@ -4,6 +4,17 @@
 #include "menu_tui.hpp"
 #include "exit_code.hpp"
 
+#define CTRL_MASK(c) ((c) & 0x1f)
+#define KEY_ESCAPE 27
+#include <ncurses.h>
+
+#include "menu_controller/menu_controller.hpp"
+
+const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function {
+    { L"todo", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('r')); }},
+    { L"flashcard", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
+};
+
 bool Parser::LoadScripts() {
     for (auto script: Config_Directory.Scripts_Retriever->GetData()) {
 	Scripts_.emplace(script);
@@ -91,12 +102,14 @@ int Parser::ExecuteDataDefault(const std::wstring& option_string) {
 void Parser::SetMenuController(MenuController* menu_controller) {
     menu_controller_ = menu_controller;
 }
+
 int Parser::Execute(const std::wstring& action, const std::wstring& data) {
-    char action_delimiter = action[0];
+    wchar_t action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
 
-    my::log.Info() << L"action: " << action;
-    my::log.Info() << L"data: " << data;
+    my::log.Info() << L"action (" << action << "), " << "data (" << data << ")" << std::endl;
+
+    my::log.Debug() << L"actiondelimiter (" << action_delimiter << ")" << std::endl;
 
     switch (action_delimiter) {
 	case (DestinationAction::Delimiter):
@@ -126,12 +139,14 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    break;
 	}
 	case (ProgramAction::Delimiter):
-	    ProgramAction_String_To_Function.at(action_identifier)(data);
+	    return ProgramAction_String_To_Function.at(action_identifier)(data);
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
 		my::log.Error(1) << "You can't execute a menu action here";
 	    } else {
+		my::log.Debug() << " theory4" << std::endl;
+		MenuAction_String_To_Function.at(action_identifier)(menu_controller_);
 		return ExitCode::DontExit;
 	    }
 
