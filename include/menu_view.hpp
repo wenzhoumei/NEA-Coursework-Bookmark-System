@@ -160,11 +160,14 @@ public:
 	std::wstring new_name = menu_data_.SelectedName();
 
 	int attr_selected = A_REVERSE;
-	if (mode == MenuData::INSERT || mode == MenuData::EDIT) {
+	if (mode == MenuData::INSERT) {
 	    mvprintw(new_position, 0, "%-*ls", cols, menu_data_.Input.c_str());
+	} else if (mode == MenuData::EDIT) {
+	    mvprintw(new_position, 0, "%-*ls", cols, menu_data_.Input.c_str());
+	    if (editing == MenuData::DATA) { attr_selected |= A_BOLD; } // Show data as bold 
 	} else if (mode == MenuData::SEARCH) {
 	    if (editing == MenuData::NAME) {
-		mvprintw(Previous_Selected_Position_, 0, "%-*ls", cols, Previous_Selected_Name_.c_str());
+		if (!menu_data_.Changed.Option_List) { (mvprintw(Previous_Selected_Position_, 0, "%-*ls", cols, Previous_Selected_Name_.c_str())); }
 		mvprintw(new_position, 0, "%-*ls", cols, new_name.c_str());
 	    } else {
 		mvprintw(new_position, 0, "%-*ls", cols, menu_data_.SelectedData().c_str());

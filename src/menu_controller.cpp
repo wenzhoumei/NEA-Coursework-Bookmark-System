@@ -11,7 +11,6 @@ MenuController::MenuController(MenuData& menu_data)
 
 int MenuController::ProcessChar(const wchar_t& c) {
     PossibleExit p_e = ProcessPossibleExit_(c);
-    my::log.Debug() << " return code " << p_e.ReturnCode << std::endl;
     if (p_e.Matched) { return p_e.ReturnCode; }
     if (ProcessSpecialChars_(c).Matched) { return ExitCode::DontExit; }
 

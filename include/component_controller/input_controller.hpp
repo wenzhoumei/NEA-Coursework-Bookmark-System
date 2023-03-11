@@ -27,13 +27,14 @@ public:
 
 
     /**
-     * @brief Removes last character from input box if it is not empty
+     * @brief You have menu_data_.Cursor_Position as a member variable
+     * update menu_data_.Input
      */
-    void PopChar() {
-	if (menu_data_.Input == L"") return;
+    void Backspace() {
+	if (menu_data_.Cursor_Position == 0) return;
 
 	Cursor_Position_Controller_.Left();
-	menu_data_.Input.pop_back();
+	menu_data_.Input.erase(menu_data_.Cursor_Position, 1);
 	menu_data_.Changed.Input = true;
 
 	if (menu_data_.Mode == MenuData::SEARCH) {

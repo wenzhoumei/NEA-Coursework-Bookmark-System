@@ -143,12 +143,15 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 		action_at_destination = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.OptionString;
 	    }
 
+	    History.push({ action, data });
+
 	    MenuTUI menu_tui = MenuTUI(DestinationAction_String_To_Function.at(destination_action_identifier)(action_at_destination, action, data));
 
 	    return menu_tui.Open();
 
 	    break;
 	}
+
 	case (ProgramAction::Delimiter):
 	    return ProgramAction_String_To_Function.at(action_identifier)(data);
 	    break;

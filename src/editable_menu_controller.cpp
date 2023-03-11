@@ -63,7 +63,6 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 }
 
 void EditableMenuController::SetMode_(enum MenuData::Mode m) {
-    Menu_Data_.Changed.Title = true;
     if (m == MenuData::EDIT) {
 	Menu_Data_.Mode = m;
 	if (Menu_Data_.Editing == MenuData::NAME) {
@@ -82,6 +81,8 @@ void EditableMenuController::SetMode_(enum MenuData::Mode m) {
 	    Input_.SetText(L"");
 	}
     }
+
+    SetTitle();
 }
 
 void EditableMenuController::SetTitle() {

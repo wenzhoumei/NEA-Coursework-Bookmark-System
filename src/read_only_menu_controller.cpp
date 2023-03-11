@@ -7,7 +7,7 @@
 #include <ncurses.h>
 
 MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const wchar_t& c) {
-    MenuController::PossibleExit p_e { true, 0 };
+    MenuController::PossibleExit p_e { true, ExitCode::LogicError };
 
     switch (c) {
 	case CTRL_MASK(KEY_ENTER):
@@ -20,6 +20,22 @@ MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const 
 	case KEY_ESCAPE:
 	    p_e.ReturnCode = ExitCode::Success;
 	    break;
+	case KEY_BACKSPACE:
+	case 127:  // Some systems use 127 instead of KEY_BACKSPACE
+	{
+	    p_e.ReturnCode = ExitCode::DontExit;
+	    if (Menu_Data_.Input == L"") {
+		if (Parser::Instance().History.size() == 1) { p_e.ReturnCode = ExitCode::DontExit; }
+		else {
+		    Parser::Instance().History.pop(); // Remove itself
+		    std::pair<std::wstring, std::wstring> last_menu = Parser::Instance().History.top();
+		    p_e.ReturnCode = Parser::Instance().Execute(last_menu.first, last_menu.second);
+		}
+	    } else {
+		Input_.Backspace();
+	    }
+	    break;
+	}
 	default:
 	    p_e.Matched = false;
     }
@@ -31,6 +47,18 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
     bool matched = true;
 
     switch (c) {
+	case CTRL_MASK('a'):
+	    my::log.Info() << "Can't add, read only" << std::endl;
+	    break;
+	case CTRL_MASK('r'):
+	    my::log.Info() << "Can't remove, read only" << std::endl;
+	    break;
+	case CTRL_MASK('k'):
+	    my::log.Info() << "Can't enter insert mode, read only" << std::endl;
+	    break;
+	case CTRL_MASK('e'):
+	    my::log.Info() << "Can't enter edit mode, read only" << std::endl;
+	    break;
 	case KEY_DOWN:
 	    Selected_Option_Position_.Down();
 	    break;
@@ -42,10 +70,6 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	    break;
 	case KEY_RIGHT:
 	    Cursor_Position_.Right();
-	    break;
-	case KEY_BACKSPACE:
-	case 127:  // Some systems use 127 instead of KEY_BACKSPACE
-	    Input_.PopChar();
 	    break;
 	case '\t':
 	    Input_.SetTextToSelected();
@@ -68,6 +92,8 @@ void ReadOnlyMenuController::ToggleData_() {
     if (Menu_Data_.Option_List->IsBookmarkList()) {
 	if (Menu_Data_.Editing == MenuData::DATA) { Menu_Data_.Editing = MenuData::NAME; }
 	else { Menu_Data_.Editing = MenuData::DATA; }
+    } else {
+	my::log.Info() << "Not a bookmark list" << std::endl;
     }
 }
 

@@ -94,7 +94,7 @@ public:
     }
 
     bool IsBookmarkList() override { return false; }
-    bool Editable() override { return false; }
+    bool Editable() override { return true; }
 protected:
     std::filesystem::path dir_path;
 };

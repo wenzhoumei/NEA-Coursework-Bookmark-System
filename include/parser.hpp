@@ -7,6 +7,8 @@
 #include <string>
 #include <functional>
 
+#include <stack>
+
 #include "option_list/option_list.hpp"
 
 class MenuController;
@@ -75,8 +77,10 @@ public:
 
     int ExecuteOptionString(const std::wstring& option_string);
     int ExecuteDataDefault(const std::wstring& option_string);
+
     int Execute(const std::wstring& action, const std::wstring& data);
 
+    std::stack<std::pair<std::wstring, std::wstring>> History;
 private:
     size_t GetActionPos_(const std::wstring& name, size_t action_pos=std::wstring::npos, bool first_it=true) const {
 	size_t action_delimiter_pos = FindLastActionDelimiterPos_(name);
