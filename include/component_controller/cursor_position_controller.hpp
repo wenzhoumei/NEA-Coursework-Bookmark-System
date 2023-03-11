@@ -10,10 +10,6 @@ public:
      */
     void Right() {
 	if (menu_data_.Cursor_Position == menu_data_.Input.size()) { return; }
-	if (menu_data_.Cursor_Position > menu_data_.Input.size()) {
-	    menu_data_.Input = menu_data_.Input.size();
-	    return;
-	}
 
 	menu_data_.Cursor_Position++;
     }

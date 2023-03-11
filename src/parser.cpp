@@ -8,11 +8,24 @@
 #define KEY_ESCAPE 27
 #include <ncurses.h>
 
+#include "option_list/data_option_list.hpp"
+#include "option_list/bookmark_option_list.hpp"
+#include "option_list/read_directory_option_list.hpp"
+#include "option_list/editable_directory_option_list.hpp"
+#include "option_list/read_only_data_option_list.hpp"
 #include "menu_controller/menu_controller.hpp"
 
 const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function {
     { L"todo", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('r')); }},
     { L"flashcard", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
+};
+
+const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function {
+    { L"rdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadDirectoryOptionList>(ReadDirectoryOptionList(action_out_of_here, action_to_here, location)); }},
+    { L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<DirectoryOptionList>(DirectoryOptionList(action_out_of_here, action_to_here, location)); }},
+    { L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<BmkOptionList>(BmkOptionList(action_out_of_here, action_to_here, location)); }},
+    { L"file", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<DataOptionList>(DataOptionList(action_out_of_here, action_to_here, location)); }},
+    { L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action_out_of_here, action_to_here, location)); }},
 };
 
 bool Parser::LoadScripts() {
@@ -107,9 +120,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     wchar_t action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
 
-    my::log.Info() << L"action (" << action << "), " << "data (" << data << ")" << std::endl;
-
-    my::log.Debug() << L"actiondelimiter (" << action_delimiter << ")" << std::endl;
+    my::log.Info() << L"Executing action (" << action << "), " << "data (" << data << ")" << std::endl;
 
     switch (action_delimiter) {
 	case (DestinationAction::Delimiter):
@@ -145,7 +156,6 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    if (menu_controller_ == nullptr) {
 		my::log.Error(1) << "You can't execute a menu action here";
 	    } else {
-		my::log.Debug() << " theory4" << std::endl;
 		MenuAction_String_To_Function.at(action_identifier)(menu_controller_);
 		return ExitCode::DontExit;
 	    }

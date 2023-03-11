@@ -12,7 +12,11 @@ public:
 
     bool Load() override {
 	if (!std::filesystem::exists(file_path_)) {
-	    return false;
+	    std::ofstream create_file(file_path_);
+	    if (!create_file.is_open()) {
+		return false;
+	    }
+	    create_file.close();
 	}
 
 	std::wifstream file_stream(file_path_);

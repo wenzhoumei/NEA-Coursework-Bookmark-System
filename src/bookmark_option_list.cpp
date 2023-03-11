@@ -10,8 +10,13 @@
 bool BmkOptionList::Load() {
     File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(Location_));
 
-    if (!File_Retriever_->Load()) {
-	return false;
+    if (!std::filesystem::is_regular_file(Location_)) {
+	std::wstring test_default_location = (ConfigDirectory::Instance().GetOptionListsDirectoryPath()/std::filesystem::path(Location_)).wstring();
+	if (!File_Retriever_->Load()) { return false; }
+	else { Location_ = test_default_location; }
+    } else if (!File_Retriever_->Load()) {
+	File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(Location_));
+	if (!File_Retriever_->Load()) { return false; }
     }
 
     for (auto option_string: File_Retriever_->GetData()) {

@@ -76,6 +76,7 @@ public:
     enum LogColor GetCurrentColorForMenu() {
 	return color_;
     }
+
     void SetLogPath(std::filesystem::path log_path) {
 	log_path_ = log_path;
 	log_path_set_ = true;

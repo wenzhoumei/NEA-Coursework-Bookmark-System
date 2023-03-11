@@ -8,5 +8,5 @@ class ReadOnlyDataOptionList: public DataOptionList {
 public:
     using DataOptionList::DataOptionList;
 
-    bool Editable() override { return true; }
+    bool Editable() override { return false; }
 };

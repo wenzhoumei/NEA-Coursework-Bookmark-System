@@ -162,8 +162,8 @@ public:
 	    mvprintw(new_position, 0, "%-*ls", cols, menu_data_->Input.c_str());
 	} else if (mode == MenuData::SEARCH) {
 	    if (editing == MenuData::NAME) {
-		mvprintw(new_position, 0, "%-*ls", cols, new_name.c_str());
 		mvprintw(previous_position, 0, "%-*ls", cols, previous_name.c_str());
+		mvprintw(new_position, 0, "%-*ls", cols, new_name.c_str());
 	    } else {
 		mvprintw(new_position, 0, "%-*ls", cols, menu_data_->SelectedData().c_str());
 		attr_selected |= A_BOLD; // Show data as bold

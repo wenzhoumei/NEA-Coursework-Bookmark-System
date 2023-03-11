@@ -14,7 +14,7 @@ void Log::LogStream::operator<<(std::ostream& (*manipulator)(std::ostream&)) {
 	log_.NumAddedOptionsSession--;
     }
 
-    bool menu_opened = log_.menu_tui_ != nullptr;
+    bool menu_opened = log_.menu_tui_ != nullptr && log_.menu_tui_->GetMenuController() != nullptr;
     if (menu_opened) {
 	log_.menu_tui_->GetMenuController()->UpdateStatus();
     }

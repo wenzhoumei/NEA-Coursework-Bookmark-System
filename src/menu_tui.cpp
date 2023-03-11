@@ -17,10 +17,13 @@ MenuTUI::MenuTUI(std::unique_ptr<OptionList> option_list)
 
     if (!menu_data_->Option_List->Load()) {
 	menu_controller_ = std::make_unique<ReadOnlyMenuController>(ReadOnlyMenuController(*menu_data_));
+	my::log.Warning() << "Option list failed to load, opening read only" << std::endl;
     } else if (!menu_data_->Option_List->Editable()) {
 	menu_controller_ = std::make_unique<ReadOnlyMenuController>(ReadOnlyMenuController(*menu_data_));
+	my::log.Info() << "Loaded option list successfully" << std::endl;
     } else {
 	menu_controller_ = std::make_unique<EditableMenuController>(EditableMenuController(*menu_data_));
+	my::log.Info() << "Loaded option list successfully" << std::endl;
     }
 
     my::log.SetMenuTUI(this);

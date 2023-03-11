@@ -123,6 +123,7 @@ public:
 
     virtual bool IsBookmarkList() { return false; }
     virtual bool Editable() { return false; }
+
 protected:
     std::vector<std::wstring> Options_All_;
     std::vector<int> Options_Indexes_Searched;

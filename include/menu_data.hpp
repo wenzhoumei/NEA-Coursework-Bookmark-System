@@ -24,7 +24,6 @@ public:
     std::unique_ptr<OptionList> Option_List;
 
     size_t SelectedOptionPosition = 0;
-    enum { OPTION, STATUS_LOG } Selected;
 
     std::unique_ptr<OptionList> Status_Log;
 
