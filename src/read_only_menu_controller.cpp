@@ -65,8 +65,10 @@ void ReadOnlyMenuController::ProcessDefaultChar_(const wchar_t &c) {
 }
 
 void ReadOnlyMenuController::ToggleData_() {
-    if (Menu_Data_.Editing == MenuData::DATA) { Menu_Data_.Editing = MenuData::NAME; }
-    else { Menu_Data_.Editing = MenuData::DATA; }
+    if (Menu_Data_.Option_List->IsBookmarkList()) {
+	if (Menu_Data_.Editing == MenuData::DATA) { Menu_Data_.Editing = MenuData::NAME; }
+	else { Menu_Data_.Editing = MenuData::DATA; }
+    }
 }
 
 int ReadOnlyMenuController::ExecuteInput_() {

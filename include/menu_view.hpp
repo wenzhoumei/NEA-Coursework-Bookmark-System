@@ -5,7 +5,7 @@
 
 class MenuView {
 public:
-    MenuView(MenuData* menu_data): menu_data_(menu_data) {}
+    MenuView(MenuData& menu_data): menu_data_(menu_data) {}
 
     void Start() {
 	initscr(); // Start ncurses mode
@@ -24,8 +24,12 @@ public:
 	keypad(stdscr, TRUE);
     }
 
-    ~MenuView() {
+    void Close() {
 	endwin();
+    }
+
+    ~MenuView() {
+	Close();
     }
 
     void Display() {
@@ -38,31 +42,31 @@ public:
 
 	UpdateRowInformation(rows);
 
-	if (Start_Option_ != Previous_Start_Option_) { menu_data_->Changed.Option_List = true; }
+	if (Start_Option_ != Previous_Start_Option_) { menu_data_.Changed.Option_List = true; }
 
-	if (menu_data_->Changed.Title) {
+	if (menu_data_.Changed.Title) {
 	    UpdateTitle(cols);
 	}
 
-	if (menu_data_->Changed.Input) {
+	if (menu_data_.Changed.Input) {
 	    UpdateInput(cols);
 	}
 
-	if (menu_data_->Changed.Option_List) {
+	if (menu_data_.Changed.Option_List) {
 	    UpdateMenuOptions(rows, cols);
 	}
 
 	UpdateSelectedOption(cols);
 
-	if (menu_data_->Changed.Status_Log) {
+	if (menu_data_.Changed.Status_Log) {
 	    UpdateStatusLog(rows, cols);
 	}
 
 	UpdateCursorPosition();
 
-	menu_data_->Changed.Reset();
+	menu_data_.Changed.Reset();
 
-	if (menu_data_->Mode == MenuData::SEARCH) {
+	if (menu_data_.Mode == MenuData::SEARCH) {
 	    curs_set(1);
 	} else {
 	    curs_set(2);
@@ -71,16 +75,16 @@ public:
 
     void UpdateTitle(int cols) {
 	attron(A_BOLD);
-	mvprintw(0, 0, "%-*ls", cols, menu_data_->Title.c_str());
+	mvprintw(0, 0, "%-*ls", cols, menu_data_.Title.c_str());
 	attroff(A_BOLD);
     }
 
     void UpdateRowInformation(int rows) {
-	enum MenuData::Mode mode = menu_data_->Mode;
+	enum MenuData::Mode mode = menu_data_.Mode;
 
 	size_t menu_rows = rows - 3;
-	size_t menu_total_size = menu_data_->Option_List->GetSearched().size();
-	size_t selected_index = menu_data_->SelectedOptionPosition;
+	size_t menu_total_size = menu_data_.Option_List->GetSearched().size();
+	size_t selected_index = menu_data_.SelectedOptionPosition;
 
 	if (mode == MenuData::INSERT) { menu_rows -= 1; }
 
@@ -90,18 +94,18 @@ public:
     }
 
     void UpdateMenuOptions(int rows, int cols) {
-	enum MenuData::Mode mode = menu_data_->Mode;
-	size_t selected_index = menu_data_->SelectedOptionPosition;
+	enum MenuData::Mode mode = menu_data_.Mode;
+	size_t selected_index = menu_data_.SelectedOptionPosition;
 
 	if (mode == MenuData::INSERT) {
 	    attron(A_NORMAL);
 
 	    for (size_t i = Start_Option_; i < selected_index; i++) {
-		mvprintw(i - Start_Option_ + 2, 0, "%-*ls", cols, menu_data_->Option_List->NameAt(i).c_str());
+		mvprintw(i - Start_Option_ + 2, 0, "%-*ls", cols, menu_data_.Option_List->NameAt(i).c_str());
 	    }
 
 	    for (size_t i = selected_index; i < Num_Options_; i++) {
-		mvprintw(i - Start_Option_ + 2 + 1, 0, "%-*ls", cols, menu_data_->Option_List->NameAt(i).c_str());
+		mvprintw(i - Start_Option_ + 2 + 1, 0, "%-*ls", cols, menu_data_.Option_List->NameAt(i).c_str());
 	    }
 
 	    // Fill out remaining empty rows
@@ -114,7 +118,7 @@ public:
 	    attron(A_NORMAL);
 
 	    for (size_t i = Start_Option_; i < Num_Options_; i++) {
-		mvprintw(i - Start_Option_ + 2, 0, "%-*ls", cols, menu_data_->Option_List->NameAt(i).c_str());
+		mvprintw(i - Start_Option_ + 2, 0, "%-*ls", cols, menu_data_.Option_List->NameAt(i).c_str());
 	    }
 
 	    // Fill out remaining empty rows
@@ -127,45 +131,43 @@ public:
     }
 
     void UpdateInput(int cols) {
-	enum MenuData::Mode mode = menu_data_->Mode;
+	enum MenuData::Mode mode = menu_data_.Mode;
 
 	// Print input row
-	std::wstring input_text = menu_data_->Input;
+	std::wstring input_text = menu_data_.Input;
 	mvprintw(1, 0, "%-*ls", cols, input_text.c_str());
 
 	if (mode == MenuData::EDIT || mode == MenuData::INSERT) {
-	    mvprintw(menu_data_->SelectedOptionPosition - Start_Option_ + 2, 0, "%-*ls", cols, input_text.c_str());
+	    mvprintw(menu_data_.SelectedOptionPosition - Start_Option_ + 2, 0, "%-*ls", cols, input_text.c_str());
 	}
     }
 
     void UpdateSelectedOption(int cols) {
-	static size_t previous_position = 0;
-	static std::wstring previous_name = L"";
 
-	size_t new_position = menu_data_->SelectedOptionPosition - Start_Option_ + 2;
+	size_t new_position = menu_data_.SelectedOptionPosition - Start_Option_ + 2;
 
 
 	// If no results, there is no selected
-	if (menu_data_->Option_List->GetSearched().size() == 0 && menu_data_->Mode == MenuData::SEARCH) {
-	    mvprintw(menu_data_->SelectedOptionPosition - Start_Option_ + 2, 0, "%-*s", cols, "");
+	if (menu_data_.Option_List->GetSearched().size() == 0 && menu_data_.Mode == MenuData::SEARCH) {
+	    mvprintw(menu_data_.SelectedOptionPosition - Start_Option_ + 2, 0, "%-*s", cols, "");
 	    mvchgat(2, 0, cols, A_NORMAL, 0, NULL);
 	    return;
 	}
 
-	enum MenuData::Mode mode = menu_data_->Mode;
-	enum MenuData::Editing editing = menu_data_->Editing;
+	enum MenuData::Mode mode = menu_data_.Mode;
+	enum MenuData::Editing editing = menu_data_.Editing;
 	
-	std::wstring new_name = menu_data_->SelectedName();
+	std::wstring new_name = menu_data_.SelectedName();
 
 	int attr_selected = A_REVERSE;
 	if (mode == MenuData::INSERT || mode == MenuData::EDIT) {
-	    mvprintw(new_position, 0, "%-*ls", cols, menu_data_->Input.c_str());
+	    mvprintw(new_position, 0, "%-*ls", cols, menu_data_.Input.c_str());
 	} else if (mode == MenuData::SEARCH) {
 	    if (editing == MenuData::NAME) {
-		mvprintw(previous_position, 0, "%-*ls", cols, previous_name.c_str());
+		mvprintw(Previous_Selected_Position_, 0, "%-*ls", cols, Previous_Selected_Name_.c_str());
 		mvprintw(new_position, 0, "%-*ls", cols, new_name.c_str());
 	    } else {
-		mvprintw(new_position, 0, "%-*ls", cols, menu_data_->SelectedData().c_str());
+		mvprintw(new_position, 0, "%-*ls", cols, menu_data_.SelectedData().c_str());
 		attr_selected |= A_BOLD; // Show data as bold
 	    }
 	}
@@ -173,12 +175,12 @@ public:
 	// Reverse foreground and background of selected line
 	mvchgat(new_position, 0, cols, attr_selected, 0, NULL);
 
-	previous_position = new_position;
-	previous_name = new_name;
+	Previous_Selected_Position_ = new_position;
+	Previous_Selected_Name_ = new_name;
     }
 
     void UpdateCursorPosition() {
-	move(1, menu_data_->Cursor_Position);
+	move(1, menu_data_.Cursor_Position);
     }
 
     void UpdateStatusLog(int rows, int cols) {
@@ -192,5 +194,8 @@ private:
     size_t Start_Option_;
     size_t Num_Options_;
 
-    MenuData* menu_data_;
+    MenuData& menu_data_;
+
+    size_t Previous_Selected_Position_ = 0;
+    std::wstring Previous_Selected_Name_ = L"";
 };

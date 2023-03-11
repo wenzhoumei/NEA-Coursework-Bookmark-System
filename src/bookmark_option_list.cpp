@@ -105,14 +105,13 @@ OptionList::ModifyStatus BmkOptionList::Remove(size_t pos) {
 OptionList::ModifyStatus BmkOptionList::Update(size_t pos, const std::wstring& new_option_string) {
     if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't remove, out of range"; }
 
-    std::wstring new_name;
-    std::wstring tmp_data;
-
-    SplitStringToNameAndData_(new_option_string, new_name, tmp_data);
-    if (tmp_data != L"") { return { false, true }; } // Contains >
+    if (std::find(new_option_string.begin(), new_option_string.end(), (Parser::Instance().Data.Delimiter)) != new_option_string.end()) {
+	my::log.Warning() << "Invalid sequence, contains >, nothing done" << std::endl;
+	return { false, false };
+    }
 
     // Check if the new option string already exists
-    auto it = std::find(Options_All_.begin(), Options_All_.end(), new_name);
+    auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);
     if (it != Options_All_.end()) {
 	// New name already exists, swap with the old one
 	std::swap(Options_All_[pos], *it);

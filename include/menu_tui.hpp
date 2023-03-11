@@ -15,12 +15,12 @@
 // Handles display of MenuData
 // Recieves events and execute appropriate Controller function
 class MenuTUI {
-    std::unique_ptr<MenuData> menu_data_;
-    std::unique_ptr<MenuController> menu_controller_;
-    std::unique_ptr<MenuView> menu_view_;
+    MenuData menu_data_;
+    MenuView menu_view_;
 
+    std::unique_ptr<MenuController> menu_controller_;
 public:
-    MenuTUI(std::unique_ptr<OptionList> option_list);
+    MenuTUI(OptionList* option_list);
     int Open();
 
     MenuController* GetMenuController() { return menu_controller_.get(); }

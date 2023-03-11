@@ -10,15 +10,22 @@
 
 class ReadOnlyMenuController: public MenuController {
 public:
-    using MenuController::MenuController;
+    ReadOnlyMenuController(MenuData& menu_data)
+	: MenuController(menu_data),
+	  Title_(menu_data),
+	  Cursor_Position_(menu_data),
+	  Selected_Option_Position_(menu_data),
+	  Option_List_(menu_data, Selected_Option_Position_),
+	  Input_(menu_data, Cursor_Position_, Option_List_)
+    { }
 
 protected:
-    TitleController Title_ = TitleController(Menu_Data_);
+    TitleController Title_;
 
-    CursorPositionController Cursor_Position_ = CursorPositionController(Menu_Data_);
-    SelectedOptionPositionController Selected_Option_Position_ = SelectedOptionPositionController(Menu_Data_);
-    OptionListController Option_List_ = OptionListController(Menu_Data_, Selected_Option_Position_);
-    InputController Input_ = InputController(Menu_Data_, Cursor_Position_, Option_List_);
+    CursorPositionController Cursor_Position_;
+    SelectedOptionPositionController Selected_Option_Position_;
+    OptionListController Option_List_;
+    InputController Input_;
 
     void SetTitle() override;
 

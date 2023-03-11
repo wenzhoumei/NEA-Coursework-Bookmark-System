@@ -4,9 +4,10 @@
 #define CTRL_MASK(c) ((c) & 0x1f)
 #define KEY_ESCAPE 27
 #include <ncurses.h>
+#include <assert.h>
 
 MenuController::MenuController(MenuData& menu_data)
-    : Menu_Data_(menu_data) {}
+    : Menu_Data_(menu_data) { }
 
 int MenuController::ProcessChar(const wchar_t& c) {
     PossibleExit p_e = ProcessPossibleExit_(c);

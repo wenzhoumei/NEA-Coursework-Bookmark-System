@@ -8,7 +8,7 @@
 
 class MenuData {
 public:
-    MenuData(std::unique_ptr<OptionList> option_list)
+    MenuData(OptionList* option_list)
 	: Option_List(std::move(option_list))
     {
     }

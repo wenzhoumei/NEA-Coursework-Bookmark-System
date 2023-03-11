@@ -25,6 +25,6 @@ public:
 	return true;
     }
 
-    const bool Editable = false;
-    const bool HasData = false;
+    bool IsBookmarkList() override { return false; }
+    bool Editable() override { return false; }
 };

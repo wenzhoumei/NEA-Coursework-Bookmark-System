@@ -63,8 +63,7 @@ public:
 	{ ProgramAction.OptionString, [this](std::wstring data) { return ExecuteOptionString(data); }},
     };
 
-    static const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring, std::wstring)>> DestinationAction_String_To_Function;
-
+    static const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> DestinationAction_String_To_Function;
     static const std::unordered_map<std::wstring, std::function<void(MenuController*)>> MenuAction_String_To_Function;
 
     ConfigDirectory& Config_Directory = ConfigDirectory::Instance();

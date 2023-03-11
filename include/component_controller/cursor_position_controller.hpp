@@ -1,9 +1,11 @@
 #pragma once
 #include "component_controller.hpp"
+#include <assert.h>
+#include <iostream>
 
 class CursorPositionController: public ComponentController {
 public:
-    CursorPositionController(MenuData& menu_data): ComponentController(menu_data) {}
+    CursorPositionController(MenuData& menu_data): ComponentController(menu_data) { }
 
     /**
      * Moves cursor to the right if possible

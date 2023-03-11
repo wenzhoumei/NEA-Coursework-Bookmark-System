@@ -15,22 +15,22 @@
 #include "option_list/read_only_data_option_list.hpp"
 #include "menu_controller/menu_controller.hpp"
 
-const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function {
+const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function = {
     { L"todo", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('r')); }},
     { L"flashcard", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
 };
 
-const std::unordered_map<std::wstring, std::function<std::unique_ptr<OptionList>(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function {
-    { L"rdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadDirectoryOptionList>(ReadDirectoryOptionList(action_out_of_here, action_to_here, location)); }},
-    { L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<DirectoryOptionList>(DirectoryOptionList(action_out_of_here, action_to_here, location)); }},
-    { L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<BmkOptionList>(BmkOptionList(action_out_of_here, action_to_here, location)); }},
-    { L"file", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<DataOptionList>(DataOptionList(action_out_of_here, action_to_here, location)); }},
-    { L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return std::make_unique<ReadOnlyDataOptionList>(ReadOnlyDataOptionList(action_out_of_here, action_to_here, location)); }},
+const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function = {
+    { L"rdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadDirectoryOptionList(action_out_of_here, action_to_here, location); }},
+    { L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DirectoryOptionList(action_out_of_here, action_to_here, location); }},
+    { L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new BmkOptionList(action_out_of_here, action_to_here, location); }},
+    { L"file", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DataOptionList(action_out_of_here, action_to_here, location); }},
+    { L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadOnlyDataOptionList(action_out_of_here, action_to_here, location); }},
 };
 
 bool Parser::LoadScripts() {
     for (auto script: Config_Directory.Scripts_Retriever->GetData()) {
-	Scripts_.emplace(script);
+	Scripts_.insert(script);
     }
 
     return true;
