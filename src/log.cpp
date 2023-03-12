@@ -4,8 +4,8 @@
 enum LogColor Log::GetCurrentColorForMenu() {
     return Color_;
 }
-void Log::SetLogPath(std::filesystem::path Log_path) {
-    Log_Path_ = Log_path;
+void Log::SetLogPath(std::filesystem::path log_path) {
+    Log_Path_ = log_path;
     Log_Path_Set_ = true;
 }
 

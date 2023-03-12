@@ -115,9 +115,9 @@ public:
     /**
      * @brief Sets the path to the log file.
      *
-     * @param Log_path The path to the log file.
+     * @param log_path The path to the log file.
      */
-    void SetLogPath(std::filesystem::path Log_path);
+    void SetLogPath(std::filesystem::path log_path);
 
     /**
      * @brief Sets the MenuTUI object for the log.

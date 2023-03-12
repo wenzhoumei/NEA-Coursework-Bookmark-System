@@ -4,6 +4,9 @@
 #include <string>
 #include <filesystem>
 
+/**
+ * @brief Buffer store for settings in parser
+ */
 class Retriever {
 protected:
     std::vector<std::wstring> data_;

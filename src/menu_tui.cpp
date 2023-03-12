@@ -13,52 +13,52 @@
 
 MenuTUI::~MenuTUI() {
     Close();
-    delete menu_controller_;
+    delete Menu_Controller_;
 }
 
 void MenuTUI::Close() {
-    menu_view_.Close();
+    Menu_View_.Close();
     my::log.SetMenuTUI(nullptr);
     Parser::Instance().SetMenuController(nullptr);
 }
 
 MenuTUI::MenuTUI(OptionList* option_list)
-    : menu_data_(option_list), menu_view_(menu_data_)
+    : Menu_Data_(option_list), Menu_View_(Menu_Data_)
 {
     my::log.SetMenuTUI(nullptr);
 
-    if (!menu_data_.Option_List->Load()) {
-	menu_controller_ = new ReadOnlyMenuController(menu_data_);
+    if (!Menu_Data_.Option_List->Load()) {
+	Menu_Controller_ = new ReadOnlyMenuController(Menu_Data_);
 	my::log.Warning() << "Option list failed to load, opening read only" << std::endl;
-    } else if (!menu_data_.Option_List->Editable()) {
-	menu_controller_ = new ReadOnlyMenuController(menu_data_);
+    } else if (!Menu_Data_.Option_List->Editable()) {
+	Menu_Controller_ = new ReadOnlyMenuController(Menu_Data_);
 	my::log.Info() << "Loaded option list successfully" << std::endl;
     } else {
-	menu_controller_ = new EditableMenuController(menu_data_);
+	Menu_Controller_ = new EditableMenuController(Menu_Data_);
 	my::log.Info() << "Loaded option list successfully" << std::endl;
     }
 
-    menu_data_.History.push({ menu_data_.Option_List->GetActionToHere(), menu_data_.Option_List->GetLocation() });
+    Menu_Data_.History.push({ Menu_Data_.Option_List->GetActionToHere(), Menu_Data_.Option_List->GetLocation() });
 
     my::log.SetMenuTUI(this);
-    Parser::Instance().SetMenuController(menu_controller_);
+    Parser::Instance().SetMenuController(Menu_Controller_);
 }
 
 
-MenuController* MenuTUI::GetMenuController() { return menu_controller_; }
+MenuController* MenuTUI::GetMenuController() { return Menu_Controller_; }
 
 int MenuTUI::Open() {
-    menu_view_.Start();
-    menu_view_.Display();
+    Menu_View_.Initialize();
+    Menu_View_.Display();
 
-    menu_controller_->SetTitle();
+    Menu_Controller_->SetTitle();
 
     int exit_code;
     wint_t char_choice;
     do {
-	menu_view_.Display();
+	Menu_View_.Display();
 	get_wch(&char_choice);
-    } while ((exit_code = menu_controller_->ProcessChar(char_choice)) == ExitCode::DontExit);
+    } while ((exit_code = Menu_Controller_->ProcessChar(char_choice)) == ExitCode::DontExit);
 
     Close();
     return exit_code;
