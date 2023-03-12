@@ -1,34 +1,22 @@
 #pragma once
 #include "component_controller.hpp"
-#include <assert.h>
-#include <iostream>
 
 class CursorPositionController: public ComponentController {
 public:
-    CursorPositionController(MenuData* menu_data): ComponentController(menu_data) { }
+    CursorPositionController(MenuData* menu_data);
 
     /**
      * Moves cursor to the right if possible
      */
-    void Right() {
-	if (menu_data_->Cursor_Position == menu_data_->Input.size()) { return; }
-
-	menu_data_->Cursor_Position++;
-    }
+    void Right();
 
     /**
      * Moves cursor to the left if possible
      */
-    void Left() {
-	if (menu_data_->Cursor_Position <= 0) { return; }
-
-	menu_data_->Cursor_Position--;
-    }
+    void Left();
 
     /**
      * Sets cursor position to end of input text
      */
-    void MoveEnd() {
-	menu_data_->Cursor_Position = menu_data_->Input.size();
-    }
+    void MoveEnd();
 };

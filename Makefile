@@ -14,9 +14,9 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -O2 -flto -fno-fat-lto-objects -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -std=c++20 -g -O2 -flto -fno-fat-lto-objects -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
+DEFINES       = -DQT_GUI_LIB -DQT_CORE_LIB
+CFLAGS        = -pipe -g -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -std=c++20 -g -g -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -Iinclude -I/usr/include/qt -I/usr/include/qt/QtGui -I/usr/include/qt/QtCore -I. -I/usr/lib/qt/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
@@ -39,9 +39,9 @@ COMPRESS      = gzip -9f
 DISTNAME      = program.program1.0.0
 DISTDIR = /home/wenzhou/Entries/obj/program.program1.0.0
 LINK          = g++
-LFLAGS        = -Wl,-O1 -pipe -std=c++20 -g -O2 -flto=8 -fno-fat-lto-objects -fuse-linker-plugin -fPIC
+LFLAGS        = -fPIC
 LIBS          = $(SUBLIBS) -lncursesw /usr/lib/libQt5Gui.so /usr/lib/libQt5Core.so -lGL -lpthread   
-AR            = gcc-ar cqs
+AR            = ar cqs
 RANLIB        = 
 SED           = sed
 STRIP         = strip
@@ -54,28 +54,44 @@ OBJECTS_DIR   = obj/
 
 SOURCES       = src/bookmark_option_list.cpp \
 		src/config_directory.cpp \
+		src/cursor_position_controller.cpp \
 		src/editable_menu_controller.cpp \
+		src/file_retriever.cpp \
+		src/input_controller.cpp \
 		src/log.cpp \
 		src/main.cpp \
 		src/menu_controller.cpp \
+		src/menu_data.cpp \
 		src/menu_tui.cpp \
+		src/menu_view.cpp \
 		src/option_list.cpp \
+		src/option_list_controller.cpp \
 		src/parameter_processor.cpp \
 		src/parser.cpp \
 		src/read_only_menu_controller.cpp \
-		src/scripts_directory_option_list.cpp 
+		src/scripts_directory_option_list.cpp \
+		src/selected_option_position_controller.cpp \
+		src/title_controller.cpp 
 OBJECTS       = obj/bookmark_option_list.o \
 		obj/config_directory.o \
+		obj/cursor_position_controller.o \
 		obj/editable_menu_controller.o \
+		obj/file_retriever.o \
+		obj/input_controller.o \
 		obj/log.o \
 		obj/main.o \
 		obj/menu_controller.o \
+		obj/menu_data.o \
 		obj/menu_tui.o \
+		obj/menu_view.o \
 		obj/option_list.o \
+		obj/option_list_controller.o \
 		obj/parameter_processor.o \
 		obj/parser.o \
 		obj/read_only_menu_controller.o \
-		obj/scripts_directory_option_list.o
+		obj/scripts_directory_option_list.o \
+		obj/selected_option_position_controller.o \
+		obj/title_controller.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/common/unix.conf \
 		/usr/lib/qt/mkspecs/common/linux.conf \
@@ -276,13 +292,13 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/default_pre.prf \
 		/usr/lib/qt/mkspecs/features/resolve_config.prf \
 		/usr/lib/qt/mkspecs/features/default_post.prf \
-		/usr/lib/qt/mkspecs/features/link_ltcg.prf \
 		/usr/lib/qt/mkspecs/features/ltcg.prf \
 		/usr/lib/qt/mkspecs/features/warn_on.prf \
 		/usr/lib/qt/mkspecs/features/qt.prf \
 		/usr/lib/qt/mkspecs/features/resources_functions.prf \
 		/usr/lib/qt/mkspecs/features/resources.prf \
 		/usr/lib/qt/mkspecs/features/moc.prf \
+		/usr/lib/qt/mkspecs/features/link_ltcg.prf \
 		/usr/lib/qt/mkspecs/features/unix/opengl.prf \
 		/usr/lib/qt/mkspecs/features/unix/thread.prf \
 		/usr/lib/qt/mkspecs/features/qmake_use.prf \
@@ -300,16 +316,24 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		include/parameter_processor.hpp \
 		include/parser.hpp src/bookmark_option_list.cpp \
 		src/config_directory.cpp \
+		src/cursor_position_controller.cpp \
 		src/editable_menu_controller.cpp \
+		src/file_retriever.cpp \
+		src/input_controller.cpp \
 		src/log.cpp \
 		src/main.cpp \
 		src/menu_controller.cpp \
+		src/menu_data.cpp \
 		src/menu_tui.cpp \
+		src/menu_view.cpp \
 		src/option_list.cpp \
+		src/option_list_controller.cpp \
 		src/parameter_processor.cpp \
 		src/parser.cpp \
 		src/read_only_menu_controller.cpp \
-		src/scripts_directory_option_list.cpp
+		src/scripts_directory_option_list.cpp \
+		src/selected_option_position_controller.cpp \
+		src/title_controller.cpp
 QMAKE_TARGET  = program.program
 DESTDIR       = 
 TARGET        = program.program
@@ -521,13 +545,13 @@ Makefile: myproject.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/lib/qt/mks
 		/usr/lib/qt/mkspecs/features/default_pre.prf \
 		/usr/lib/qt/mkspecs/features/resolve_config.prf \
 		/usr/lib/qt/mkspecs/features/default_post.prf \
-		/usr/lib/qt/mkspecs/features/link_ltcg.prf \
 		/usr/lib/qt/mkspecs/features/ltcg.prf \
 		/usr/lib/qt/mkspecs/features/warn_on.prf \
 		/usr/lib/qt/mkspecs/features/qt.prf \
 		/usr/lib/qt/mkspecs/features/resources_functions.prf \
 		/usr/lib/qt/mkspecs/features/resources.prf \
 		/usr/lib/qt/mkspecs/features/moc.prf \
+		/usr/lib/qt/mkspecs/features/link_ltcg.prf \
 		/usr/lib/qt/mkspecs/features/unix/opengl.prf \
 		/usr/lib/qt/mkspecs/features/unix/thread.prf \
 		/usr/lib/qt/mkspecs/features/qmake_use.prf \
@@ -738,13 +762,13 @@ Makefile: myproject.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/lib/qt/mks
 /usr/lib/qt/mkspecs/features/default_pre.prf:
 /usr/lib/qt/mkspecs/features/resolve_config.prf:
 /usr/lib/qt/mkspecs/features/default_post.prf:
-/usr/lib/qt/mkspecs/features/link_ltcg.prf:
 /usr/lib/qt/mkspecs/features/ltcg.prf:
 /usr/lib/qt/mkspecs/features/warn_on.prf:
 /usr/lib/qt/mkspecs/features/qt.prf:
 /usr/lib/qt/mkspecs/features/resources_functions.prf:
 /usr/lib/qt/mkspecs/features/resources.prf:
 /usr/lib/qt/mkspecs/features/moc.prf:
+/usr/lib/qt/mkspecs/features/link_ltcg.prf:
 /usr/lib/qt/mkspecs/features/unix/opengl.prf:
 /usr/lib/qt/mkspecs/features/unix/thread.prf:
 /usr/lib/qt/mkspecs/features/qmake_use.prf:
@@ -770,7 +794,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents include/config_directory.hpp include/exit_code.hpp include/log.hpp include/menu_data.hpp include/menu_tui.hpp include/menu_view.hpp include/parameter_processor.hpp include/parser.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/editable_menu_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_tui.cpp src/option_list.cpp src/parameter_processor.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/cursor_position_controller.cpp src/editable_menu_controller.cpp src/file_retriever.cpp src/input_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_data.cpp src/menu_tui.cpp src/menu_view.cpp src/option_list.cpp src/option_list_controller.cpp src/parameter_processor.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp src/selected_option_position_controller.cpp src/title_controller.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -800,7 +824,7 @@ compiler_moc_predefs_make_all: moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) moc_predefs.h
 moc_predefs.h: /usr/lib/qt/mkspecs/features/data/dummy.cpp
-	g++ -pipe -std=c++20 -g -O2 -flto -fno-fat-lto-objects -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/qt/mkspecs/features/data/dummy.cpp
+	g++ -pipe -std=c++20 -g -g -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/qt/mkspecs/features/data/dummy.cpp
 
 compiler_moc_header_make_all:
 compiler_moc_header_clean:
@@ -836,6 +860,13 @@ obj/config_directory.o: src/config_directory.cpp include/retriever/directory_ret
 		include/config_directory.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/config_directory.o src/config_directory.cpp
 
+obj/cursor_position_controller.o: src/cursor_position_controller.cpp include/component_controller/cursor_position_controller.hpp \
+		include/component_controller/component_controller.hpp \
+		include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/cursor_position_controller.o src/cursor_position_controller.cpp
+
 obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_controller/editable_menu_controller.hpp \
 		include/menu_controller/read_only_menu_controller.hpp \
 		include/component_controller/title_controller.hpp \
@@ -850,6 +881,20 @@ obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_co
 		include/menu_controller/menu_controller.hpp \
 		include/exit_code.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/editable_menu_controller.o src/editable_menu_controller.cpp
+
+obj/file_retriever.o: src/file_retriever.cpp include/retriever/file_retriever.hpp \
+		include/retriever/retriever.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/file_retriever.o src/file_retriever.cpp
+
+obj/input_controller.o: src/input_controller.cpp include/component_controller/input_controller.hpp \
+		include/component_controller/component_controller.hpp \
+		include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp \
+		include/component_controller/cursor_position_controller.hpp \
+		include/component_controller/option_list_controller.hpp \
+		include/component_controller/selected_option_position_controller.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/input_controller.o src/input_controller.cpp
 
 obj/log.o: src/log.cpp include/log.hpp \
 		include/menu_tui.hpp \
@@ -876,6 +921,11 @@ obj/menu_controller.o: src/menu_controller.cpp include/menu_controller/menu_cont
 		include/exit_code.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_controller.o src/menu_controller.cpp
 
+obj/menu_data.o: src/menu_data.cpp include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_data.o src/menu_data.cpp
+
 obj/menu_tui.o: src/menu_tui.cpp include/menu_tui.hpp \
 		include/option_list/option_list.hpp \
 		include/log.hpp \
@@ -898,9 +948,23 @@ obj/menu_tui.o: src/menu_tui.cpp include/menu_tui.hpp \
 		include/menu_controller/editable_menu_controller.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_tui.o src/menu_tui.cpp
 
+obj/menu_view.o: src/menu_view.cpp include/menu_view.hpp \
+		include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_view.o src/menu_view.cpp
+
 obj/option_list.o: src/option_list.cpp include/option_list/option_list.hpp \
 		include/log.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/option_list.o src/option_list.cpp
+
+obj/option_list_controller.o: src/option_list_controller.cpp include/component_controller/option_list_controller.hpp \
+		include/component_controller/component_controller.hpp \
+		include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp \
+		include/component_controller/selected_option_position_controller.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/option_list_controller.o src/option_list_controller.cpp
 
 obj/parameter_processor.o: src/parameter_processor.cpp include/parameter_processor.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/parameter_processor.o src/parameter_processor.cpp
@@ -956,6 +1020,20 @@ obj/scripts_directory_option_list.o: src/scripts_directory_option_list.cpp inclu
 		include/retriever/file_retriever.hpp \
 		include/parser.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/scripts_directory_option_list.o src/scripts_directory_option_list.cpp
+
+obj/selected_option_position_controller.o: src/selected_option_position_controller.cpp include/component_controller/selected_option_position_controller.hpp \
+		include/component_controller/component_controller.hpp \
+		include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/selected_option_position_controller.o src/selected_option_position_controller.cpp
+
+obj/title_controller.o: src/title_controller.cpp include/component_controller/title_controller.hpp \
+		include/component_controller/component_controller.hpp \
+		include/menu_data.hpp \
+		include/option_list/option_list.hpp \
+		include/log.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/title_controller.o src/title_controller.cpp
 
 ####### Install
 

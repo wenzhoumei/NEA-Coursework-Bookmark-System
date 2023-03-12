@@ -1,13 +1,11 @@
 #pragma once
 
-#include "config_directory.hpp"
 
 #include <set>
 #include <unordered_map>
 #include <string>
 #include <functional>
-
-#include <stack>
+#include "config_directory.hpp"
 
 #include "option_list/option_list.hpp"
 
@@ -69,7 +67,6 @@ public:
     static const std::unordered_map<std::wstring, std::function<void(MenuController*)>> MenuAction_String_To_Function;
 
     ConfigDirectory& Config_Directory = ConfigDirectory::Instance();
-
     bool LoadScripts();
     bool LoadIdentifierExtensions();
 
@@ -81,77 +78,11 @@ public:
     int ExecuteBookmark(const std::wstring& name, const std::wstring& data);
 
     int Execute(const std::wstring& action, const std::wstring& data);
-
-    std::stack<std::pair<std::wstring, std::wstring>> History;
 private:
     void ReplaceAll_(std::wstring& str, const std::wstring& from, const std::wstring& to);
-
-    size_t GetActionPos_(const std::wstring& name, size_t action_pos=std::wstring::npos, bool first_it=true) const {
-	size_t action_delimiter_pos = FindLastActionDelimiterPos_(name);
-
-	if (action_delimiter_pos == std::wstring::npos) {
-	    return action_pos;
-	} else {
-	    wchar_t action_delimiter = name[action_delimiter_pos];
-	    std::wstring action_identifier = name.substr(action_delimiter_pos + 1);
-
-	    if (IsValidAction_(action_delimiter, action_identifier)) {
-		std::wstring identifier = name.substr(0, action_delimiter_pos);
-		if (action_delimiter != DestinationAction.Delimiter && !first_it) { return action_pos; }
-		else { return GetActionPos_(identifier, action_delimiter_pos, false); }
-	    } else {
-		return action_pos;
-	    }
-	}
-    }
-
-    size_t FindLastActionDelimiterPos_(const std::wstring& str) const {
-	size_t pos = str.length();
-	while (pos > 0) {
-	    --pos;
-	    if (IsActionDelimiter_(str[pos])) {
-		return pos;
-	    }
-	}
-	
-	return std::wstring::npos;
-    }
-
-    size_t FindFirstActionDelimiterPos_(const std::wstring& str) const {
-	size_t pos = 0;
-	while (pos < str.length()) {
-	    if (IsActionDelimiter_(str[pos])) {
-		return pos;
-	    }
-	    ++pos;
-	}
-	return std::wstring::npos;
-    }
-
-    bool IsActionDelimiter_(const wchar_t& c) const {
-	return c == ProgramAction.Delimiter
-	    || c == DestinationAction.Delimiter
-	    || c == ScriptAction.Delimiter
-	    || c == MenuAction.Delimiter;
-    }
-
-    bool IsValidAction_(const wchar_t& action_del, const std::wstring& action_identifier) const {
-	switch (action_del) {
-	    case (DestinationAction::Delimiter):
-		return DestinationAction_String_To_Function.contains(action_identifier);
-		break;
-	    case (ProgramAction::Delimiter):
-		return ProgramAction_String_To_Function.contains(action_identifier);
-		break;
-	    case (ScriptAction::Delimiter):
-		return Scripts_.contains(action_identifier);
-		break;
-	    case (MenuAction::Delimiter):
-		return MenuAction_String_To_Function.contains(action_identifier);
-		break;
-	}
-
-	Log::Instance().Error(9) << "Invalid action delimiter: " << action_del;
-	return false;
-    }
+    size_t GetActionPos_(const std::wstring& name, size_t action_pos=std::wstring::npos, bool first_it=true) const;
+    size_t FindLastActionDelimiterPos_(const std::wstring& str) const;
+    size_t FindFirstActionDelimiterPos_(const std::wstring& str) const;
+    bool IsActionDelimiter_(const wchar_t& c) const;
+    bool IsValidAction_(const wchar_t& action_del, const std::wstring& action_identifier) const;
 };

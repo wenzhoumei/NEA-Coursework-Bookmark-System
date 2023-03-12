@@ -10,14 +10,7 @@
 
 class ReadOnlyMenuController: public MenuController {
 public:
-    ReadOnlyMenuController(MenuData& menu_data)
-	: MenuController(menu_data),
-	  Title_(&menu_data),
-	  Cursor_Position_(&menu_data),
-	  Selected_Option_Position_(&menu_data),
-	  Option_List_(&menu_data, Selected_Option_Position_),
-	  Input_(&menu_data, Cursor_Position_, Option_List_)
-    { }
+    ReadOnlyMenuController(MenuData& menu_data);
 
 protected:
     TitleController Title_;

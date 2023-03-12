@@ -1,3 +1,4 @@
+CONFIG += debug
 TARGET = program.program
 OBJECTS_DIR = ./obj
 INCLUDEPATH += ./include

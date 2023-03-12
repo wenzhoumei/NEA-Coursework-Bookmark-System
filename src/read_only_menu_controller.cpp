@@ -1,10 +1,21 @@
 #include "menu_controller/read_only_menu_controller.hpp"
 #include "exit_code.hpp"
 #include "parser.hpp"
+#include "menu_data.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
 #define KEY_ESCAPE 27
 #include <ncurses.h>
+
+ReadOnlyMenuController::ReadOnlyMenuController(MenuData& menu_data)
+	: MenuController(menu_data),
+	  Title_(&menu_data),
+	  Cursor_Position_(&menu_data),
+	  Selected_Option_Position_(&menu_data),
+	  Option_List_(&menu_data, Selected_Option_Position_),
+	  Input_(&menu_data, Cursor_Position_, Option_List_)
+    {
+    }
 
 MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const wchar_t& c) {
     MenuController::PossibleExit p_e { true, ExitCode::LogicError };
@@ -25,10 +36,10 @@ MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const 
 	{
 	    p_e.ReturnCode = ExitCode::DontExit;
 	    if (Menu_Data_.Input == L"") {
-		if (Parser::Instance().History.size() == 1) { p_e.ReturnCode = ExitCode::DontExit; }
+		if (MenuData::History.size() == 1) { p_e.ReturnCode = ExitCode::DontExit; }
 		else {
-		    Parser::Instance().History.pop(); // Remove itself
-		    std::pair<std::wstring, std::wstring> last_menu = Parser::Instance().History.top();
+		    MenuData::History.pop(); // Remove itself
+		    std::pair<std::wstring, std::wstring> last_menu = MenuData::History.top();
 		    p_e.ReturnCode = Parser::Instance().Execute(last_menu.first, last_menu.second);
 		}
 	    } else {

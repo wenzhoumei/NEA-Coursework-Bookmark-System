@@ -10,120 +10,182 @@
 #include <algorithm>
 #include <stack>
 
+/**
+ * @brief Identifies color that is associated with each of the log types, which is used to create INIT_COLOR_PAIR in menu_view.hpp
+ */
 enum LogColor {
     Info = 1, 
     Warning = 2, 
     Error = 3, 
     Debug = 4, 
-    Normal = 5, 
+
+    Normal = 5, //
 };
 
+
+class Log;
+namespace my {
+    extern Log& log; ///< More compact way of referencing instance of singleton
+}
+
+/**
+ * @brief Custom singleton log class that writes text streamed into it to stdout, menu status bar and the log file if they are loaded
+ *
+ * Different types of log
+ * Error: Program can't continue functioning, logs text and exits
+ * Warning: Action may lead to undefined behavior
+ * Info: General information to communicate with user
+ * Debug: Used for debugging
+ */
 class MenuTUI;
 class Log {
-    Log() {}; // Private constructor to prevent instantiation
-    Log(const Log&) = delete; // Delete copy constructor
-    Log& operator=(const Log&) = delete; // Delete assignment operato
+    Log() {}; ///< Private constructor to prevent instantiation
+    Log(const Log&) = delete; ///< Delete copy constructor
+    Log& operator=(const Log&) = delete; ///< Delete assignment operator
 							     
+    /**
+     * @brief Nested class representing the stream used for logging output.
+     */
     class LogStream {
-    public:
-	LogStream(const std::wstring& prefix, enum LogColor color, Log& log, bool exit_after=false, int exit_code=0)
-	    : color_(color), log_(log), exit_after_(exit_after), exit_code_(exit_code)
-	{
-	    if (exit_after) {
-		os_ << prefix << " (" << exit_code << ") : ";
-	    } else {
-		os_ << prefix << ": ";
+	public:
+	    /**
+	     * @param prefix The prefix that identifies to the user the type of log message.
+	     * @param color The color to use for the log message.
+	     * @param log Reference to the `Log` object that creates this stream
+	     * @param exit_after Indicates whether the program should exit after logging the message.
+	     * @param exit_code Exit code to use if the program exits after logging the message.
+	     */
+	    LogStream(const std::wstring& prefix, enum LogColor color, Log& log, bool exit_after=false, int exit_code=0)
+		: Color_(color), Log_(log), Exit_After_(exit_after), Exit_Code_(exit_code)
+	    {
+		if (exit_after) {
+		    Os_ << prefix << " (" << exit_code << ") : ";
+		} else {
+		    Os_ << prefix << ": ";
+		}
 	    }
-	}
 
-	template<typename T>
-	LogStream& operator<<(const T& value) {
-	    os_ << value;
-	    return *this;
-	}
+	    /**
+	     * @brief Appends text to current buffer
+	     *
+	     * @tparam T The type of the value to write.
+	     * @param value The value to write to the log stream.
+	     * @return A reference to the LogStream object to allow for chaining of the output
+	     */
+	    template<typename T>
+		LogStream& operator<<(const T& value) {
+		    Os_ << value;
+		    return *this;
+		}
 
-	// Define a custom std::ostream& operator for std::endl
-	void operator<<(std::ostream& (*manipulator)(std::ostream&));
+	    /**
+	     * @brief Catches std::endl, indicating to flush Os_
+	     * 
+	     * @param manipulator To catch std::endl
+	     */
+	    void operator<<(std::ostream& (*manipulator)(std::ostream&));
 
-    private:
-	std::wostringstream os_;
-	enum LogColor color_;
-	Log& log_;
-	int exit_after_;
-	int exit_code_;
+	private:
+	    std::wostringstream Os_; ///< The stream buffer used to store the log message.
+	    enum LogColor Color_; ///< The color to use for the log message.
+	    Log& Log_; ///< A reference to the `Log` object that is using this stream.
+	    int Exit_After_; ///< Indicates whether the program should exit after logging the message.
+	    int Exit_Code_; ///< The exit code to use if the program exits after logging the message.
     };
 
-    // back is most recent
-    std::deque<std::wstring> entries_;
-
-    std::filesystem::path log_path_;
-    bool log_path_set_ = false;
-
-    MenuTUI* menu_tui_;
-
-    enum LogColor color_ = LogColor::Info;
 public:
-    const size_t MAX_LINES = 20;
-
-    int NumAddedOptionsSession = 0;
-
+    /**
+     * @brief Access point to only instance of class
+     *
+     * @return Meyer's singleton
+     */
     static Log& Instance()
     {
 	static Log INSTANCE;
 	return INSTANCE;
     }
 
-    enum LogColor GetCurrentColorForMenu() {
-	return color_;
-    }
+    /**
+     * @brief Gets the current color for the menu.
+     *
+     * @return The current color for the menu.
+     */
+    enum LogColor GetCurrentColorForMenu();
 
-    void SetLogPath(std::filesystem::path log_path) {
-	log_path_ = log_path;
-	log_path_set_ = true;
-    }
+    /**
+     * @brief Sets the path to the log file.
+     *
+     * @param Log_path The path to the log file.
+     */
+    void SetLogPath(std::filesystem::path Log_path);
 
+    /**
+     * @brief Sets the MenuTUI object for the log.
+     *
+     * @param menu_tui The MenuTUI object to close when exiting and for its status bar
+     */
     void SetMenuTUI(MenuTUI* menu_tui);
 
-    void Time() {
-	// Get the current time
-	auto now = std::chrono::system_clock::now();
-	std::time_t time = std::chrono::system_clock::to_time_t(now);
+    /**
+     * @brief Outputs the current time to the log.
+     */
+    void Time();
 
-	// Convert to a std::tm object to extract the date and time
-	std::tm tm = *std::localtime(&time);
-
-	// Create a wide string with the formatted date and time
-	std::wstringstream wss;
-	wss << std::put_time(&tm, L"%Y-%m-%d %H:%M:%S");
-	std::wstring time_str = L"Time: " + wss.str();
-
-	entries_.insert(entries_.begin(), time_str);
-	NumAddedOptionsSession++;
-
-	while (entries_.size() > MAX_LINES) {
-	    entries_.pop_back();
-	    NumAddedOptionsSession--;
-	}
-    }
-
+    /**
+     * @brief Creates a LogStream object for a warning message.
+     *
+     * @return A LogStream object for a warning message.
+     */
     LogStream Warning();
+
+    /**
+     * @brief Creates a LogStream object for an error message with an exit code.
+     *
+     * @param exit_code The exit code for the error message.
+     * @return A LogStream object for an error message with an exit code.
+     */
     LogStream Error(int exit_code);
+
+    /**
+     * @brief Creates a LogStream object for an informational message.
+     *
+     * @return A LogStream object for an informational message.
+     */
     LogStream Info();
+
+    /**
+     * @brief Creates a LogStream object for a debug message.
+     *
+     * @return A LogStream object for a debug message.
+     */
     LogStream Debug();
 
-    void PrintSession() {
-	for (auto entry: entries_) {
-	    std::wcout << entry << std::endl;
-	}
-    }
+    /**
+     * @brief Prints the session to the log.
+     */
+    void PrintSession();
 
-    const std::wstring& Peek() {
-	return entries_.back();
-    }
+    /**
+     * @brief Gets the next message from the log without removing it.
+     *
+     * @return The next message from the log without removing it.
+     */
+    const std::wstring& Peek();
 
+    /**
+     * @brief Flushes the current session to the log.
+     */
     void FlushSession();
-};
 
-namespace my {
-    extern Log& log;
-}
+private:
+    std::deque<std::wstring> Entries_; ///< Stores strings of all of the flushed log entries
+
+    std::filesystem::path Log_Path_; ///< Contains path of log file
+    bool Log_Path_Set_ = false; ///< Indicates if Log_Path_ has been set
+
+    MenuTUI* Menu_TUI_ = nullptr; ///< Pointer to Menu_TUI_ to use its status bar and exit gracefully, calling menu_view's destructor
+
+    enum LogColor Color_ = LogColor::Info; ///< Indicates color of most recently flushed entry for status bar
+    const size_t MAX_LINES = 20; ///< Max number of lines of entries to be stored inside log file
+    int Num_Added_Options_Session_ = 0; ///< Number of options added in the current session
+};
