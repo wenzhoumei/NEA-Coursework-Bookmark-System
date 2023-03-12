@@ -52,6 +52,10 @@ public:
     std::unique_ptr<DirectoryRetriever> Scripts_Retriever = nullptr;
     std::unique_ptr<FileRetriever> IdentifierExtension_To_Action_Retriever = nullptr;
 
+    std::filesystem::path GetPath() const {
+	return config_directory_path_;
+    }
+
     std::filesystem::path GetLogFilePath() const {
 	return config_directory_path_/log_file_name_;
     }

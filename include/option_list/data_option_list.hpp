@@ -28,6 +28,7 @@ public:
     }
 
     bool Load() override {
+	SetLocationPath();
 	File_Retriever_ = std::make_unique<FileRetriever>(FileRetriever(Location_));
 
 	if (!std::filesystem::is_regular_file(Location_)) {

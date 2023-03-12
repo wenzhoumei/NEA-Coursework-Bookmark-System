@@ -1,6 +1,7 @@
 #pragma once
 #include "option_list.hpp"
 #include "retriever/file_retriever.hpp"
+#include "config_directory.hpp"
 
 class FileOptionList: public OptionList {
 protected:
@@ -9,6 +10,16 @@ protected:
     virtual bool Flush_() = 0; // Writes to backend
 			       // Returns true if successful else false
 
+    void SetLocationPath() {
+	std::filesystem::path parent_path = std::filesystem::path(Location_).parent_path();
+	if (std::filesystem::exists(parent_path) && std::filesystem::is_directory(parent_path)) {
+	    // If user is trying to specify a file load it
+	    Location_ = (ConfigDirectory::Instance().GetPath()/std::filesystem::path(Location_)).wstring();
+	} else {
+	    // In default option list directory
+	    Location_ = std::filesystem::path(Location_).wstring();
+	}
+    }
 public:
     using OptionList::OptionList;
 
