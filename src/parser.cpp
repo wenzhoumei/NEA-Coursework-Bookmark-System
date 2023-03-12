@@ -121,11 +121,21 @@ void Parser::SetMenuController(MenuController* menu_controller) {
     menu_controller_ = menu_controller;
 }
 
+void Parser::ReplaceAll_(std::wstring& str, const std::wstring& from, const std::wstring& to) {
+    size_t pos = 0;
+    while ((pos = str.find(from, pos)) != std::wstring::npos) {
+	str.replace(pos, from.length(), to);
+	pos += to.length();
+    }
+}
+
 int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     wchar_t action_delimiter = action[0];
     std::wstring action_identifier = action.substr(1);
 
-    my::log.Info() << L"Executing action (" << action << "), " << "data (" << data << ")" << std::endl;
+    const std::wstring config_dir_macro = L"CONFIG_DIR";
+    std::wstring processed_data = data;
+    ReplaceAll_(processed_data, config_dir_macro, Config_Directory.GetPath().wstring());
 
     switch (action_delimiter) {
 	case (DestinationAction::Delimiter):
@@ -148,9 +158,9 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 		action_at_destination = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.OptionString;
 	    }
 
-	    History.push({ action, data });
+	    History.push({ action, processed_data });
 
-	    MenuTUI menu_tui = MenuTUI(DestinationAction_String_To_Function.at(destination_action_identifier)(action_at_destination, action, data));
+	    MenuTUI menu_tui = MenuTUI(DestinationAction_String_To_Function.at(destination_action_identifier)(action_at_destination, action, processed_data));
 
 	    return menu_tui.Open();
 
@@ -158,7 +168,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	}
 
 	case (ProgramAction::Delimiter):
-	    return ProgramAction_String_To_Function.at(action_identifier)(data);
+	    return ProgramAction_String_To_Function.at(action_identifier)(processed_data);
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
@@ -172,7 +182,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	case (ScriptAction::Delimiter):
 	{
 	    // convert wstring data to string
-	    std::string data_str(data.begin(), data.end());
+	    std::string data_str(processed_data.begin(), processed_data.end());
 
 	    std::cout <<((Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\"") << std::endl;
 	    return std::system(((Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\"").c_str());

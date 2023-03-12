@@ -9,7 +9,7 @@
 class ConfigDirectory {
     const std::filesystem::path scripts_directory_name_ = "SCRIPTS";
     const std::filesystem::path identifier_extensions_file_name_ = "IDENTIFIER_EXTENSIONS";
-    const std::filesystem::path option_lists_file_name_ = "OPTION_LISTS";
+    const std::filesystem::path option_lists_dir_name_ = "OPTION_LISTS";
     const std::filesystem::path log_file_name_ = "LOG";
 
     std::filesystem::path config_directory_path_;
@@ -28,8 +28,6 @@ public:
     void Initialize(const std::filesystem::path& directory_path) {
 	config_directory_path_ = directory_path;
 
-	Log& log = Log::Instance();
-
 	// Exits if fails
 	CheckDirectory(directory_path);
 	CheckFile(GetLogFilePath());
@@ -41,11 +39,11 @@ public:
 	IdentifierExtension_To_Action_Retriever = std::make_unique<FileRetriever>(FileRetriever(GetIdentifierExtensionsFilePath()));
 
 	if (!Scripts_Retriever->Load()) {
-	    log.Error(5) << "Scripts failed to load";
+	    my::log.Error(5) << "Scripts failed to load";
 	}
 
 	if (!IdentifierExtension_To_Action_Retriever->Load()) {
-	    log.Error(5) << "Identifier extensions failed to load";
+	    my::log.Error(5) << "Identifier extensions failed to load";
 	}
     }
 
@@ -65,39 +63,35 @@ public:
     }
 
     std::filesystem::path GetOptionListsDirectoryPath() const {
-	return config_directory_path_/option_lists_file_name_;
+	return config_directory_path_/option_lists_dir_name_;
     }
 
-    std::filesystem::path GetScriptPath(std::filesystem::path script_name) const {
+    std::filesystem::path GetScriptPath(const std::filesystem::path& script_name) const {
 	return GetScriptsDirectoryPath()/script_name;
     }
 
 
-    std::filesystem::path GetOptionListPath(std::filesystem::path option_list_name) const {
-	return config_directory_path_/option_lists_file_name_/option_list_name;
+    std::filesystem::path GetOptionListPath(const std::filesystem::path& option_list_name) const {
+	return config_directory_path_/option_lists_dir_name_/option_list_name;
     }
 
     std::filesystem::path GetIdentifierExtensionsFilePath() const {
 	return config_directory_path_/identifier_extensions_file_name_;
     }
 private:
-    static void CheckDirectory(std::filesystem::path directory_path) {
-	Log& log = Log::Instance();
-
+    static void CheckDirectory(const std::filesystem::path& directory_path) {
 	if (!std::filesystem::exists(directory_path)) {
-	    log.Error(1) << "The specified directory does not exist: " << directory_path;
+	    my::log.Error(1) << "The specified directory does not exist: " << directory_path;
 	} else if (!std::filesystem::is_directory(directory_path)) {
-	    log.Error(2) << "The specified path is not a directory: " << directory_path;
+	    my::log.Error(2) << "The specified path is not a directory: " << directory_path;
 	}
     }
 
-    static void CheckFile(std::filesystem::path file_path) {
-	Log& log = Log::Instance();
-
+    static void CheckFile(const std::filesystem::path& file_path) {
 	if (!std::filesystem::exists(file_path)) {
-	    log.Error(1) << "Error: The specified file does not exist: " << file_path;
+	    my::log.Error(1) << "Error: The specified file does not exist: " << file_path;
 	} else if (!std::filesystem::is_regular_file(file_path)) {
-	    log.Error(2) << "Error: The specified path is not a regular file: " << file_path;
+	    my::log.Error(2) << "Error: The specified path is not a regular file: " << file_path;
 	}
     }
 };

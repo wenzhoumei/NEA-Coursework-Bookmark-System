@@ -10,5 +10,6 @@ protected:
 
 public:
     virtual bool Load() = 0;
+    virtual ~Retriever() {};
     const std::vector<std::wstring>& GetData() const { return data_; };
 };

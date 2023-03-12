@@ -82,6 +82,8 @@ public:
 
     std::stack<std::pair<std::wstring, std::wstring>> History;
 private:
+    void ReplaceAll_(std::wstring& str, const std::wstring& from, const std::wstring& to);
+
     size_t GetActionPos_(const std::wstring& name, size_t action_pos=std::wstring::npos, bool first_it=true) const {
 	size_t action_delimiter_pos = FindLastActionDelimiterPos_(name);
 

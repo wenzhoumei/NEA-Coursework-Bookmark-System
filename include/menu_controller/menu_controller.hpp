@@ -12,6 +12,7 @@ public:
 
     virtual void SetTitle() = 0;
 
+    virtual ~MenuController() {};
     void UpdateStatus();
 protected:
     virtual PossibleExit ProcessPossibleExit_(const wchar_t& c) = 0;

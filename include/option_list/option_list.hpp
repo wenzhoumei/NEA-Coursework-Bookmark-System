@@ -14,6 +14,7 @@ public:
     {
     }
 
+    virtual ~OptionList() {};
     virtual bool Load() = 0;
 
     struct ModifyStatus {

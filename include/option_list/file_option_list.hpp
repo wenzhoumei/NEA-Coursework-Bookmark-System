@@ -12,12 +12,13 @@ protected:
 
     void SetLocationPath() {
 	std::filesystem::path parent_path = std::filesystem::path(Location_).parent_path();
-	if (std::filesystem::exists(parent_path) && std::filesystem::is_directory(parent_path)) {
+	my::log.Debug() << Location_ << std::endl;
+	if (!parent_path.empty() && std::filesystem::exists(parent_path) && std::filesystem::is_directory(parent_path)) {
 	    // If user is trying to specify a file load it
-	    Location_ = (ConfigDirectory::Instance().GetPath()/std::filesystem::path(Location_)).wstring();
+	    Location_ = std::filesystem::path(Location_).wstring();
 	} else {
 	    // In default option list directory
-	    Location_ = std::filesystem::path(Location_).wstring();
+	    Location_ = (ConfigDirectory::Instance().GetOptionListsDirectoryPath()/std::filesystem::path(Location_)).wstring();
 	}
     }
 public:

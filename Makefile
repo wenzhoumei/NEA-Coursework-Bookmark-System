@@ -818,9 +818,9 @@ obj/bookmark_option_list.o: src/bookmark_option_list.cpp include/option_list/boo
 		include/log.hpp \
 		include/retriever/file_retriever.hpp \
 		include/retriever/retriever.hpp \
-		include/parser.hpp \
 		include/config_directory.hpp \
-		include/retriever/directory_retriever.hpp
+		include/retriever/directory_retriever.hpp \
+		include/parser.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/bookmark_option_list.o src/bookmark_option_list.cpp
 
 obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_controller/editable_menu_controller.hpp \
