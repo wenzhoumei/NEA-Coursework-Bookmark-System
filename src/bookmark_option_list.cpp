@@ -168,5 +168,4 @@ void BmkOptionList::RemoveNameInMap_(const std::wstring& name) {
     auto it = Names_To_Data_.find(name);
 
     Names_To_Data_.erase(it);
-    Options_All_.erase(std::remove(Options_All_.begin(), Options_All_.end(), name), Options_All_.end());
 }
