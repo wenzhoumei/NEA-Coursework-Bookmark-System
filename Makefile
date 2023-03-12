@@ -53,6 +53,7 @@ OBJECTS_DIR   = obj/
 ####### Files
 
 SOURCES       = src/bookmark_option_list.cpp \
+		src/config_directory.cpp \
 		src/editable_menu_controller.cpp \
 		src/log.cpp \
 		src/main.cpp \
@@ -63,6 +64,7 @@ SOURCES       = src/bookmark_option_list.cpp \
 		src/read_only_menu_controller.cpp \
 		src/scripts_directory_option_list.cpp 
 OBJECTS       = obj/bookmark_option_list.o \
+		obj/config_directory.o \
 		obj/editable_menu_controller.o \
 		obj/log.o \
 		obj/main.o \
@@ -295,6 +297,7 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		include/menu_view.hpp \
 		include/parameter_processor.hpp \
 		include/parser.hpp src/bookmark_option_list.cpp \
+		src/config_directory.cpp \
 		src/editable_menu_controller.cpp \
 		src/log.cpp \
 		src/main.cpp \
@@ -764,7 +767,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents include/config_directory.hpp include/exit_code.hpp include/log.hpp include/menu_data.hpp include/menu_tui.hpp include/menu_view.hpp include/parameter_processor.hpp include/parser.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/editable_menu_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_tui.cpp src/option_list.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/editable_menu_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_tui.cpp src/option_list.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -823,6 +826,13 @@ obj/bookmark_option_list.o: src/bookmark_option_list.cpp include/option_list/boo
 		include/parser.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/bookmark_option_list.o src/bookmark_option_list.cpp
 
+obj/config_directory.o: src/config_directory.cpp include/retriever/directory_retriever.hpp \
+		include/retriever/retriever.hpp \
+		include/retriever/file_retriever.hpp \
+		include/log.hpp \
+		include/config_directory.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/config_directory.o src/config_directory.cpp
+
 obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_controller/editable_menu_controller.hpp \
 		include/menu_controller/read_only_menu_controller.hpp \
 		include/component_controller/title_controller.hpp \
@@ -850,9 +860,9 @@ obj/main.o: src/main.cpp include/config_directory.hpp \
 		include/retriever/directory_retriever.hpp \
 		include/retriever/retriever.hpp \
 		include/retriever/file_retriever.hpp \
-		include/log.hpp \
 		include/parser.hpp \
 		include/option_list/option_list.hpp \
+		include/log.hpp \
 		include/parameter_processor.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
 
@@ -894,8 +904,8 @@ obj/parser.o: src/parser.cpp include/parser.hpp \
 		include/retriever/directory_retriever.hpp \
 		include/retriever/retriever.hpp \
 		include/retriever/file_retriever.hpp \
-		include/log.hpp \
 		include/option_list/option_list.hpp \
+		include/log.hpp \
 		include/menu_tui.hpp \
 		include/menu_data.hpp \
 		include/menu_view.hpp \

@@ -78,6 +78,8 @@ public:
     int ExecuteOptionString(const std::wstring& option_string);
     int ExecuteDataDefault(const std::wstring& option_string);
 
+    int ExecuteBookmark(const std::wstring& name, const std::wstring& data);
+
     int Execute(const std::wstring& action, const std::wstring& data);
 
     std::stack<std::pair<std::wstring, std::wstring>> History;

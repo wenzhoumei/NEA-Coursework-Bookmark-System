@@ -19,6 +19,7 @@
 const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function = {
     { L"todo", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('r')); }},
     { L"flashcard", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
+    { L"setting", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
 };
 
 const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function = {
@@ -137,6 +138,8 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     std::wstring processed_data = data;
     ReplaceAll_(processed_data, config_dir_macro, Config_Directory.GetPath().wstring());
 
+    my::log.Info() << L"Executing action(" << action << "), data(" << data << ")" << std::endl;
+
     switch (action_delimiter) {
 	case (DestinationAction::Delimiter):
 	{
@@ -172,7 +175,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
-		my::log.Error(1) << "You can't execute a menu action here";
+		my::log.Error(1) << "You can't execute a menu action here" << std::endl;
 	    } else {
 		MenuAction_String_To_Function.at(action_identifier)(menu_controller_);
 		return ExitCode::DontExit;
@@ -184,8 +187,8 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    // convert wstring data to string
 	    std::string data_str(processed_data.begin(), processed_data.end());
 
-	    std::cout <<((Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\"") << std::endl;
-	    return std::system(((Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\"").c_str());
+	    std::system(((Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\"" + " & disown").c_str());
+	    return ExitCode::Success;
 	    break;
 	}
     }

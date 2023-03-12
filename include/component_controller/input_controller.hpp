@@ -108,6 +108,19 @@ void Paste() {
 	SetText(menu_data_->SelectedName());
     }
 
+    void Autofill() {
+	if (menu_data_->Option_List->GetSearched().size() == 0) { return; }
+
+	// Check for prefix matches
+	for (size_t i: menu_data_->Option_List->GetSearched()) {
+	    std::wstring str_check_match = menu_data_->Option_List->NameAt(i);
+	    if (str_check_match.substr(0, menu_data_->Input.size()) == menu_data_->Input) {
+	    SetText(str_check_match);
+	    return;
+	}
+	}
+    }
+
     void SetTextToData() {
 	if (menu_data_->Option_List->GetSearched().size() == 0) { return; }
 

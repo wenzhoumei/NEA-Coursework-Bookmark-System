@@ -11,7 +11,21 @@ MenuController::PossibleExit EditableMenuController::ProcessPossibleExit_(const 
 
     switch (c) {
 	case KEY_ESCAPE:
-	    ret = ExitCode::Success;
+	    if (Menu_Data_.Editing == MenuData::DATA) {
+		ReadOnlyMenuController::ToggleData_();
+		SetMode_(MenuData::SEARCH);
+		Input_.SetTextToSelected();
+		ret = ExitCode::DontExit;
+	    } else if (Menu_Data_.Mode == MenuData::SEARCH) {
+		return ReadOnlyMenuController::ProcessPossibleExit_(c);
+		break;
+	    } else if (Menu_Data_.Mode == MenuData::EDIT) {
+		SetMode_(MenuData::SEARCH);
+		ret = ExitCode::DontExit;
+	    } else if (Menu_Data_.Mode == MenuData::INSERT) {
+		SetMode_(MenuData::SEARCH);
+		ret = ExitCode::DontExit;
+	    }
 	    break;
 	case KEY_ENTER:
 	case '\n':
@@ -30,6 +44,7 @@ MenuController::PossibleExit EditableMenuController::ProcessPossibleExit_(const 
 	    ret = ExitCode::DontExit;
 	    break;
 	}
+
 	default:
 	    matched = false;
     }

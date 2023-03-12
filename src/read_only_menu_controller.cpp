@@ -75,7 +75,11 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	    Cursor_Position_.Right();
 	    break;
 	case '\t':
-	    Input_.SetTextToSelected();
+	    if (Menu_Data_.Mode == MenuData::SEARCH) {
+		Input_.SetTextToSelected();
+	    } else {
+		Input_.Autofill();
+	    }
 	    break;
 	case CTRL_MASK('d'):
 	    ToggleData_();
@@ -110,8 +114,13 @@ int ReadOnlyMenuController::ExecuteSelected_() {
 	if (Menu_Data_.IsSearchListEmpty()) {
 	    chosen_input = Menu_Data_.Input;
 	    if (chosen_input == L"") { return ExitCode::DontExit; }
+	    return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), chosen_input);
 	} else {
-	    chosen_input = Menu_Data_.SelectedName();
+	    if (Menu_Data_.Option_List->IsBookmarkList()) {
+		chosen_input = Menu_Data_.SelectedData();
+	    } else {
+		chosen_input = Menu_Data_.SelectedName();
+	    }
 	}
 
 	return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), chosen_input);

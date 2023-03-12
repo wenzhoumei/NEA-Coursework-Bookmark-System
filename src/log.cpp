@@ -50,7 +50,7 @@ void Log::FlushSession() {
     std::wofstream file(log_path_, std::ios::app);
     
     // Print the deque to the end of the file
-    for (auto it = entries_.rbegin(); it != entries_.rend(); it++) {
+    for (auto it = entries_.begin(); it != entries_.end(); it++) {
         file << *it << std::endl;
     }
     
