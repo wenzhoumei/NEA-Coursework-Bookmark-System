@@ -60,6 +60,7 @@ SOURCES       = src/bookmark_option_list.cpp \
 		src/menu_controller.cpp \
 		src/menu_tui.cpp \
 		src/option_list.cpp \
+		src/parameter_processor.cpp \
 		src/parser.cpp \
 		src/read_only_menu_controller.cpp \
 		src/scripts_directory_option_list.cpp 
@@ -71,6 +72,7 @@ OBJECTS       = obj/bookmark_option_list.o \
 		obj/menu_controller.o \
 		obj/menu_tui.o \
 		obj/option_list.o \
+		obj/parameter_processor.o \
 		obj/parser.o \
 		obj/read_only_menu_controller.o \
 		obj/scripts_directory_option_list.o
@@ -304,6 +306,7 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		src/menu_controller.cpp \
 		src/menu_tui.cpp \
 		src/option_list.cpp \
+		src/parameter_processor.cpp \
 		src/parser.cpp \
 		src/read_only_menu_controller.cpp \
 		src/scripts_directory_option_list.cpp
@@ -767,7 +770,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents include/config_directory.hpp include/exit_code.hpp include/log.hpp include/menu_data.hpp include/menu_tui.hpp include/menu_view.hpp include/parameter_processor.hpp include/parser.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/editable_menu_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_tui.cpp src/option_list.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/editable_menu_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_tui.cpp src/option_list.cpp src/parameter_processor.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -898,6 +901,9 @@ obj/menu_tui.o: src/menu_tui.cpp include/menu_tui.hpp \
 obj/option_list.o: src/option_list.cpp include/option_list/option_list.hpp \
 		include/log.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/option_list.o src/option_list.cpp
+
+obj/parameter_processor.o: src/parameter_processor.cpp include/parameter_processor.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/parameter_processor.o src/parameter_processor.cpp
 
 obj/parser.o: src/parser.cpp include/parser.hpp \
 		include/config_directory.hpp \
