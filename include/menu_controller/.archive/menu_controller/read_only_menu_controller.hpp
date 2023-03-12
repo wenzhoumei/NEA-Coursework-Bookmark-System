@@ -17,7 +17,8 @@ public:
 	  Selected_Option_Position_(&menu_data),
 	  Option_List_(&menu_data, Selected_Option_Position_),
 	  Input_(&menu_data, Cursor_Position_, Option_List_)
-    { }
+    {
+    }
 
 protected:
     TitleController Title_;

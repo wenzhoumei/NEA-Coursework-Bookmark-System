@@ -3,8 +3,8 @@
 
 class ComponentController {
 public:
-    ComponentController(MenuData& menu_data)
+    ComponentController(MenuData* menu_data)
 	: menu_data_(menu_data) {}
 protected:
-    MenuData& menu_data_;
+    MenuData* menu_data_;
 };

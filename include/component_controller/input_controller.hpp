@@ -17,7 +17,7 @@
 
 class InputController: public ComponentController {
 public:
-    InputController(MenuData& menu_data, CursorPositionController& cursor_position_controller, OptionListController& options_controller): ComponentController(menu_data), Cursor_Position_Controller_(cursor_position_controller), Options_Controller_(options_controller) {}
+    InputController(MenuData* menu_data, CursorPositionController& cursor_position_controller, OptionListController& options_controller): ComponentController(menu_data), Cursor_Position_Controller_(cursor_position_controller), Options_Controller_(options_controller) {}
 
 
     /**
@@ -27,29 +27,29 @@ public:
     void AddChar(wchar_t c) {
 	if (!iswprint(c)) return;
 
-	menu_data_.Input.insert(menu_data_.Cursor_Position, 1, c);
-	menu_data_.Changed.Input = true;
+	menu_data_->Input.insert(menu_data_->Cursor_Position, 1, c);
+	menu_data_->Changed.Input = true;
 
 	Cursor_Position_Controller_.Right();
 
-	if (menu_data_.Mode == MenuData::SEARCH) {
+	if (menu_data_->Mode == MenuData::SEARCH) {
 	    Options_Controller_.Search();
 	}
     }
 
 
     /**
-     * @brief You have menu_data_.Cursor_Position as a member variable
-     * update menu_data_.Input
+     * @brief You have menu_data_->Cursor_Position as a member variable
+     * update menu_data_->Input
      */
     void Backspace() {
-	if (menu_data_.Cursor_Position == 0) return;
+	if (menu_data_->Cursor_Position == 0) return;
 
 	Cursor_Position_Controller_.Left();
-	menu_data_.Input.erase(menu_data_.Cursor_Position, 1);
-	menu_data_.Changed.Input = true;
+	menu_data_->Input.erase(menu_data_->Cursor_Position, 1);
+	menu_data_->Changed.Input = true;
 
-	if (menu_data_.Mode == MenuData::SEARCH) {
+	if (menu_data_->Mode == MenuData::SEARCH) {
 	    Options_Controller_.Search();
 	}
     }
@@ -60,12 +60,12 @@ public:
      * @param input_text is text to set it as
      */
     void SetText(std::wstring input_text) { 
-	menu_data_.Input = input_text;
+	menu_data_->Input = input_text;
 	
 	Cursor_Position_Controller_.MoveEnd();
-	menu_data_.Changed.Input = true;
+	menu_data_->Changed.Input = true;
 
-	if (menu_data_.Mode == MenuData::SEARCH) {
+	if (menu_data_->Mode == MenuData::SEARCH) {
 	    Options_Controller_.Search();
 	}
     }
@@ -81,16 +81,16 @@ void Paste() {
     if (clipboard_text.empty()) return;
 
     // Insert the clipboard text at the current cursor position
-    menu_data_.Input.insert(menu_data_.Cursor_Position, clipboard_text);
+    menu_data_->Input.insert(menu_data_->Cursor_Position, clipboard_text);
 
     // Move the cursor to the end of the inserted text
-    menu_data_.Cursor_Position += clipboard_text.size();
+    menu_data_->Cursor_Position += clipboard_text.size();
 
     // Mark input as changed
-    menu_data_.Changed.Input = true;
+    menu_data_->Changed.Input = true;
 
     // If in search mode, update search options
-    if (menu_data_.Mode == MenuData::SEARCH) {
+    if (menu_data_->Mode == MenuData::SEARCH) {
         Options_Controller_.Search();
     }
 }
@@ -103,15 +103,15 @@ void Paste() {
     }
 
     void SetTextToSelected() {
-	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
+	if (menu_data_->Option_List->GetSearched().size() == 0) { return; }
 
-	SetText(menu_data_.SelectedName());
+	SetText(menu_data_->SelectedName());
     }
 
     void SetTextToData() {
-	if (menu_data_.Option_List->GetSearched().size() == 0) { return; }
+	if (menu_data_->Option_List->GetSearched().size() == 0) { return; }
 
-	SetText(menu_data_.SelectedData());
+	SetText(menu_data_->SelectedData());
     }
 
 protected:
