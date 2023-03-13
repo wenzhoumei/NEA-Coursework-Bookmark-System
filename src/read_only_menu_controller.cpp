@@ -32,7 +32,7 @@ MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const 
 	case KEY_ESCAPE:
 	    p_e.ReturnCode = ExitCode::Success;
 	    break;
-	case CTRL_MASK('b'):
+	case CTRL_MASK('b'): ///< Go back in history
 	    if (MenuData::History.size() == 1) {
 		p_e.ReturnCode = ExitCode::DontExit;
 		my::log.Info() << "Bottom of history stack" << std::endl;

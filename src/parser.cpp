@@ -201,6 +201,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    // convert wstring data to string
 	    std::string data_str(processed_data.begin(), processed_data.end());
 
+	    my::log.Info() << "Running command: \"" << ("nohup " + (Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\" >/dev/null 2>&1" + "\"").c_str() << std::endl;
 	    std::system(("nohup " + (Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\" >/dev/null 2>&1").c_str());
 	    return ExitCode::Success;
 	}

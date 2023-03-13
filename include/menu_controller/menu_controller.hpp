@@ -2,7 +2,7 @@
 #include "menu_data.hpp"
 
 /**
- * @brief Interface that changes MenuData class
+ * @brief Abstract class that changes MenuData class
  */
 class MenuController {
 protected:
@@ -44,7 +44,7 @@ protected:
     virtual PossibleExit ProcessPossibleExit_(const wchar_t& c) = 0;
 
     /**
-     * @brief Processes special characters that correspond to a specific user action
+     * @brief Processes special characters that correspond to a specific user action that won't cause program to exit
      */
     virtual SpecialChar ProcessSpecialChars_(const wchar_t& c) = 0;
 

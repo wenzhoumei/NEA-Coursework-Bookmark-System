@@ -29,7 +29,7 @@ OptionList::ModifyStatus OptionList::Insert(size_t pos, const std::wstring& opti
 
 OptionList::ModifyStatus OptionList::Remove(size_t pos) {
     if (pos >= Options_All_.size()) {
-	Log::Instance().Info() << "Can't remove, out of range";
+	Log::Instance().Error(ExitCode::LogicError) << "Can't remove, out of range";
 	return { false, false };
     }
 
