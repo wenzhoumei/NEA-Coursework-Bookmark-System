@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <stack>
 
 #include "option_list/option_list.hpp"
 
@@ -40,13 +41,26 @@ public:
 	bool Selected = true;
 	bool Status_Log = true;
 
-	void Reset();
+	/**
+	 * @brief Set all to true
+	 */
+	void SetAll();
+
+	/**
+	 * @brief Set all to false
+	 */
+	void SetNone();
     } Changed;
 
     /**
      * @return Name which is displayed part of selected string
      */
     std::wstring SelectedName() const;
+
+    /**
+     * @return Returns option string to be executed
+     */
+    std::wstring SelectedOptionString() const;
 
     /**
      * @return Selected data

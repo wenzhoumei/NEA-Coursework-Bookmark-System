@@ -26,8 +26,8 @@ public:
     std::wstring NameAt(size_t i) const override;
     std::wstring DataAt(size_t i) const override;
 
-    bool IsBookmarkList() override { return true; }
-    bool Editable() override { return true; }
+    bool IsBookmarkList() const override { return true; }
+    bool Editable() const override { return true; }
 
 protected:
     bool Flush_() override;

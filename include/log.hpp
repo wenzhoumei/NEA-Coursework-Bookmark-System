@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <stack>
 
+#include "exit_code.hpp"
+
 /**
  * @brief Identifies color that is associated with each of the log types, which is used to create INIT_COLOR_PAIR in menu_view.hpp
  */

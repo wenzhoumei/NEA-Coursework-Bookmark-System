@@ -6,6 +6,7 @@
 #define CTRL_MASK(c) ((c) & 0x1f)
 #define KEY_ESCAPE 27
 #include <ncurses.h>
+#include "log.hpp"
 
 ReadOnlyMenuController::ReadOnlyMenuController(MenuData& menu_data)
 	: MenuController(menu_data),
@@ -31,22 +32,18 @@ MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const 
 	case KEY_ESCAPE:
 	    p_e.ReturnCode = ExitCode::Success;
 	    break;
-	case KEY_BACKSPACE:
-	case 127:  // Some systems use 127 instead of KEY_BACKSPACE
-	{
-	    p_e.ReturnCode = ExitCode::DontExit;
-	    if (Menu_Data_.Input == L"") {
-		if (MenuData::History.size() == 1) { p_e.ReturnCode = ExitCode::DontExit; }
-		else {
-		    MenuData::History.pop(); // Remove itself
-		    std::pair<std::wstring, std::wstring> last_menu = MenuData::History.top();
-		    p_e.ReturnCode = Parser::Instance().Execute(last_menu.first, last_menu.second);
-		}
+	case CTRL_MASK('b'):
+	    if (MenuData::History.size() == 1) {
+		p_e.ReturnCode = ExitCode::DontExit;
+		my::log.Info() << "Bottom of history stack" << std::endl;
 	    } else {
-		Input_.Backspace();
+		MenuData::History.pop();
+		std::pair<std::wstring, std::wstring> last_menu = MenuData::History.top();
+		MenuData::History.pop();
+
+		p_e.ReturnCode = Parser::Instance().Execute(last_menu.first, last_menu.second);
 	    }
 	    break;
-	}
 	default:
 	    p_e.Matched = false;
     }
@@ -73,6 +70,9 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	case CTRL_MASK('v'):
 	    Input_.Paste();
 	    break;
+	case CTRL_MASK('c'):
+	    Input_.Copy();
+	    break;
 	case KEY_DOWN:
 	    Selected_Option_Position_.Down();
 	    break;
@@ -84,6 +84,10 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	    break;
 	case KEY_RIGHT:
 	    Cursor_Position_.Right();
+	    break;
+	case KEY_BACKSPACE:
+	case 127:  // Some systems use 127 instead of KEY_BACKSPACE
+	    Input_.Backspace();
 	    break;
 	case '\t':
 	    if (Menu_Data_.Mode == MenuData::SEARCH) {
@@ -103,7 +107,14 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 }
 
 void ReadOnlyMenuController::ProcessDefaultChar_(const wchar_t &c) {
-    Input_.AddChar(c);
+    switch (c) {
+	case KEY_RESIZE:
+	    break;
+	default:
+	    if (iswprint(c)) {
+		Input_.AddChar(c);
+	    }
+    }
 }
 
 void ReadOnlyMenuController::ToggleData_() {
@@ -125,13 +136,11 @@ int ReadOnlyMenuController::ExecuteSelected_() {
 	if (Menu_Data_.IsSearchListEmpty()) {
 	    chosen_input = Menu_Data_.Input;
 	    if (chosen_input == L"") { return ExitCode::DontExit; }
+	    Was_Input_ = true;
 	    return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), chosen_input);
 	} else {
-	    if (Menu_Data_.Option_List->IsBookmarkList()) {
-		chosen_input = Menu_Data_.SelectedData();
-	    } else {
-		chosen_input = Menu_Data_.SelectedName();
-	    }
+	    Was_Input_ = false;
+	    chosen_input = Menu_Data_.SelectedOptionString();
 	}
 
 	return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), chosen_input);

@@ -12,21 +12,13 @@ class ReadDirectoryOptionList: public OptionList {
 public:
     using OptionList::OptionList;
 
-    bool Load() override {
-	Directory_Retriever_ = std::make_unique<DirectoryRetriever>(DirectoryRetriever(Location_));
+    bool Load() override;
 
-	if (!Directory_Retriever_->Load()) {
-	    return false;
-	}
+    bool IsBookmarkList() const override { return false; }
+    bool Editable() const override { return false; }
 
+    std::wstring DataAt(size_t i) const override {
 	std::filesystem::current_path(Location_); //setting path
-
-	Options_All_ = Directory_Retriever_->GetData();
-
-	Search(L"");
-	return true;
+	return std::filesystem::absolute(Options_All_[Options_Indexes_Searched[i]]).wstring();
     }
-
-    bool IsBookmarkList() override { return false; }
-    bool Editable() override { return false; }
 };

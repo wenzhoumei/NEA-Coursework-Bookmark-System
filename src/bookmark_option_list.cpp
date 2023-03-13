@@ -6,6 +6,7 @@
 
 #include "option_list/bookmark_option_list.hpp"
 #include "parser.hpp"
+#include "log.hpp"
 
 bool BmkOptionList::Load() {
     SetLocationPath();
@@ -40,7 +41,7 @@ bool BmkOptionList::Flush_() {
     std::wofstream file(narrow_location);
 
     if (!file) {
-	Log::Instance().Error(1) << "Unable to open file for writing: " << Location_;
+	my::log.Error(ExitCode::WriteError) << "Unable to open file for writing: " << Location_;
 	return false;
     }
 
@@ -105,7 +106,7 @@ OptionList::ModifyStatus BmkOptionList::Remove(size_t pos) {
 }
 
 OptionList::ModifyStatus BmkOptionList::Update(size_t pos, const std::wstring& new_option_string) {
-    if (pos >= Options_All_.size()) { Log::Instance().Error(9) << "Can't remove, out of range"; }
+    if (pos >= Options_All_.size()) { my::log.Error(ExitCode::LogicError) << "Can't remove, out of range"; }
 
     if (std::find(new_option_string.begin(), new_option_string.end(), (Parser::Instance().Data.Delimiter)) != new_option_string.end()) {
 	my::log.Warning() << "Invalid sequence, contains >, nothing done" << std::endl;
@@ -157,7 +158,7 @@ void BmkOptionList::SplitStringToNameAndData_(const std::wstring& option_string,
     size_t data_del_pos = option_string.find_first_of(Parser::Instance().Data.Delimiter);
     if (data_del_pos == std::wstring::npos) {
 	name = option_string;
-	data = option_string;
+	data = L"";
     } else {
 	name = option_string.substr(0, data_del_pos);
 	data = option_string.substr(data_del_pos + 1);

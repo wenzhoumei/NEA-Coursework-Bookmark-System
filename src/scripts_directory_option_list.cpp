@@ -1,6 +1,7 @@
 #include "option_list/scripts_directory_option_list.hpp"
 #include "config_directory.hpp"
 #include "parser.hpp"
+#include "log.hpp"
 
 OptionList::ModifyStatus ScriptsDirectoryOptionList::Add(const std::wstring& option_string) {
 	ModifyStatus m_s = EditableDirectoryOptionList::Add(option_string);

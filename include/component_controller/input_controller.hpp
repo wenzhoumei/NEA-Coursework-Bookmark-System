@@ -32,6 +32,11 @@ public:
     void SetText(std::wstring input_text);
 
     /**
+     * @brief Copies selected name or data to clipboard
+     */
+    void Copy();
+
+    /**
      * @brief Paste the contents of the clipboard into the input field at the current cursor position
      */
     void Paste();

@@ -55,7 +55,11 @@ OBJECTS_DIR   = obj/
 SOURCES       = src/bookmark_option_list.cpp \
 		src/config_directory.cpp \
 		src/cursor_position_controller.cpp \
+		src/data_option_list.cpp \
+		src/directory_retriever.cpp \
+		src/editable_directory_option_list.cpp \
 		src/editable_menu_controller.cpp \
+		src/file_option_list.cpp \
 		src/file_retriever.cpp \
 		src/input_controller.cpp \
 		src/log.cpp \
@@ -68,6 +72,7 @@ SOURCES       = src/bookmark_option_list.cpp \
 		src/option_list_controller.cpp \
 		src/parameter_processor.cpp \
 		src/parser.cpp \
+		src/read_directory_option_list.cpp \
 		src/read_only_menu_controller.cpp \
 		src/scripts_directory_option_list.cpp \
 		src/selected_option_position_controller.cpp \
@@ -75,7 +80,11 @@ SOURCES       = src/bookmark_option_list.cpp \
 OBJECTS       = obj/bookmark_option_list.o \
 		obj/config_directory.o \
 		obj/cursor_position_controller.o \
+		obj/data_option_list.o \
+		obj/directory_retriever.o \
+		obj/editable_directory_option_list.o \
 		obj/editable_menu_controller.o \
+		obj/file_option_list.o \
 		obj/file_retriever.o \
 		obj/input_controller.o \
 		obj/log.o \
@@ -88,6 +97,7 @@ OBJECTS       = obj/bookmark_option_list.o \
 		obj/option_list_controller.o \
 		obj/parameter_processor.o \
 		obj/parser.o \
+		obj/read_directory_option_list.o \
 		obj/read_only_menu_controller.o \
 		obj/scripts_directory_option_list.o \
 		obj/selected_option_position_controller.o \
@@ -317,7 +327,11 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		include/parser.hpp src/bookmark_option_list.cpp \
 		src/config_directory.cpp \
 		src/cursor_position_controller.cpp \
+		src/data_option_list.cpp \
+		src/directory_retriever.cpp \
+		src/editable_directory_option_list.cpp \
 		src/editable_menu_controller.cpp \
+		src/file_option_list.cpp \
 		src/file_retriever.cpp \
 		src/input_controller.cpp \
 		src/log.cpp \
@@ -330,6 +344,7 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		src/option_list_controller.cpp \
 		src/parameter_processor.cpp \
 		src/parser.cpp \
+		src/read_directory_option_list.cpp \
 		src/read_only_menu_controller.cpp \
 		src/scripts_directory_option_list.cpp \
 		src/selected_option_position_controller.cpp \
@@ -794,7 +809,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/qt/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents include/config_directory.hpp include/exit_code.hpp include/log.hpp include/menu_data.hpp include/menu_tui.hpp include/menu_view.hpp include/parameter_processor.hpp include/parser.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/cursor_position_controller.cpp src/editable_menu_controller.cpp src/file_retriever.cpp src/input_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_data.cpp src/menu_tui.cpp src/menu_view.cpp src/option_list.cpp src/option_list_controller.cpp src/parameter_processor.cpp src/parser.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp src/selected_option_position_controller.cpp src/title_controller.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/bookmark_option_list.cpp src/config_directory.cpp src/cursor_position_controller.cpp src/data_option_list.cpp src/directory_retriever.cpp src/editable_directory_option_list.cpp src/editable_menu_controller.cpp src/file_option_list.cpp src/file_retriever.cpp src/input_controller.cpp src/log.cpp src/main.cpp src/menu_controller.cpp src/menu_data.cpp src/menu_tui.cpp src/menu_view.cpp src/option_list.cpp src/option_list_controller.cpp src/parameter_processor.cpp src/parser.cpp src/read_directory_option_list.cpp src/read_only_menu_controller.cpp src/scripts_directory_option_list.cpp src/selected_option_position_controller.cpp src/title_controller.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -845,27 +860,48 @@ compiler_clean: compiler_moc_predefs_clean
 obj/bookmark_option_list.o: src/bookmark_option_list.cpp include/option_list/bookmark_option_list.hpp \
 		include/option_list/file_option_list.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/retriever/file_retriever.hpp \
 		include/retriever/retriever.hpp \
+		include/parser.hpp \
 		include/config_directory.hpp \
-		include/retriever/directory_retriever.hpp \
-		include/parser.hpp
+		include/retriever/directory_retriever.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/bookmark_option_list.o src/bookmark_option_list.cpp
 
 obj/config_directory.o: src/config_directory.cpp include/retriever/directory_retriever.hpp \
 		include/retriever/retriever.hpp \
 		include/retriever/file_retriever.hpp \
 		include/log.hpp \
+		include/exit_code.hpp \
 		include/config_directory.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/config_directory.o src/config_directory.cpp
 
 obj/cursor_position_controller.o: src/cursor_position_controller.cpp include/component_controller/cursor_position_controller.hpp \
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
-		include/option_list/option_list.hpp \
-		include/log.hpp
+		include/option_list/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/cursor_position_controller.o src/cursor_position_controller.cpp
+
+obj/data_option_list.o: src/data_option_list.cpp include/option_list/data_option_list.hpp \
+		include/option_list/file_option_list.hpp \
+		include/option_list/option_list.hpp \
+		include/retriever/file_retriever.hpp \
+		include/retriever/retriever.hpp \
+		include/config_directory.hpp \
+		include/retriever/directory_retriever.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/data_option_list.o src/data_option_list.cpp
+
+obj/directory_retriever.o: src/directory_retriever.cpp include/retriever/directory_retriever.hpp \
+		include/retriever/retriever.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/directory_retriever.o src/directory_retriever.cpp
+
+obj/editable_directory_option_list.o: src/editable_directory_option_list.cpp include/option_list/editable_directory_option_list.hpp \
+		include/option_list/option_list.hpp \
+		include/option_list/read_directory_option_list.hpp \
+		include/retriever/directory_retriever.hpp \
+		include/retriever/retriever.hpp \
+		include/log.hpp \
+		include/exit_code.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/editable_directory_option_list.o src/editable_directory_option_list.cpp
 
 obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_controller/editable_menu_controller.hpp \
 		include/menu_controller/read_only_menu_controller.hpp \
@@ -873,7 +909,6 @@ obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_co
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/component_controller/selected_option_position_controller.hpp \
 		include/component_controller/option_list_controller.hpp \
 		include/component_controller/cursor_position_controller.hpp \
@@ -881,6 +916,14 @@ obj/editable_menu_controller.o: src/editable_menu_controller.cpp include/menu_co
 		include/menu_controller/menu_controller.hpp \
 		include/exit_code.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/editable_menu_controller.o src/editable_menu_controller.cpp
+
+obj/file_option_list.o: src/file_option_list.cpp include/option_list/file_option_list.hpp \
+		include/option_list/option_list.hpp \
+		include/retriever/file_retriever.hpp \
+		include/retriever/retriever.hpp \
+		include/config_directory.hpp \
+		include/retriever/directory_retriever.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/file_option_list.o src/file_option_list.cpp
 
 obj/file_retriever.o: src/file_retriever.cpp include/retriever/file_retriever.hpp \
 		include/retriever/retriever.hpp
@@ -890,13 +933,13 @@ obj/input_controller.o: src/input_controller.cpp include/component_controller/in
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/component_controller/cursor_position_controller.hpp \
 		include/component_controller/option_list_controller.hpp \
 		include/component_controller/selected_option_position_controller.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/input_controller.o src/input_controller.cpp
 
 obj/log.o: src/log.cpp include/log.hpp \
+		include/exit_code.hpp \
 		include/menu_tui.hpp \
 		include/option_list/option_list.hpp \
 		include/menu_data.hpp \
@@ -910,25 +953,23 @@ obj/main.o: src/main.cpp include/config_directory.hpp \
 		include/retriever/file_retriever.hpp \
 		include/parser.hpp \
 		include/option_list/option_list.hpp \
+		include/parameter_processor.hpp \
 		include/log.hpp \
-		include/parameter_processor.hpp
+		include/exit_code.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o src/main.cpp
 
 obj/menu_controller.o: src/menu_controller.cpp include/menu_controller/menu_controller.hpp \
 		include/menu_data.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/exit_code.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_controller.o src/menu_controller.cpp
 
 obj/menu_data.o: src/menu_data.cpp include/menu_data.hpp \
-		include/option_list/option_list.hpp \
-		include/log.hpp
+		include/option_list/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_data.o src/menu_data.cpp
 
 obj/menu_tui.o: src/menu_tui.cpp include/menu_tui.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/menu_data.hpp \
 		include/menu_view.hpp \
 		include/menu_controller/menu_controller.hpp \
@@ -950,19 +991,18 @@ obj/menu_tui.o: src/menu_tui.cpp include/menu_tui.hpp \
 
 obj/menu_view.o: src/menu_view.cpp include/menu_view.hpp \
 		include/menu_data.hpp \
-		include/option_list/option_list.hpp \
-		include/log.hpp
+		include/option_list/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/menu_view.o src/menu_view.cpp
 
-obj/option_list.o: src/option_list.cpp include/option_list/option_list.hpp \
-		include/log.hpp
+obj/option_list.o: src/option_list.cpp include/log.hpp \
+		include/exit_code.hpp \
+		include/option_list/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/option_list.o src/option_list.cpp
 
 obj/option_list_controller.o: src/option_list_controller.cpp include/component_controller/option_list_controller.hpp \
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/component_controller/selected_option_position_controller.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/option_list_controller.o src/option_list_controller.cpp
 
@@ -975,7 +1015,6 @@ obj/parser.o: src/parser.cpp include/parser.hpp \
 		include/retriever/retriever.hpp \
 		include/retriever/file_retriever.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/menu_tui.hpp \
 		include/menu_data.hpp \
 		include/menu_view.hpp \
@@ -990,12 +1029,17 @@ obj/parser.o: src/parser.cpp include/parser.hpp \
 		include/option_list/scripts_directory_option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/parser.o src/parser.cpp
 
+obj/read_directory_option_list.o: src/read_directory_option_list.cpp include/option_list/read_directory_option_list.hpp \
+		include/option_list/option_list.hpp \
+		include/retriever/directory_retriever.hpp \
+		include/retriever/retriever.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/read_directory_option_list.o src/read_directory_option_list.cpp
+
 obj/read_only_menu_controller.o: src/read_only_menu_controller.cpp include/menu_controller/read_only_menu_controller.hpp \
 		include/component_controller/title_controller.hpp \
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/component_controller/selected_option_position_controller.hpp \
 		include/component_controller/option_list_controller.hpp \
 		include/component_controller/cursor_position_controller.hpp \
@@ -1006,12 +1050,12 @@ obj/read_only_menu_controller.o: src/read_only_menu_controller.cpp include/menu_
 		include/config_directory.hpp \
 		include/retriever/directory_retriever.hpp \
 		include/retriever/retriever.hpp \
-		include/retriever/file_retriever.hpp
+		include/retriever/file_retriever.hpp \
+		include/log.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/read_only_menu_controller.o src/read_only_menu_controller.cpp
 
 obj/scripts_directory_option_list.o: src/scripts_directory_option_list.cpp include/option_list/scripts_directory_option_list.hpp \
 		include/option_list/option_list.hpp \
-		include/log.hpp \
 		include/option_list/editable_directory_option_list.hpp \
 		include/option_list/read_directory_option_list.hpp \
 		include/retriever/directory_retriever.hpp \
@@ -1024,15 +1068,13 @@ obj/scripts_directory_option_list.o: src/scripts_directory_option_list.cpp inclu
 obj/selected_option_position_controller.o: src/selected_option_position_controller.cpp include/component_controller/selected_option_position_controller.hpp \
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
-		include/option_list/option_list.hpp \
-		include/log.hpp
+		include/option_list/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/selected_option_position_controller.o src/selected_option_position_controller.cpp
 
 obj/title_controller.o: src/title_controller.cpp include/component_controller/title_controller.hpp \
 		include/component_controller/component_controller.hpp \
 		include/menu_data.hpp \
-		include/option_list/option_list.hpp \
-		include/log.hpp
+		include/option_list/option_list.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/title_controller.o src/title_controller.cpp
 
 ####### Install

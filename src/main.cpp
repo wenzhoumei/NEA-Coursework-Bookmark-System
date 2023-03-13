@@ -8,7 +8,19 @@
 int main(int argc, char* argv[]) {
     std::locale::global(std::locale(""));
 
-    const std::filesystem::path config_file_path = "/home/wenzhou/Entries/files";
+    const char* config_file_path_cstr = std::getenv("MY_MENY_CONFIG");
+
+    std::filesystem::path config_file_path;
+    if (config_file_path_cstr == nullptr) {
+	config_file_path = std::getenv("HOME");
+	config_file_path /= ".config/my_menu";
+    } else {
+	config_file_path = std::filesystem::path(config_file_path_cstr);
+    }
+
+    if (!std::filesystem::is_directory(config_file_path)) {
+	my::log.Error(ExitCode::ConfigLoadError) << "Please add configuration directory into $HOME/.config/my_menu" << std::endl;
+    }
 
     ConfigDirectory& config_directory = ConfigDirectory::Instance();
     config_directory.Initialize(config_file_path);

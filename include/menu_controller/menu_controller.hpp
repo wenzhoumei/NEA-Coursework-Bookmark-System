@@ -25,13 +25,17 @@ public:
      */
     virtual void SetTitle() = 0;
 
-
     /**
      * @brief Used to update status bar
      *
      * Used by log class, so don't log inside this function otherwise there will be infinite recursion
      */
     void UpdateStatus();
+
+    /**
+     * @brief If last command was directly from input, which is used for menu actions in parser class
+     */
+    bool WasInput() { return Was_Input_; }
 
 protected:
     /**
@@ -50,4 +54,5 @@ protected:
     virtual void ProcessDefaultChar_(const wchar_t& c) = 0;
 
     MenuData& Menu_Data_;
+    bool Was_Input_ = false;
 };

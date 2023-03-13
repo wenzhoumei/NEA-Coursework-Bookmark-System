@@ -28,8 +28,8 @@ public:
     void Display();
 
 private:
-    size_t Previous_Cols_ = -1;
-    size_t Previous_Rows_ = -1;
+    int Previous_Cols_ = -1;
+    int Previous_Rows_ = -1;
 
     /**
      * @brief Calculates and sets some information about which options correspond to which row

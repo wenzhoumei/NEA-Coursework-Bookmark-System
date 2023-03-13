@@ -2,7 +2,7 @@
 
 #include "option_list/option_list.hpp"
 #include "menu_tui.hpp"
-#include "exit_code.hpp"
+#include "log.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
 #define KEY_ESCAPE 27
@@ -14,12 +14,22 @@
 #include "option_list/editable_directory_option_list.hpp"
 #include "option_list/read_only_data_option_list.hpp"
 #include "option_list/scripts_directory_option_list.hpp"
+#include "option_list/input_only_option_list.hpp"
 #include "menu_controller/menu_controller.hpp"
 
 const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Parser::MenuAction_String_To_Function = {
-    { L"todo", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('r')); }},
-    { L"flashcard", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
-    { L"setting", [](MenuController* menu_controller) { menu_controller->ProcessChar(CTRL_MASK('d')); }},
+    { L"todo", [](MenuController* menu_controller) {
+		if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
+		else { menu_controller->ProcessChar(CTRL_MASK('r')); }
+    }},
+    { L"flashcard", [](MenuController* menu_controller) {
+		    if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
+		    else { menu_controller->ProcessChar(CTRL_MASK('d')); }
+    }},
+    { L"setting", [](MenuController* menu_controller) {
+		    if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
+		    else { menu_controller->ProcessChar(CTRL_MASK('d')); }
+    }},
 };
 
 const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function = {
@@ -27,8 +37,9 @@ const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, s
     { L"dir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new EditableDirectoryOptionList(action_out_of_here, action_to_here, location); }},
     { L"sdir", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ScriptsDirectoryOptionList(action_out_of_here, action_to_here, location); }},
     { L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new BmkOptionList(action_out_of_here, action_to_here, location); }},
-    { L"file", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DataOptionList(action_out_of_here, action_to_here, location); }},
-    { L"rfile", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadOnlyDataOptionList(action_out_of_here, action_to_here, location); }},
+    { L"lst", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DataOptionList(action_out_of_here, action_to_here, location); }},
+    { L"rlst", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadOnlyDataOptionList(action_out_of_here, action_to_here, location); }},
+    { L"", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new InputOnlyOptionList(action_out_of_here, action_to_here, location); }},
 };
 
 bool Parser::LoadScripts() {
@@ -50,7 +61,7 @@ bool Parser::LoadIdentifierExtensions() {
 	std::wstring data;
 
 	if (pos == std::wstring::npos) {
-	    my::log.Error(1) << "Malformed option list - missing \'>\'" << std::endl;
+	    my::log.Error(ExitCode::ConfigLoadError) << "Malformed option list - missing \'>\'" << std::endl;
 	    return false;
 	} else {
 	    name = identifier_extension_to_script.substr(0, pos);
@@ -89,6 +100,7 @@ int Parser::ExecuteOptionString(const std::wstring& option_string) {
     if (data_pos == std::wstring::npos) {
 	// file.txt|text
 	data = option_string.substr(0, action_pos);
+	my::log.Debug() << action_pos << std::endl;
     } else {
 	// file.txt|text>/path/to/file.txt
 	data = option_string.substr(data_pos + 1);
@@ -101,6 +113,10 @@ int Parser::ExecuteOptionString(const std::wstring& option_string) {
 int Parser::ExecuteDataDefault(const std::wstring& option_string) {
     size_t identifier_extension_pos = option_string.find_first_of(IdentifierExtension::Delimiter);
     std::wstring identifier_extension;
+
+    if (std::filesystem::is_directory(option_string)) {
+	return Execute(std::wstring(1, DestinationAction.Delimiter) + L"dir", option_string);
+    }
 
     if (identifier_extension_pos == std::wstring::npos) {
 	identifier_extension = L"";
@@ -173,7 +189,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
-		my::log.Error(1) << "You can't execute a menu action here" << std::endl;
+		my::log.Error(ExitCode::UserError) << "You can't execute a menu action here" << std::endl;
 	    } else {
 		MenuAction_String_To_Function.at(action_identifier)(menu_controller_);
 		return ExitCode::DontExit;
@@ -187,7 +203,6 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 
 	    std::system(("nohup " + (Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\" >/dev/null 2>&1").c_str());
 	    return ExitCode::Success;
-	    break;
 	}
     }
 
@@ -259,6 +274,6 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 		break;
 	}
 
-	Log::Instance().Error(9) << "Invalid action delimiter: " << action_del;
+	my::log.Error(ExitCode::LogicError) << "Invalid action delimiter: " << action_del;
 	return false;
     }

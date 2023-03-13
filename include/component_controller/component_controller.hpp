@@ -11,7 +11,7 @@
 class ComponentController {
 public:
     ComponentController(MenuData* menu_data)
-	: menu_data_(menu_data) {}
+	: Menu_Data_(menu_data) {}
 protected:
-    MenuData* menu_data_;
+    MenuData* Menu_Data_;
 };

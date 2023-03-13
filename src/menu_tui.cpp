@@ -11,6 +11,8 @@
 #include <locale.h>
 #include <memory>
 
+#include "log.hpp"
+
 MenuTUI::~MenuTUI() {
     Close();
     delete Menu_Controller_;
