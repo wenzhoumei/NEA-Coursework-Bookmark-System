@@ -117,11 +117,11 @@ OptionList::ModifyStatus BmkOptionList::Update(size_t pos, const std::wstring& n
     auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);
     if (it != Options_All_.end()) {
 	// New name already exists, swap with the old one
-	std::swap(Options_All_[pos], *it);
+	std::swap(Options_All_[Options_Indexes_Searched_[pos]], *it);
     } else {
 	std::wstring data = DataAt(pos);
 	// Replace the option string at the specified position with the new one
-	Options_All_[pos] = new_option_string;
+	Options_All_[Options_Indexes_Searched_[pos]] = new_option_string;
 	Names_To_Data_[new_option_string] = data;
     }
 
@@ -147,7 +147,7 @@ bool BmkOptionList::Search(const std::wstring& option_string) {
 }
 
 std::wstring BmkOptionList::NameAt(size_t i) const {
-    return Options_All_.at(Options_Indexes_Searched[i]);
+    return Options_All_.at(Options_Indexes_Searched_[i]);
 }
 
 std::wstring BmkOptionList::DataAt(size_t i) const {

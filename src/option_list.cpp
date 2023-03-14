@@ -15,12 +15,15 @@ OptionList::ModifyStatus OptionList::Add(const std::wstring& option_string) {
 };
 
 OptionList::ModifyStatus OptionList::Insert(size_t pos, const std::wstring& option_string) {
-    if (pos > Options_All_.size()) {
-	Log::Instance().Info() << "Can't insert, out of range";
+    if (pos > Options_Indexes_Searched_.size()) {
+	my::log.Info() << "Can't insert, out of range" << std::endl;
 	return { false, false };
     }
 
-    if (Contains(option_string)) { return { false, false }; }
+    if (Contains(option_string)) {
+	my::log.Info() << "Can't insert, already exists" << std::endl;
+	return { false, false };
+    }
 
     // Insert at the specified position
     Options_All_.insert(Options_All_.begin() + pos, option_string);
@@ -28,31 +31,27 @@ OptionList::ModifyStatus OptionList::Insert(size_t pos, const std::wstring& opti
 }
 
 OptionList::ModifyStatus OptionList::Remove(size_t pos) {
-    if (pos >= Options_All_.size()) {
-	Log::Instance().Error(ExitCode::LogicError) << "Can't remove, out of range";
+    if (pos >= Options_Indexes_Searched_.size() || Options_Indexes_Searched_.size() == 0) {
+	my::log.Error(ExitCode::LogicError) << "Can't remove, out of range" << std::endl;
 	return { false, false };
     }
 
-    if (Options_All_.size() == 0) {
-	my::log.Info() << "Can't remove, out of range";
-	return { false, false };
-    }
+    Options_All_.erase(Options_All_.begin() + Options_Indexes_Searched_[pos]);
 
-    Options_All_.erase(Options_All_.begin() + pos);
     return { true, false };
 };
 
 OptionList::ModifyStatus OptionList::Update(size_t pos, const std::wstring& new_option_string) {
-    if (pos >= Options_All_.size()) { my::log.Error(ExitCode::LogicError) << "Can't update, out of range"; }
+    if (pos >= Options_Indexes_Searched_.size()) { my::log.Error(ExitCode::LogicError) << "Can't update, out of range" << std::endl; }
 
     // Check if the new option string already exists
     auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);
     if (it != Options_All_.end()) {
 	// New option string already exists, swap with the old one
-	std::swap(Options_All_[pos], *it);
+	std::swap(Options_All_[Options_Indexes_Searched_[pos]], *it);
     } else {
 	// Replace the option string at the specified position with the new one
-	Options_All_[pos] = new_option_string;
+	Options_All_[Options_Indexes_Searched_[pos]] = new_option_string;
     }
 
     return { true, false };
@@ -68,7 +67,7 @@ std::wstring OptionList::OptionStringAt(size_t i) const {
 }
 
 OptionList::ModifyStatus OptionList::UpdateData(size_t pos, const std::wstring& new_data) { 
-    Log::Instance().Error(9) << "This should not be called";
+    my::log.Error(ExitCode::LogicError) << "This should not be called" << std::endl;
     return { false, false }; // Doesn't matter
 };
 
@@ -83,18 +82,17 @@ bool OptionList::Contains(const std::wstring& option_string) const {
 
 bool OptionList::Search(const std::wstring& input_text)
 {
-    Options_Indexes_Searched.clear();
+    // If no tokens, return all entries
+    if (input_text == L"") {
+	Options_Indexes_Searched_.resize(Options_All_.size());
+	std::iota(Options_Indexes_Searched_.begin(), Options_Indexes_Searched_.end(), 0);
+	return true;
+    }
 
+    Options_Indexes_Searched_.clear();
     std::vector<std::wstring> input_tokens;
     const std::wstring SPLIT_DELIMITERS = L" \t.-~|,@>";
     boost::split(input_tokens, input_text, boost::is_any_of(SPLIT_DELIMITERS), boost::token_compress_on);
-
-    // If no tokens, return all entries
-    if (input_text == L"") {
-	Options_Indexes_Searched.resize(Options_All_.size());
-	std::iota(Options_Indexes_Searched.begin(), Options_Indexes_Searched.end(), 0);
-	return true;
-    }
 
     // Create vectors to store the exact, prefix, and substring matches
     std::vector<size_t> exactMatches;
@@ -135,9 +133,9 @@ bool OptionList::Search(const std::wstring& input_text)
     }
 
     // Concatenate the exact, prefix, and substring matches vectors and add them to the output array
-    Options_Indexes_Searched.insert(Options_Indexes_Searched.end(), exactMatches.begin(), exactMatches.end());
-    Options_Indexes_Searched.insert(Options_Indexes_Searched.end(), prefixMatches.begin(), prefixMatches.end());
-    Options_Indexes_Searched.insert(Options_Indexes_Searched.end(), substringMatches.begin(), substringMatches.end());
+    Options_Indexes_Searched_.insert(Options_Indexes_Searched_.end(), exactMatches.begin(), exactMatches.end());
+    Options_Indexes_Searched_.insert(Options_Indexes_Searched_.end(), prefixMatches.begin(), prefixMatches.end());
+    Options_Indexes_Searched_.insert(Options_Indexes_Searched_.end(), substringMatches.begin(), substringMatches.end());
 
     return true;
 }

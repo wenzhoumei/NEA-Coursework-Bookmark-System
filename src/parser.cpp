@@ -22,6 +22,13 @@ const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Par
 		if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
 		else { menu_controller->ProcessChar(CTRL_MASK('r')); }
     }},
+    { L"scratchpad", [](MenuController* menu_controller) {
+		if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
+		else {
+		    menu_controller->ProcessChar(CTRL_MASK('d'));
+		    menu_controller->ProcessChar(CTRL_MASK('e'));
+		}
+    }},
     { L"flashcard", [](MenuController* menu_controller) {
 		    if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
 		    else { menu_controller->ProcessChar(CTRL_MASK('d')); }

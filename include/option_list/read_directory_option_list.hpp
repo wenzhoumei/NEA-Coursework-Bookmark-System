@@ -25,7 +25,7 @@ public:
      */
     std::wstring DataAt(size_t i) const override {
 	std::filesystem::current_path(Location_); //setting path
-	return std::filesystem::absolute(Options_All_[Options_Indexes_Searched[i]]).wstring();
+	return std::filesystem::absolute(Options_All_[Options_Indexes_Searched_[i]]).wstring();
     }
 
     bool IsBookmarkList() const override { return false; }

@@ -73,6 +73,9 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	case CTRL_MASK('c'):
 	    Input_.Copy();
 	    break;
+	case CTRL_MASK('q'):
+	    Input_.Clear();
+	    break;
 	case KEY_DOWN:
 	    Selected_Option_Position_.Down();
 	    break;

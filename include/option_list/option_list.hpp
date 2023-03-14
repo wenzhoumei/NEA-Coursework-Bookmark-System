@@ -26,14 +26,14 @@ public:
     /**
      * @brief Adds string to end of menu
      *
-     * @param option_string Option string to add
+     * @param pos Position inside Options_Indexes_Searched_ to add it at
      */
     virtual ModifyStatus Add(const std::wstring& option_string);
 
     /**
      * @brief Function that will be binded to Enter in Insert mode, inserts current input text at pos, shifting all later entries down
      *
-     * @param pos Position to insert it at
+     * @param pos Position inside Options_Indexes_Searched_ to insert it at
      * @param option_string Option string to insert
      */
     virtual ModifyStatus Insert(size_t pos, const std::wstring& option_string);
@@ -41,14 +41,14 @@ public:
     /**
      * @brief Removes option at if it exists
      *
-     * @param pos Position of option string to remove
+     * @param pos Position inside Options_Indexes_Searched_ to remove it at
      */
     virtual ModifyStatus Remove(size_t pos);
 
     /**
      * @brief Changes option at position pos to new_option_string, if new_option_string exists, swaps these two options
      *
-     * @param pos Position to update it at
+     * @param pos Position inside Options_Indexes_Searched_ to update it at
      * @param new_option_string Option string to update to
      */
     virtual ModifyStatus Update(size_t pos, const std::wstring& new_option_string);
@@ -56,7 +56,7 @@ public:
     /**
      * @brief Changes data at position pos to new_data
      *
-     * @param pos Position to update it at
+     * @param pos Position inside Options_Indexes_Searched_ to update it at
      * @param option_string Data to update to
      */
     virtual ModifyStatus UpdateData(size_t pos, const std::wstring& new_data);
@@ -70,7 +70,7 @@ public:
     virtual bool Contains(const std::wstring& option_string) const;
 
     /**
-     * @brief Updates Options_Indexes_Searched with matching exact, prefix and substring matches in that priority
+     * @brief Updates Options_Indexes_Searched_ with matching exact, prefix and substring matches in that priority
      *
      * @param option_string Option string to check
      * @return Does it contain option string
@@ -80,30 +80,30 @@ public:
     /**
      * @brief Gets vector containing indexes of all found strings from Search
      */
-    const std::vector<int>& GetSearched() { return Options_Indexes_Searched; }
+    const std::vector<int>& GetSearched() { return Options_Indexes_Searched_; }
 
     /**
      * @brief Gets size of vector containing indexes of all found strings from Search
      */
-    size_t SearchedSize() { return Options_Indexes_Searched.size(); }
+    size_t SearchedSize() { return Options_Indexes_Searched_.size(); }
 
     /**
-     * @brief Gets option string at a certain index in Options_All_ std::vector
+     * @brief Gets option string pointed to by Options_Indexes_Searched_
      */
     virtual std::wstring OptionStringAt(size_t i) const;
 
     /**
-     * @brief Gets name at a certain index in Options_All_ std::vector
+     * @brief Gets name pointed to by Options_Indexes_Searched_
      */
     virtual std::wstring NameAt(size_t i) const {
-	return Options_All_[Options_Indexes_Searched[i]];
+	return Options_All_[Options_Indexes_Searched_[i]];
     }
 
     /**
-     * @brief Gets data at a certain index in Options_All_ std::vector
+     * @brief Gets data pointed to by Options_Indexes_Searched_
      */
     virtual std::wstring DataAt(size_t i) const {
-	return Options_All_[Options_Indexes_Searched[i]];
+	return Options_All_[Options_Indexes_Searched_[i]];
     }
 
     /**
@@ -133,7 +133,7 @@ public:
 
 protected:
     std::vector<std::wstring> Options_All_; ///< A list of all the options
-    std::vector<int> Options_Indexes_Searched; ///< A list of all options after a Search
+    std::vector<int> Options_Indexes_Searched_; ///< A list of all options after a Search
     std::wstring Action_Out_Of_Here_; ///< Action that executes on selected/inputted option
     std::wstring Action_To_Here_; ///< Destination action that got here
     std::wstring Location_; ///< File/directory/other that the list of values was found
