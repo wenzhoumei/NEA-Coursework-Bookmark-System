@@ -72,6 +72,7 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	    break;
 	case CTRL_MASK('c'):
 	    Input_.Copy();
+	    Menu_Data_.SelectedMode = MenuData::NAME;
 	    break;
 	case CTRL_MASK('q'):
 	    Input_.Clear();
@@ -122,8 +123,8 @@ void ReadOnlyMenuController::ProcessDefaultChar_(const wchar_t &c) {
 
 void ReadOnlyMenuController::ToggleData_() {
     if (Menu_Data_.Option_List->IsBookmarkList()) {
-	if (Menu_Data_.Editing == MenuData::DATA) { Menu_Data_.Editing = MenuData::NAME; }
-	else { Menu_Data_.Editing = MenuData::DATA; }
+	if (Menu_Data_.SelectedMode == MenuData::DATA) { Menu_Data_.SelectedMode = MenuData::NAME; }
+	else { Menu_Data_.SelectedMode = MenuData::DATA; }
     } else {
 	my::log.Info() << "Not a bookmark list" << std::endl;
     }

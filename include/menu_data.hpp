@@ -23,7 +23,7 @@ public:
     std::wstring Input = L""; ///> String in input box
     size_t Cursor_Position = 0;
 
-    enum Editing { NAME, DATA } Editing = NAME;
+    enum SelectedMode { NAME, DATA } SelectedMode = NAME;
     enum Mode { SEARCH, INSERT, EDIT } Mode = SEARCH;
 
     std::unique_ptr<OptionList> Option_List; ///> Initializer of menu data, defines functionality of menu

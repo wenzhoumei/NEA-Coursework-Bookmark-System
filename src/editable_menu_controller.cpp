@@ -11,7 +11,7 @@ MenuController::PossibleExit EditableMenuController::ProcessPossibleExit_(const 
 
     switch (c) {
 	case KEY_ESCAPE:
-	    if (Menu_Data_.Editing == MenuData::DATA) {
+	    if (Menu_Data_.SelectedMode == MenuData::DATA) {
 		ReadOnlyMenuController::ToggleData_();
 		SetMode_(MenuData::SEARCH);
 		Input_.SetTextToSelected();
@@ -80,7 +80,7 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 void EditableMenuController::SetMode_(enum MenuData::Mode m) {
     if (m == MenuData::EDIT) {
 	Menu_Data_.Mode = m;
-	if (Menu_Data_.Editing == MenuData::NAME) {
+	if (Menu_Data_.SelectedMode == MenuData::NAME) {
 	    Input_.SetTextToSelected();
 	} else {
 	    Input_.SetTextToData();
