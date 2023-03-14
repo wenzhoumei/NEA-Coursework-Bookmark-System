@@ -9,6 +9,7 @@
 #include <fstream>
 #include <algorithm>
 #include <stack>
+#include <queue>
 
 #include "exit_code.hpp"
 
@@ -24,6 +25,32 @@ enum LogColor {
     Normal = 5, //
 };
 
+template <typename T, int size, typename container=std::deque<T>>
+class FixedLengthQueue : public std::queue<T, container> {
+public:
+    void push(const T& value) {
+        if (this->size() == size) {
+           this->c.pop_front();
+        }
+        std::queue<T, container>::push(value);
+    }
+
+    typename container::iterator begin() {
+        return this->c.begin();
+    }
+
+    typename container::iterator end() {
+        return this->c.end();
+    }
+
+    typename container::const_iterator begin() const {
+        return this->c.begin();
+    }
+
+    typename container::const_iterator end() const {
+        return this->c.end();
+    }
+};
 
 class Log;
 namespace my {
@@ -51,7 +78,7 @@ class Log {
     class LogStream {
 	public:
 	    /**
-	     * @param prefix The prefix that identifies to the user the type of log message.
+	     * @param prefix The prefix that identifies to the user the type of log message, "" if no prefix
 	     * @param color The color to use for the log message.
 	     * @param log Reference to the `Log` object that creates this stream
 	     * @param exit_after Indicates whether the program should exit after logging the message.
@@ -122,6 +149,13 @@ public:
     void SetLogPath(std::filesystem::path log_path);
 
     /**
+     * @brief Sets the path to the history file.
+     *
+     * @param history_path The path to the history file.
+     */
+    void SetHistoryPath(std::filesystem::path history_path);
+
+    /**
      * @brief Sets the MenuTUI object for the log.
      *
      * @param menu_tui The MenuTUI object to close when exiting and for its status bar
@@ -162,6 +196,12 @@ public:
      */
     LogStream Debug();
 
+				       
+    /**
+     * @brief Adds to command to history and flushes
+     */
+    void History(std::wstring option_string);
+
     /**
      * @brief Prints the session to the log.
      */
@@ -184,10 +224,16 @@ private:
 
     std::filesystem::path Log_Path_; ///< Contains path of log file
     bool Log_Path_Set_ = false; ///< Indicates if Log_Path_ has been set
+				
+    std::filesystem::path History_Path_; ///< Contains path of history file
+    bool History_Path_Set_ = false; ///< Indicates if History_File_ has been set
+    static const size_t MAX_HISTORY_LINES_ = 5; ///< Max number of lines of entries to be stored inside log file
+
+    FixedLengthQueue<std::wstring, MAX_HISTORY_LINES_> History_; ///< Stores strings of all of the flushed log entries
 
     MenuTUI* Menu_TUI_ = nullptr; ///< Pointer to Menu_TUI_ to use its status bar and exit gracefully, calling menu_view's destructor
 
     enum LogColor Color_ = LogColor::Info; ///< Indicates color of most recently flushed entry for status bar
-    const size_t MAX_LINES = 20; ///< Max number of lines of entries to be stored inside log file
+    const size_t MAX_LOG_LINES_ = 20; ///< Max number of lines of entries to be stored inside log file
     int Num_Added_Options_Session_ = 0; ///< Number of options added in the current session
 };

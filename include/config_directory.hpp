@@ -12,6 +12,7 @@ class ConfigDirectory {
     const std::filesystem::path IDENTIFIER_EXTENSIONS_FILE_NAME_ = "IDENTIFIER_EXTENSIONS";
     const std::filesystem::path OPTION_LISTS_DIR_NAME_ = "OPTION_LISTS";
     const std::filesystem::path LOG_FILE_NAME_ = "LOG";
+    const std::filesystem::path HISTORY_FILE_NAME_ = "HISTORY";
 
     std::filesystem::path Config_Directory_Path_;
 
@@ -64,6 +65,10 @@ public:
      */
     std::filesystem::path GetIdentifierExtensionsFilePath() const;
 
+    /**
+     * @return Path of history file
+     */
+    std::filesystem::path GetHistoryFilePath() const;
 private:
     /**
      * @brief Checks if directory is valid, exits if not

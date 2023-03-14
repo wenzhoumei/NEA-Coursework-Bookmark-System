@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
 
     const char* config_file_path_cstr = std::getenv("MY_MENY_CONFIG");
 
+    // Get config directory name
     std::filesystem::path config_file_path;
     if (config_file_path_cstr == nullptr) {
 	config_file_path = std::getenv("HOME");
@@ -29,6 +30,7 @@ int main(int argc, char* argv[]) {
 
     my::log.Time();
     my::log.SetLogPath(config_directory.GetLogFilePath());
+    my::log.SetHistoryPath(config_directory.GetHistoryFilePath());
 
     Parser& parser = Parser::Instance();
 

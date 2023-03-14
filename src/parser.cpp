@@ -87,6 +87,7 @@ bool Parser::LoadIdentifierExtensions() {
 }
 
 int Parser::ExecuteOptionString(const std::wstring& option_string) {
+    my::log.History(option_string);
     std::wstring data;
     size_t data_pos = option_string.find_first_of(Data::Delimiter);
 
@@ -135,7 +136,11 @@ int Parser::ExecuteDataDefault(const std::wstring& option_string) {
     if (IdentifierExtension_To_Action_.contains(identifier_extension)) {
 	action = IdentifierExtension_To_Action_[identifier_extension];
     } else {
-	action = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.Nothing;
+	if (IdentifierExtension_To_Action_.contains(L"")) {
+	    action = IdentifierExtension_To_Action_[L""];
+	} else {
+	    action = std::wstring(1, ProgramAction::Delimiter) + ProgramAction.Nothing;
+	}
     }
 
     return Execute(action, option_string);

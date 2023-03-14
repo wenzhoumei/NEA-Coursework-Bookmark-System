@@ -11,6 +11,7 @@ void ConfigDirectory::Initialize(const std::filesystem::path& directory_path) {
     // Exits if fails
     CheckDirectory_(directory_path);
     CheckFile_(GetLogFilePath());
+    CheckFile_(GetHistoryFilePath());
     CheckDirectory_(GetScriptsDirectoryPath());
     CheckDirectory_(GetOptionListsDirectoryPath());
     CheckFile_(GetIdentifierExtensionsFilePath());
@@ -45,6 +46,10 @@ std::filesystem::path ConfigDirectory::GetOptionListsDirectoryPath() const {
 
 std::filesystem::path ConfigDirectory::GetIdentifierExtensionsFilePath() const {
     return Config_Directory_Path_/IDENTIFIER_EXTENSIONS_FILE_NAME_;
+}
+
+std::filesystem::path ConfigDirectory::GetHistoryFilePath() const {
+    return Config_Directory_Path_/HISTORY_FILE_NAME_;
 }
 
 void ConfigDirectory::CheckDirectory_(const std::filesystem::path& directory_path) {

@@ -77,6 +77,36 @@ Log::LogStream Log::Debug() {
     return LogStream(L"Debug", LogColor::Debug, *this);
 }
 
+void Log::SetHistoryPath(std::filesystem::path history_path) {
+    History_Path_ = history_path;
+    History_Path_Set_ = true;
+}
+
+void Log::History(std::wstring option_string) {
+    // Add the option_string to the history queue
+    History_.push(option_string);
+
+    // If the history path is not set, exit early
+    if (!History_Path_Set_) {
+        return;
+    }
+
+    // Open the history file for writing
+    std::wofstream history_file(History_Path_);
+    if (!history_file) {
+        // Unable to open the file, handle the error
+        return;
+    }
+
+    // Write the contents of the history queue to the file
+    for (const auto& entry : History_) {
+        history_file << entry << std::endl;
+    }
+
+    // Close the history file
+    history_file.close();
+}
+
 void Log::FlushSession() {
     if (!Log_Path_Set_) { return; }
 
@@ -95,22 +125,22 @@ void Log::FlushSession() {
 
     // Remove oldest entries if the file has more than 200 lines
     std::wifstream infile(Log_Path_);
-    int lineCount = 0;
+    int line_count = 0;
     std::wstring line;
     while (getline(infile, line)) {
-	lineCount++;
+	line_count++;
     }
     infile.close();
-    int excessLines = lineCount - MAX_LINES;
-    if (excessLines > 0) {
+    int excess_lines = line_count - MAX_LOG_LINES_;
+    if (excess_lines > 0) {
 	// Open the file in read mode
 	std::wifstream infile2(Log_Path_);
 	// Create a temporary file to store the trimmed contents
 	std::wofstream outfile("temp.txt");
-	int linesRemoved = 0;
+	int lines_removed = 0;
 	while (getline(infile2, line)) {
-	    if (linesRemoved < excessLines) {
-		linesRemoved++;
+	    if (lines_removed < excess_lines) {
+		lines_removed++;
 		continue;
 	    }
 	    outfile << line << std::endl;
