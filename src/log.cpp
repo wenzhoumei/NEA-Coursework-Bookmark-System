@@ -146,7 +146,7 @@ void Log::Flush_(const std::filesystem::path& path, const std::deque<std::wstrin
         while (getline(infile2, line)) {
             if (lines_removed < excess_lines) {
                 lines_removed++;
-                continue;
+                break;
             }
             outfile << line << std::endl;
         }
