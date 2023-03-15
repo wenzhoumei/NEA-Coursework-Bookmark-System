@@ -22,7 +22,7 @@ MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const 
     MenuController::PossibleExit p_e { true, ExitCode::LogicError };
 
     switch (c) {
-	case CTRL_MASK(KEY_ENTER):
+	case CTRL_MASK('n'):
 	    p_e.ReturnCode = ExecuteInput_();
 	    break;
 	case KEY_ENTER:
@@ -70,8 +70,13 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	case CTRL_MASK('v'):
 	    Input_.Paste();
 	    break;
-	case CTRL_MASK('c'):
-	    Input_.Copy();
+	case CTRL_MASK('c'): // Copy operation to copy name/data depending on which one
+	    Input_.Copy(Menu_Data_.SelectedMode == MenuData::NAME ? Menu_Data_.SelectedName(): Menu_Data_.SelectedData());
+	    Menu_Data_.SelectedMode = MenuData::NAME;
+	    break;
+	case CTRL_MASK('x'): // Cut operation to move option string
+	    Input_.Copy(Menu_Data_.SelectedOptionString());
+	    Option_List_.Remove();
 	    Menu_Data_.SelectedMode = MenuData::NAME;
 	    break;
 	case CTRL_MASK('q'):
@@ -132,7 +137,7 @@ void ReadOnlyMenuController::ToggleData_() {
 
 int ReadOnlyMenuController::ExecuteInput_() {
     if (Menu_Data_.Input == L"") { return ExitCode::DontExit; }
-    return Parser::Instance().Execute(Menu_Data_.Option_List->GetActionOutOfHere(), Menu_Data_.Input);
+    return Parser::Instance().Execute(std::wstring(1, Parser::Instance().ProgramAction.Delimiter) + Parser::Instance().ProgramAction.OptionString, Menu_Data_.Input);
 }
 
 int ReadOnlyMenuController::ExecuteSelected_() {

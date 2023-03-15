@@ -4,7 +4,7 @@
 #include "option_list_controller.hpp"
 
 /**
- * @brief Contains functions that correspond to actions that directly modify input text
+ * @brief Contains functions that correspond to actions that directly interact with input text
  *
  * Each time input text is modified, option list is searched if on search mode
  */
@@ -29,12 +29,12 @@ public:
      * @brief Sets text in input box
      * @param input_text is text to set it as
      */
-    void SetText(std::wstring input_text);
+    void SetText(const std::wstring& input_text);
 
     /**
      * @brief Copies selected name or data to clipboard
      */
-    void Copy();
+    void Copy(const std::wstring& text_to_copy);
 
     /**
      * @brief Paste the contents of the clipboard into the input field at the current cursor position

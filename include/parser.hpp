@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include "config_directory.hpp"
+#include "log.hpp"
 
 #include "option_list/option_list.hpp"
 
@@ -66,7 +67,7 @@ public:
     } MenuAction;
 
     const std::unordered_map<std::wstring, std::function<int(std::wstring)>> ProgramAction_String_To_Function {
-	{ ProgramAction.Nothing, [](std::wstring data) { std::cout << "hello :)" << std::endl; return 0; }},
+	{ ProgramAction.Nothing, [](std::wstring data) { my::log.Info() << "Nothing done, no default script found" << std::endl; return ExitCode::DontExit; }},
 	{ ProgramAction.Echo, [](std::wstring data) { std::wcout << data << std::endl; return 0; }},
 	{ ProgramAction.OptionString, [this](std::wstring data) { return ExecuteOptionString(data); }},
     };

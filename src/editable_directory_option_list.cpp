@@ -38,11 +38,16 @@ OptionList::ModifyStatus EditableDirectoryOptionList::Insert(size_t pos, const s
 
 OptionList::ModifyStatus EditableDirectoryOptionList::Remove(size_t pos)  {
     if (Options_All_.size() == 0) {
-	my::log.Info() << "Can't remove, out of range";
+	my::log.Info() << "Can't remove, out of range" << std::endl;
 	return { false, false };
     }
 
     std::filesystem::path path = std::filesystem::path(Location_)/std::filesystem::path(Options_All_[pos]);
+
+    if (std::filesystem::is_directory(path)) {
+	my::log.Info() << "Can't remove, directory not empty" << std::endl;
+	return { false, false };
+    }
 
     ModifyStatus m_s = OptionList::Remove(pos);
 

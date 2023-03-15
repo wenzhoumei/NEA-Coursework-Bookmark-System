@@ -25,33 +25,6 @@ enum LogColor {
     Normal = 5, //
 };
 
-template <typename T, int size, typename container=std::deque<T>>
-class FixedLengthQueue : public std::queue<T, container> {
-public:
-    void push(const T& value) {
-        if (this->size() == size) {
-           this->c.pop_front();
-        }
-        std::queue<T, container>::push(value);
-    }
-
-    typename container::iterator begin() {
-        return this->c.begin();
-    }
-
-    typename container::iterator end() {
-        return this->c.end();
-    }
-
-    typename container::const_iterator begin() const {
-        return this->c.begin();
-    }
-
-    typename container::const_iterator end() const {
-        return this->c.end();
-    }
-};
-
 class Log;
 namespace my {
     extern Log& log; ///< More compact way of referencing instance of singleton
@@ -220,20 +193,21 @@ public:
     void FlushSession();
 
 private:
-    std::deque<std::wstring> Entries_; ///< Stores strings of all of the flushed log entries
+    void Flush_(const std::filesystem::path& path, const std::deque<std::wstring>& entries, int max_lines);
 
+    std::deque<std::wstring> Entries_; ///< Stores strings of all of the flushed log entries
+				       
     std::filesystem::path Log_Path_; ///< Contains path of log file
     bool Log_Path_Set_ = false; ///< Indicates if Log_Path_ has been set
+    std::deque<std::wstring> History_; ///< Stores strings of all of the flushed log entries
+    const size_t MAX_LOG_LINES_ = 20; ///< Max number of lines of entries to be stored inside log file
 				
     std::filesystem::path History_Path_; ///< Contains path of history file
     bool History_Path_Set_ = false; ///< Indicates if History_File_ has been set
     static const size_t MAX_HISTORY_LINES_ = 5; ///< Max number of lines of entries to be stored inside log file
 
-    FixedLengthQueue<std::wstring, MAX_HISTORY_LINES_> History_; ///< Stores strings of all of the flushed log entries
-
     MenuTUI* Menu_TUI_ = nullptr; ///< Pointer to Menu_TUI_ to use its status bar and exit gracefully, calling menu_view's destructor
 
     enum LogColor Color_ = LogColor::Info; ///< Indicates color of most recently flushed entry for status bar
-    const size_t MAX_LOG_LINES_ = 20; ///< Max number of lines of entries to be stored inside log file
     int Num_Added_Options_Session_ = 0; ///< Number of options added in the current session
 };

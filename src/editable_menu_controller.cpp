@@ -79,6 +79,10 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 
 void EditableMenuController::SetMode_(enum MenuData::Mode m) {
     if (m == MenuData::EDIT) {
+	if (Menu_Data_.IsSearchListEmpty()) {
+	    SetMode_(MenuData::INSERT);
+	    return;
+	}
 	Menu_Data_.Mode = m;
 	if (Menu_Data_.SelectedMode == MenuData::NAME) {
 	    Input_.SetTextToSelected();

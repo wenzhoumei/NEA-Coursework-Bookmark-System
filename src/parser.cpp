@@ -37,6 +37,10 @@ const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Par
 		    if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
 		    else { menu_controller->ProcessChar(CTRL_MASK('d')); }
     }},
+    { L"toggle", [](MenuController* menu_controller) {
+		    if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
+		    else { menu_controller->ProcessChar(CTRL_MASK('d')); }
+    }},
 };
 
 const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> Parser::DestinationAction_String_To_Function = {

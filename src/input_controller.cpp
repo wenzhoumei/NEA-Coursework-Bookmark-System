@@ -45,7 +45,7 @@ void InputController::Backspace() {
     }
 }
 
-void InputController::SetText(std::wstring input_text) { 
+void InputController::SetText(const std::wstring& input_text) { 
     Menu_Data_->Input = input_text;
 
     Cursor_Position_Controller_.MoveEnd();
@@ -56,7 +56,7 @@ void InputController::SetText(std::wstring input_text) {
     }
 }
 
-void InputController::Copy() {
+void InputController::Copy(const std::wstring& text_to_copy) {
     if (Menu_Data_->IsSearchListEmpty()) { return; }
     FILE* pipe = popen("xclip -sel clip", "w");
     if (!pipe) {
@@ -64,8 +64,7 @@ void InputController::Copy() {
         return;
     }
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring text = Menu_Data_->SelectedMode == MenuData::NAME ? Menu_Data_->SelectedName(): Menu_Data_->SelectedData();
-    std::string utf8_text = converter.to_bytes(text);
+    std::string utf8_text = converter.to_bytes(text_to_copy);
     std::fwrite(utf8_text.c_str(), sizeof(char), utf8_text.size(), pipe);
     pclose(pipe);
 }

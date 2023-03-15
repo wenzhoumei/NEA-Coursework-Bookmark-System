@@ -83,8 +83,8 @@ void Log::SetHistoryPath(std::filesystem::path history_path) {
 }
 
 void Log::History(std::wstring option_string) {
-    // Add the option_string to the history queue
-    History_.push(option_string);
+    // Add the option_string to end of History deque
+    History_.push_back(option_string);
 
     // If the history path is not set, exit early
     if (!History_Path_Set_) {
@@ -98,7 +98,7 @@ void Log::History(std::wstring option_string) {
         return;
     }
 
-    // Write the contents of the history queue to the file
+    // Write the contents of the history deque to the file
     for (const auto& entry : History_) {
         history_file << entry << std::endl;
     }
@@ -108,48 +108,53 @@ void Log::History(std::wstring option_string) {
 }
 
 void Log::FlushSession() {
-    if (!Log_Path_Set_) { return; }
+    Flush_(Log_Path_, Entries_, MAX_LOG_LINES_); 
+    Flush_(History_Path_, History_, MAX_HISTORY_LINES_); 
+}
+
+void Log::Flush_(const std::filesystem::path& path, const std::deque<std::wstring>& entries, const int max_lines) {
+    if (path.empty()) { return; }
 
     PrintSession();
 
     // Open the file in append mode
-    std::wofstream file(Log_Path_, std::ios::app);
+    std::wofstream file(path, std::ios::app);
 
     // Print the deque to the end of the file
-    for (auto it = Entries_.begin(); it != Entries_.end(); it++) {
-	file << *it << std::endl;
+    for (auto it = entries.begin(); it != entries.end(); it++) {
+        file << *it << std::endl;
     }
 
     // Close the file
     file.close();
 
-    // Remove oldest entries if the file has more than 200 lines
-    std::wifstream infile(Log_Path_);
+    // Remove oldest entries if the file has more than max_lines
+    std::wifstream infile(path);
     int line_count = 0;
     std::wstring line;
     while (getline(infile, line)) {
-	line_count++;
+        line_count++;
     }
     infile.close();
-    int excess_lines = line_count - MAX_LOG_LINES_;
+    int excess_lines = line_count - max_lines;
     if (excess_lines > 0) {
-	// Open the file in read mode
-	std::wifstream infile2(Log_Path_);
-	// Create a temporary file to store the trimmed contents
-	std::wofstream outfile("temp.txt");
-	int lines_removed = 0;
-	while (getline(infile2, line)) {
-	    if (lines_removed < excess_lines) {
-		lines_removed++;
-		continue;
-	    }
-	    outfile << line << std::endl;
-	}
-	infile2.close();
-	outfile.close();
-	// Replace the original file with the trimmed version
-	remove(Log_Path_.c_str());
-	rename("temp.txt", Log_Path_.c_str());
+        // Open the file in read mode
+        std::wifstream infile2(path);
+        // Create a temporary file to store the trimmed contents
+        std::wofstream outfile("temp.txt");
+        int lines_removed = 0;
+        while (getline(infile2, line)) {
+            if (lines_removed < excess_lines) {
+                lines_removed++;
+                continue;
+            }
+            outfile << line << std::endl;
+        }
+        infile2.close();
+        outfile.close();
+        // Replace the original file with the trimmed version
+        remove(path.c_str());
+        rename("temp.txt", path.c_str());
     }
 }
 
