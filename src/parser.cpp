@@ -22,6 +22,10 @@ const std::unordered_map<std::wstring, std::function<void(MenuController*)>> Par
 		if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
 		else { menu_controller->ProcessChar(CTRL_MASK('r')); }
     }},
+    { L"tmp", [](MenuController* menu_controller) {
+		if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
+		else { menu_controller->ProcessChar(CTRL_MASK('r')); }
+    }},
     { L"scratchpad", [](MenuController* menu_controller) {
 		if (menu_controller->WasInput()) { menu_controller->ProcessChar(CTRL_MASK('a')); }
 		else {
@@ -112,7 +116,6 @@ int Parser::ExecuteOptionString(const std::wstring& option_string) {
     if (data_pos == std::wstring::npos) {
 	// file.txt|text
 	data = option_string.substr(0, action_pos);
-	my::log.Debug() << action_pos << std::endl;
     } else {
 	// file.txt|text>/path/to/file.txt
 	data = option_string.substr(data_pos + 1);

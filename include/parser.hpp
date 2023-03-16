@@ -67,7 +67,7 @@ public:
     } MenuAction;
 
     const std::unordered_map<std::wstring, std::function<int(std::wstring)>> ProgramAction_String_To_Function {
-	{ ProgramAction.Nothing, [](std::wstring data) { my::log.Info() << "Nothing done, no default script found" << std::endl; return ExitCode::DontExit; }},
+	{ ProgramAction.Nothing, [](std::wstring data) { my::log.Info() << "Nothing done, no default script found"; return ExitCode::DontExit; }},
 	{ ProgramAction.Echo, [](std::wstring data) { std::wcout << data << std::endl; return 0; }},
 	{ ProgramAction.OptionString, [this](std::wstring data) { return ExecuteOptionString(data); }},
     };

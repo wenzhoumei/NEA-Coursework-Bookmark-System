@@ -137,21 +137,21 @@ void Log::Flush_(const std::filesystem::path& path, const std::deque<std::wstrin
     }
     infile.close();
     int excess_lines = line_count - max_lines;
+
     if (excess_lines > 0) {
         // Open the file in read mode
         std::wifstream infile2(path);
         // Create a temporary file to store the trimmed contents
         std::wofstream outfile("temp.txt");
-        int lines_removed = 0;
-        while (getline(infile2, line)) {
-            if (lines_removed < excess_lines) {
-                lines_removed++;
-                break;
-            }
+
+	for (int i = excess_lines; i > 0; i--) { getline(infile2, line); }
+
+        for (int i = 0; i < max_lines; i++) {
+	    getline(infile2, line);
+
             outfile << line << std::endl;
         }
-        infile2.close();
-        outfile.close();
+
         // Replace the original file with the trimmed version
         remove(path.c_str());
         rename("temp.txt", path.c_str());
