@@ -58,6 +58,12 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 
     switch (c) {
 	case CTRL_MASK('a'):
+	    if (Menu_Data_.Input == L"") {
+		Menu_Data_.Selected_Option_Position = Menu_Data_.Option_List->SearchedSize();
+		SetMode_(MenuData::INSERT);
+		break;
+	    }
+
 	    Option_List_.Add();
 	    break;
 	case CTRL_MASK('r'):
@@ -79,10 +85,13 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 
 void EditableMenuController::SetMode_(enum MenuData::Mode m) {
     if (m == MenuData::EDIT) {
+	if (Menu_Data_.Mode != MenuData::SEARCH) { return; }
+
 	if (Menu_Data_.IsSearchListEmpty()) {
 	    SetMode_(MenuData::INSERT);
 	    return;
 	}
+
 	Menu_Data_.Mode = m;
 	if (Menu_Data_.SelectedMode == MenuData::NAME) {
 	    Input_.SetTextToSelected();
@@ -90,6 +99,8 @@ void EditableMenuController::SetMode_(enum MenuData::Mode m) {
 	    Input_.SetTextToData();
 	}
     } else if (m == MenuData::INSERT) {
+	if (Menu_Data_.Mode != MenuData::SEARCH) { return; }
+
 	Menu_Data_.Mode = m;
 	Input_.Clear();
 	Menu_Data_.Changed.Option_List = true;

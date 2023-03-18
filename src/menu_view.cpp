@@ -165,8 +165,6 @@ void MenuView::UpdateSelectedOption_(int cols) {
     enum MenuData::Mode mode = Menu_Data_.Mode;
     enum MenuData::SelectedMode editing = Menu_Data_.SelectedMode;
 
-    std::wstring new_name = Menu_Data_.SelectedName();
-
     int attr_selected = A_REVERSE;
     if (mode == MenuData::INSERT) {
 	mvprintw(new_position, 0, "%-*ls", cols, Menu_Data_.Input.c_str());
@@ -175,8 +173,10 @@ void MenuView::UpdateSelectedOption_(int cols) {
 	if (editing == MenuData::DATA) { attr_selected |= A_BOLD; } // Show data as bold 
     } else if (mode == MenuData::SEARCH) {
 	if (editing == MenuData::NAME) {
+	    std::wstring new_name = Menu_Data_.SelectedName();
 	    if (!Menu_Data_.Changed.Option_List) { (mvprintw(Previous_Selected_Position_, 0, "%-*ls", cols, Previous_Selected_Name_.c_str())); }
 	    mvprintw(new_position, 0, "%-*ls", cols, new_name.c_str());
+	    Previous_Selected_Name_ = new_name;
 	} else {
 	    mvprintw(new_position, 0, "%-*ls", cols, Menu_Data_.SelectedData().c_str());
 	    attr_selected |= A_BOLD; // Show data as bold
@@ -187,7 +187,6 @@ void MenuView::UpdateSelectedOption_(int cols) {
     mvchgat(new_position, 0, cols, attr_selected, 0, NULL);
 
     Previous_Selected_Position_ = new_position;
-    Previous_Selected_Name_ = new_name;
 }
 
 void MenuView::UpdateCursorPosition_(int cols) {

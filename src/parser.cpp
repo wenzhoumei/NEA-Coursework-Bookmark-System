@@ -54,7 +54,7 @@ const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, s
     { L"bmk", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new BmkOptionList(action_out_of_here, action_to_here, location); }},
     { L"lst", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new DataOptionList(action_out_of_here, action_to_here, location); }},
     { L"rlst", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new ReadOnlyDataOptionList(action_out_of_here, action_to_here, location); }},
-    { L"", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new InputOnlyOptionList(action_out_of_here, action_to_here, location); }},
+    { L"input", [](std::wstring action_out_of_here, std::wstring action_to_here, std::wstring location) { return new InputOnlyOptionList(action_out_of_here, action_to_here, location); }},
 };
 
 bool Parser::LoadScripts() {
