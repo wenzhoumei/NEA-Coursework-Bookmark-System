@@ -56,7 +56,6 @@ void Log::LogStream::operator<<(std::ostream& (*manipulator)(std::ostream&)) {
 
     if (Exit_After_) {
 	if (menu_opened) { Log_.Menu_TUI_->Close(); }
-	Log_.FlushSession();
 	exit(Exit_Code_);
     }
 }
@@ -108,14 +107,14 @@ void Log::History(std::wstring option_string) {
 }
 
 void Log::FlushSession() {
+    PrintSession();
+
     Flush_(Log_Path_, Entries_, MAX_LOG_LINES_); 
     Flush_(History_Path_, History_, MAX_HISTORY_LINES_); 
 }
 
 void Log::Flush_(const std::filesystem::path& path, const std::deque<std::wstring>& entries, const int max_lines) {
     if (path.empty()) { return; }
-
-    PrintSession();
 
     // Open the file in append mode
     std::wofstream file(path, std::ios::app);

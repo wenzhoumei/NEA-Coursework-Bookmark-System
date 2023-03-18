@@ -55,6 +55,10 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
     bool matched = true;
 
     switch (c) {
+	case CTRL_MASK('w'):
+	    my::log.Info() << "Setting workspace to " << Menu_Data_.Option_List->GetLocation() << Menu_Data_.Option_List->GetActionToHere() << std::endl;
+	    ConfigDirectory::Instance().SetWorkspaceFileContents(Menu_Data_.Option_List->GetActionToHere() + L">" + Menu_Data_.Option_List->GetLocation());
+	    break;
 	case CTRL_MASK('a'):
 	    my::log.Info() << "Can't add, read only" << std::endl;
 	    break;
@@ -106,7 +110,7 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	    }
 	    break;
 	case CTRL_MASK('d'):
-	    ToggleData_();
+	    if (Menu_Data_.Mode == Menu_Data_.SEARCH) { ToggleData_(); }
 	    break;
 	default:
 	    matched = false;

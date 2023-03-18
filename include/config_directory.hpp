@@ -13,6 +13,7 @@ class ConfigDirectory {
     const std::filesystem::path OPTION_LISTS_DIR_NAME_ = "OPTION_LISTS";
     const std::filesystem::path LOG_FILE_NAME_ = "LOG";
     const std::filesystem::path HISTORY_FILE_NAME_ = "HISTORY";
+    const std::filesystem::path WORKSPACE_FILE_NAME_ = "WORKSPACE";
 
     std::filesystem::path Config_Directory_Path_;
 
@@ -69,6 +70,22 @@ public:
      * @return Path of history file
      */
     std::filesystem::path GetHistoryFilePath() const;
+
+    /**
+     * @return Path of workspace file
+     */
+    std::filesystem::path GetWorkspaceFilePath() const;
+
+    /**
+     * @return Contents of workspace file
+     */
+    std::wstring GetWorkspaceFileContents() const;
+
+    /**
+     * @param option_string String to rewrite file's contents to
+     * @return If it was successful
+     */
+    bool SetWorkspaceFileContents(const std::wstring& option_string) const;
 private:
     /**
      * @brief Checks if directory is valid, exits if not

@@ -12,6 +12,7 @@ void ConfigDirectory::Initialize(const std::filesystem::path& directory_path) {
     CheckDirectory_(directory_path);
     CheckFile_(GetLogFilePath());
     CheckFile_(GetHistoryFilePath());
+    CheckFile_(GetWorkspaceFilePath());
     CheckDirectory_(GetScriptsDirectoryPath());
     CheckDirectory_(GetOptionListsDirectoryPath());
     CheckFile_(GetIdentifierExtensionsFilePath());
@@ -50,6 +51,42 @@ std::filesystem::path ConfigDirectory::GetIdentifierExtensionsFilePath() const {
 
 std::filesystem::path ConfigDirectory::GetHistoryFilePath() const {
     return Config_Directory_Path_/HISTORY_FILE_NAME_;
+}
+
+std::filesystem::path ConfigDirectory::GetWorkspaceFilePath() const {
+    return Config_Directory_Path_/WORKSPACE_FILE_NAME_;
+}
+
+std::wstring ConfigDirectory::GetWorkspaceFileContents() const {
+    // Get the path to the workspace file
+    std::filesystem::path workspaceFilePath = GetWorkspaceFilePath();
+
+    // Read the contents of the file
+    std::wifstream file(workspaceFilePath);
+    if (file.is_open()) {
+        // Read the file contents without newline characters
+        std::wstring content;
+        std::getline(file, content, L'\0');
+	file.close();
+
+        return content;
+    }
+    return L"";
+}
+
+bool ConfigDirectory::SetWorkspaceFileContents(const std::wstring& option_string) const {
+    // Get the path to the workspace file
+    std::filesystem::path workspaceFilePath = GetWorkspaceFilePath();
+
+    // Write the new contents to the file
+    std::wofstream file(workspaceFilePath);
+    if (file.is_open()) {
+        file << option_string;
+	file.close();
+        return true;
+    }
+
+    return false;
 }
 
 void ConfigDirectory::CheckDirectory_(const std::filesystem::path& directory_path) {

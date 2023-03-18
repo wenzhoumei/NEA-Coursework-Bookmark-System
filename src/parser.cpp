@@ -229,71 +229,71 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     return -1;
 }
 
-    size_t Parser::GetActionPos_(const std::wstring& name, size_t action_pos, bool first_it) const {
-	size_t action_delimiter_pos = FindLastActionDelimiterPos_(name);
+size_t Parser::GetActionPos_(const std::wstring& name, size_t action_pos, bool first_it) const {
+    size_t action_delimiter_pos = FindLastActionDelimiterPos_(name);
 
-	if (action_delimiter_pos == std::wstring::npos) {
-	    return action_pos;
+    if (action_delimiter_pos == std::wstring::npos) {
+	return action_pos;
+    } else {
+	wchar_t action_delimiter = name[action_delimiter_pos];
+	std::wstring action_identifier = name.substr(action_delimiter_pos + 1);
+
+	if (IsValidAction_(action_delimiter, action_identifier)) {
+	    std::wstring identifier = name.substr(0, action_delimiter_pos);
+	    if (action_delimiter != DestinationAction.Delimiter && !first_it) { return action_pos; }
+	    else { return GetActionPos_(identifier, action_delimiter_pos, false); }
 	} else {
-	    wchar_t action_delimiter = name[action_delimiter_pos];
-	    std::wstring action_identifier = name.substr(action_delimiter_pos + 1);
+	    return action_pos;
+	}
+    }
+}
 
-	    if (IsValidAction_(action_delimiter, action_identifier)) {
-		std::wstring identifier = name.substr(0, action_delimiter_pos);
-		if (action_delimiter != DestinationAction.Delimiter && !first_it) { return action_pos; }
-		else { return GetActionPos_(identifier, action_delimiter_pos, false); }
-	    } else {
-		return action_pos;
-	    }
+size_t Parser::FindLastActionDelimiterPos_(const std::wstring& str) const {
+    size_t pos = str.length();
+    while (pos > 0) {
+	--pos;
+	if (IsActionDelimiter_(str[pos])) {
+	    return pos;
 	}
     }
 
-    size_t Parser::FindLastActionDelimiterPos_(const std::wstring& str) const {
-	size_t pos = str.length();
-	while (pos > 0) {
-	    --pos;
-	    if (IsActionDelimiter_(str[pos])) {
-		return pos;
-	    }
+    return std::wstring::npos;
+}
+
+size_t Parser::FindFirstActionDelimiterPos_(const std::wstring& str) const {
+    size_t pos = 0;
+    while (pos < str.length()) {
+	if (IsActionDelimiter_(str[pos])) {
+	    return pos;
 	}
-	
-	return std::wstring::npos;
+	++pos;
+    }
+    return std::wstring::npos;
+}
+
+bool Parser::IsActionDelimiter_(const wchar_t& c) const {
+    return c == ProgramAction.Delimiter
+	|| c == DestinationAction.Delimiter
+	|| c == ScriptAction.Delimiter
+	|| c == MenuAction.Delimiter;
+}
+
+bool Parser::IsValidAction_(const wchar_t& action_del, const std::wstring& action_identifier) const {
+    switch (action_del) {
+	case (DestinationAction::Delimiter):
+	    return DestinationAction_String_To_Function.contains(action_identifier);
+	    break;
+	case (ProgramAction::Delimiter):
+	    return ProgramAction_String_To_Function.contains(action_identifier);
+	    break;
+	case (ScriptAction::Delimiter):
+	    return Scripts_.contains(action_identifier);
+	    break;
+	case (MenuAction::Delimiter):
+	    return MenuAction_String_To_Function.contains(action_identifier);
+	    break;
     }
 
-    size_t Parser::FindFirstActionDelimiterPos_(const std::wstring& str) const {
-	size_t pos = 0;
-	while (pos < str.length()) {
-	    if (IsActionDelimiter_(str[pos])) {
-		return pos;
-	    }
-	    ++pos;
-	}
-	return std::wstring::npos;
-    }
-
-    bool Parser::IsActionDelimiter_(const wchar_t& c) const {
-	return c == ProgramAction.Delimiter
-	    || c == DestinationAction.Delimiter
-	    || c == ScriptAction.Delimiter
-	    || c == MenuAction.Delimiter;
-    }
-
-    bool Parser::IsValidAction_(const wchar_t& action_del, const std::wstring& action_identifier) const {
-	switch (action_del) {
-	    case (DestinationAction::Delimiter):
-		return DestinationAction_String_To_Function.contains(action_identifier);
-		break;
-	    case (ProgramAction::Delimiter):
-		return ProgramAction_String_To_Function.contains(action_identifier);
-		break;
-	    case (ScriptAction::Delimiter):
-		return Scripts_.contains(action_identifier);
-		break;
-	    case (MenuAction::Delimiter):
-		return MenuAction_String_To_Function.contains(action_identifier);
-		break;
-	}
-
-	my::log.Error(ExitCode::LogicError) << "Invalid action delimiter: " << action_del;
-	return false;
-    }
+    my::log.Error(ExitCode::LogicError) << "Invalid action delimiter: " << action_del;
+    return false;
+}
