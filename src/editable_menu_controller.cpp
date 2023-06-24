@@ -70,7 +70,13 @@ MenuController::SpecialChar EditableMenuController::ProcessSpecialChars_(const w
 	    Option_List_.Remove();
 	    break;
 	case CTRL_MASK('k'):
-	    SetMode_(MenuData::INSERT);
+	    if (Menu_Data_.Input == L"") {
+		SetMode_(MenuData::INSERT);
+		break;
+	    }
+
+	    Menu_Data_.Selected_Option_Position = 0;
+	    Option_List_.Insert();
 	    break;
 	case CTRL_MASK('e'):
 	    SetMode_(MenuData::EDIT);

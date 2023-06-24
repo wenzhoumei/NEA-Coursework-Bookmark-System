@@ -38,14 +38,14 @@ OptionList::ModifyStatus EditableDirectoryOptionList::Insert(size_t pos, const s
 
 OptionList::ModifyStatus EditableDirectoryOptionList::Remove(size_t pos)  {
     if (Options_All_.size() == 0) {
-	my::log.Info() << "Can't remove, out of range" << std::endl;
+	my::log.Write(L"Info: Can't remove, out of range");
 	return { false, false };
     }
 
     std::filesystem::path path = std::filesystem::path(Location_)/std::filesystem::path(Options_All_[pos]);
 
     if (std::filesystem::is_directory(path)) {
-	my::log.Info() << "Can't remove, directory not empty" << std::endl;
+	my::log.Write(L"Info: Can't remove, directory not empty");
 	return { false, false };
     }
 
@@ -65,7 +65,7 @@ OptionList::ModifyStatus EditableDirectoryOptionList::Remove(size_t pos)  {
 
 OptionList::ModifyStatus EditableDirectoryOptionList::Update(size_t pos, const std::wstring& new_option_string)  {
 
-    if (pos >= Options_All_.size() || Options_All_.size() == 0) { my::log.Error(ExitCode::LogicError) << "Can't update, out of range"; }
+    if (pos >= Options_All_.size() || Options_All_.size() == 0) { my::log.Write(L"LogicError: Can't update, out of range"); }
 
     // Check if the new option string already exists
     auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);

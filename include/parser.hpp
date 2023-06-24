@@ -6,6 +6,7 @@
 #include <functional>
 #include "config_directory.hpp"
 #include "log.hpp"
+#include "exit_code.hpp"
 
 #include "option_list/option_list.hpp"
 
@@ -67,9 +68,9 @@ public:
     } MenuAction;
 
     const std::unordered_map<std::wstring, std::function<int(std::wstring)>> ProgramAction_String_To_Function {
-	{ ProgramAction.Nothing, [](std::wstring data) { my::log.Info() << "Nothing done, no default script found"; return ExitCode::DontExit; }},
-	{ ProgramAction.Echo, [](std::wstring data) { std::wcout << data << std::endl; return 0; }},
+	{ ProgramAction.Echo, [](std::wstring data) { my::log.Write(L"Echoing: " + data); return 0; }},
 	{ ProgramAction.OptionString, [this](std::wstring data) { return ExecuteOptionString(data); }},
+	{ ProgramAction.Nothing, [](std::wstring data) { my::log.Write(L"Info: Nothing executed"); return ExitCode::DontExit; }},
     };
 
     static const std::unordered_map<std::wstring, std::function<OptionList*(std::wstring, std::wstring, std::wstring)>> DestinationAction_String_To_Function;

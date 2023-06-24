@@ -15,12 +15,12 @@ void OptionListController::Add() {
     OptionList::ModifyStatus m_s = Menu_Data_->Option_List->Add(Menu_Data_->Input);
 
     if (m_s.BackendError) {
-	my::log.Error(ExitCode::WriteError) << "Backend failed to add string" << std::endl;
+	my::log.Write(L"WriteError: Backend failed to add string");
     } else if (m_s.Modified) {
 	Search();
-	my::log.Info() << "Added string: " << Menu_Data_->Input << std::endl;
+	my::log.Write(L"Info: Added string: " + Menu_Data_->Input);
     } else {
-	my::log.Info() << "String already exists: " << Menu_Data_->Input << std::endl;
+	my::log.Write(L"Info: String already exists: " + Menu_Data_->Input);
     }
 }
 
@@ -29,12 +29,12 @@ void OptionListController::Remove() {
     OptionList::ModifyStatus m_s = Menu_Data_->Option_List->Remove(Menu_Data_->Selected_Option_Position);
 
     if (m_s.BackendError) {
-	my::log.Error(ExitCode::WriteError) << "Backend failed to remove string" << std::endl;
+	my::log.Write(L"WriteError: Backend failed to remove string");
     } else if (m_s.Modified) {
-	my::log.Info() << "Removed string: " << name << std::endl;
+	my::log.Write(L"Info: Removed string: " + name);
 	Search();
     } else {
-	my::log.Info() << "Can't remove string, probably doesn't exists: " << name << std::endl;
+	my::log.Write(L"Info: Can't remove string, probably doesn't exists: " + name);
     }
 }
 
@@ -47,7 +47,7 @@ void OptionListController::Update() {
     }
 
     if (m_s.BackendError) {
-	my::log.Error(ExitCode::WriteError) << "Update backend error" << std::endl;
+	my::log.Write(L"WriteError: Update backend error");
     } else if (m_s.Modified) {
 	Search();
     }
@@ -57,7 +57,7 @@ void OptionListController::Insert() {
     OptionList::ModifyStatus m_s = Menu_Data_->Option_List->Insert(Menu_Data_->Selected_Option_Position, Menu_Data_->Input);
 
     if (m_s.BackendError) {
-	my::log.Error(ExitCode::WriteError) << "Insertion backend error" << std::endl;
+	my::log.Write(L"WriteError: Insertion backend error");
     } else if (m_s.Modified) {
 	Search();
     }

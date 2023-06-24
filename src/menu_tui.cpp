@@ -20,29 +20,25 @@ MenuTUI::~MenuTUI() {
 
 void MenuTUI::Close() {
     Menu_View_.Close();
-    my::log.SetMenuTUI(nullptr);
     Parser::Instance().SetMenuController(nullptr);
 }
 
 MenuTUI::MenuTUI(OptionList* option_list)
     : Menu_Data_(option_list), Menu_View_(Menu_Data_)
 {
-    my::log.SetMenuTUI(nullptr);
-
     if (!Menu_Data_.Option_List->Load()) {
 	Menu_Controller_ = new ReadOnlyMenuController(Menu_Data_);
-	my::log.Warning() << "Option list failed to load, opening read only" << std::endl;
+	my::log.Write(L"Warning: Option list failed to load, opening read only");
     } else if (!Menu_Data_.Option_List->Editable()) {
 	Menu_Controller_ = new ReadOnlyMenuController(Menu_Data_);
-	my::log.Info() << "Loaded option list successfully" << std::endl;
+	my::log.Write(L"Info: Loaded option list successfully");
     } else {
 	Menu_Controller_ = new EditableMenuController(Menu_Data_);
-	my::log.Info() << "Loaded option list successfully" << std::endl;
+	my::log.Write(L"Info: Loaded option list successfully");
     }
 
     Menu_Data_.History.push({ Menu_Data_.Option_List->GetActionToHere(), Menu_Data_.Option_List->GetLocation() });
 
-    my::log.SetMenuTUI(this);
     Parser::Instance().SetMenuController(Menu_Controller_);
 }
 

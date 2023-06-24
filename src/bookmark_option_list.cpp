@@ -41,7 +41,7 @@ bool BmkOptionList::Flush_() {
     std::wofstream file(narrow_location);
 
     if (!file) {
-	my::log.Error(ExitCode::WriteError) << "Unable to open file for writing: " << Location_;
+	my::log.Write(L"Unable to open file for writing: " + Location_);
 	return false;
     }
 
@@ -106,10 +106,10 @@ OptionList::ModifyStatus BmkOptionList::Remove(size_t pos) {
 }
 
 OptionList::ModifyStatus BmkOptionList::Update(size_t pos, const std::wstring& new_option_string) {
-    if (pos >= Options_All_.size()) { my::log.Error(ExitCode::LogicError) << "Can't remove, out of range"; }
+    if (pos >= Options_All_.size()) { my::log.Write(L"LogicError: Can't remove, out of range"); }
 
     if (std::find(new_option_string.begin(), new_option_string.end(), (Parser::Instance().Data.Delimiter)) != new_option_string.end()) {
-	my::log.Warning() << "Invalid sequence, contains >, nothing done" << std::endl;
+	my::log.Write(L"Warning: Invalid sequence, contains >, nothing done");
 	return { false, false };
     }
 

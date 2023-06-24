@@ -16,12 +16,12 @@ OptionList::ModifyStatus OptionList::Add(const std::wstring& option_string) {
 
 OptionList::ModifyStatus OptionList::Insert(size_t pos, const std::wstring& option_string) {
     if (pos > Options_Indexes_Searched_.size()) {
-	my::log.Info() << "Can't insert, out of range" << std::endl;
+	my::log.Write(L"Info: Can't insert, out of range");
 	return { false, false };
     }
 
     if (Contains(option_string)) {
-	my::log.Info() << "Can't insert, already exists" << std::endl;
+	my::log.Write(L"Info: Can't insert, already exists");
 	return { false, false };
     }
 
@@ -32,7 +32,7 @@ OptionList::ModifyStatus OptionList::Insert(size_t pos, const std::wstring& opti
 
 OptionList::ModifyStatus OptionList::Remove(size_t pos) {
     if (pos >= Options_Indexes_Searched_.size() || Options_Indexes_Searched_.size() == 0) {
-	my::log.Error(ExitCode::LogicError) << "Can't remove, out of range" << std::endl;
+	my::log.Write(L"LogicError: Can't remove, out of range");
 	return { false, false };
     }
 
@@ -42,7 +42,7 @@ OptionList::ModifyStatus OptionList::Remove(size_t pos) {
 };
 
 OptionList::ModifyStatus OptionList::Update(size_t pos, const std::wstring& new_option_string) {
-    if (pos >= Options_Indexes_Searched_.size()) { my::log.Error(ExitCode::LogicError) << "Can't update, out of range" << std::endl; }
+    if (pos >= Options_Indexes_Searched_.size()) { my::log.Write(L"LogicError: Can't update, out of range"); }
 
     // Check if the new option string already exists
     auto it = std::find(Options_All_.begin(), Options_All_.end(), new_option_string);
@@ -67,7 +67,7 @@ std::wstring OptionList::OptionStringAt(size_t i) const {
 }
 
 OptionList::ModifyStatus OptionList::UpdateData(size_t pos, const std::wstring& new_data) { 
-    my::log.Error(ExitCode::LogicError) << "This should not be called" << std::endl;
+    my::log.Write(L"LogicError: This should not be called");
     return { false, false }; // Doesn't matter
 };
 

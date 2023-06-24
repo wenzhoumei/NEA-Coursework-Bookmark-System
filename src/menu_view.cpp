@@ -12,11 +12,13 @@ void MenuView::Initialize() {
     set_escdelay(0);
     start_color();
 
+    /*
     init_pair(LogColor::Info, COLOR_BLACK, COLOR_WHITE);
     init_pair(LogColor::Warning, COLOR_BLACK, COLOR_YELLOW);
     init_pair(LogColor::Error, COLOR_BLACK, COLOR_RED);
     init_pair(LogColor::Debug, COLOR_BLACK, COLOR_GREEN);
     init_pair(LogColor::Normal, COLOR_WHITE, COLOR_BLACK);
+    */
 
     raw();
     keypad(stdscr, TRUE);
@@ -201,7 +203,9 @@ void MenuView::UpdateCursorPosition_(int cols) {
 }
 
 void MenuView::UpdateStatusLog_(int rows, int cols) {
+    /*
     attron(COLOR_PAIR(my::log.GetCurrentColorForMenu()));
     mvprintw(rows - 1, 0, "%-*ls", cols, my::log.Peek().c_str());
     attron(COLOR_PAIR(LogColor::Normal));
+    */
 }

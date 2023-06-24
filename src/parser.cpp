@@ -3,6 +3,7 @@
 #include "option_list/option_list.hpp"
 #include "menu_tui.hpp"
 #include "log.hpp"
+#include "exit_code.hpp"
 
 #define CTRL_MASK(c) ((c) & 0x1f)
 #define KEY_ESCAPE 27
@@ -76,14 +77,14 @@ bool Parser::LoadIdentifierExtensions() {
 	std::wstring data;
 
 	if (pos == std::wstring::npos) {
-	    my::log.Error(ExitCode::ConfigLoadError) << "Malformed option list - missing \'>\'" << std::endl;
+	    my::log.Write(L"ConfigLoadError: Malformed option list - missing \'>\'");
 	    return false;
 	} else {
 	    name = identifier_extension_to_script.substr(0, pos);
 	    data = identifier_extension_to_script.substr(pos + 1);
 
 	    if (GetActionPos_(data) != 0) {
-		my::log.Warning() << "Ignoring invalid action assigned to file extension: " << data << std::endl;
+		my::log.Write(L"Ignoring invalid action assigned to file extension: " + data);
 	    } else {
 		IdentifierExtension_To_Action_[name] = data;
 	    }
@@ -95,7 +96,8 @@ bool Parser::LoadIdentifierExtensions() {
 }
 
 int Parser::ExecuteOptionString(const std::wstring& option_string) {
-    my::log.History(option_string);
+    //my::history.Write(option_string);
+
     std::wstring data;
     size_t data_pos = option_string.find_first_of(Data::Delimiter);
 
@@ -173,7 +175,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
     std::wstring processed_data = data;
     ReplaceAll_(processed_data, config_dir_macro, Config_Directory.GetPath().wstring());
 
-    my::log.Info() << L"Executing action(" << action << "), data(" << data << ")" << std::endl;
+    my::log.Write(L"Info: Executing action(" + action + L"), data(" + data + L")");
 
     switch (action_delimiter) {
 	case (DestinationAction::Delimiter):
@@ -208,7 +210,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    break;
 	case (MenuAction::Delimiter):
 	    if (menu_controller_ == nullptr) {
-		my::log.Error(ExitCode::UserError) << "You can't execute a menu action here" << std::endl;
+		my::log.Write(L"UserError: You can't execute a menu action here");
 	    } else {
 		MenuAction_String_To_Function.at(action_identifier)(menu_controller_);
 		return ExitCode::DontExit;
@@ -220,7 +222,7 @@ int Parser::Execute(const std::wstring& action, const std::wstring& data) {
 	    // convert wstring data to string
 	    std::string data_str(processed_data.begin(), processed_data.end());
 
-	    my::log.Info() << "Running command: \"" << ("nohup " + (Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\" >/dev/null 2>&1" + "\"").c_str() << std::endl;
+	    my::log.Write(L"Running command: \"" + (L"nohup " + (Config_Directory.GetScriptsDirectoryPath() / action_identifier).wstring() + L" " + L"\"" + processed_data + L"\" >/dev/null 2>&1"));
 	    std::system(("nohup " + (Config_Directory.GetScriptsDirectoryPath() / action_identifier).string() + " " + "\"" + data_str + "\" >/dev/null 2>&1").c_str());
 	    return ExitCode::Success;
 	}
@@ -294,6 +296,6 @@ bool Parser::IsValidAction_(const wchar_t& action_del, const std::wstring& actio
 	    break;
     }
 
-    my::log.Error(ExitCode::LogicError) << "Invalid action delimiter: " << action_del;
+    my::log.Write(L"LogicError: Invalid action delimiter: " + std::wstring(action_del, 1));
     return false;
 }

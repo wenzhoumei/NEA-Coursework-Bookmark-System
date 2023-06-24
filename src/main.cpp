@@ -20,24 +20,23 @@ int main(int argc, char* argv[]) {
     }
 
     if (!std::filesystem::is_directory(config_file_path)) {
-	my::log.Error(ExitCode::ConfigLoadError) << "Please add configuration directory into $HOME/.config/my_menu" << std::endl;
+	my::log.Write(L"ConfigLoadError: Please add configuration directory into $HOME/.config/my_menu");
     }
 
     ConfigDirectory& config_directory = ConfigDirectory::Instance();
     config_directory.Initialize(config_file_path);
 
-    std::atexit([]() { my::log.FlushSession(); });
+    std::atexit([]() { my::log.PrintSession(); my::log.FlushSession(); });
 
-    my::log.Time();
-    my::log.SetLogPath(config_directory.GetLogFilePath());
-    my::log.SetHistoryPath(config_directory.GetHistoryFilePath());
+    my::log.LoadLogPath(config_directory.GetLogFilePath());
+    my::log.LoadLogPath(config_directory.GetHistoryFilePath());
 
     Parser& parser = Parser::Instance();
 
     ParameterProcessor parameter_processor(argc, argv);
 
     if (!parameter_processor.IsNumParametersValid()) {
-	my::log.Error(1) << "Usage - " << argv[0] << " option_string" << std::endl;
+	my::log.Write(L"Invalid parameters");
     }
 
     std::wstring argument = parameter_processor.GetOptionString();

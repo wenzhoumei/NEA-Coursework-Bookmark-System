@@ -35,7 +35,7 @@ MenuController::PossibleExit ReadOnlyMenuController::ProcessPossibleExit_(const 
 	case CTRL_MASK('b'): ///< Go back in history
 	    if (MenuData::History.size() == 1) {
 		p_e.ReturnCode = ExitCode::DontExit;
-		my::log.Info() << "Bottom of history stack" << std::endl;
+		my::log.Write(L"Bottom of history stack");
 	    } else {
 		MenuData::History.pop();
 		std::pair<std::wstring, std::wstring> last_menu = MenuData::History.top();
@@ -56,20 +56,20 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 
     switch (c) {
 	case CTRL_MASK('w'):
-	    my::log.Info() << "Setting workspace to " << Menu_Data_.Option_List->GetLocation() << Menu_Data_.Option_List->GetActionToHere() << std::endl;
+	    my::log.Write(L"Setting workspace to " + Menu_Data_.Option_List->GetLocation() + Menu_Data_.Option_List->GetActionToHere());
 	    ConfigDirectory::Instance().SetWorkspaceFileContents(Menu_Data_.Option_List->GetActionToHere() + L">" + Menu_Data_.Option_List->GetLocation());
 	    break;
 	case CTRL_MASK('a'):
-	    my::log.Info() << "Can't add, read only" << std::endl;
+	    my::log.Write(L"Can't add, read only");
 	    break;
 	case CTRL_MASK('r'):
-	    my::log.Info() << "Can't remove, read only" << std::endl;
+	    my::log.Write(L"Can't remove, read only");
 	    break;
 	case CTRL_MASK('k'):
-	    my::log.Info() << "Can't enter insert mode, read only" << std::endl;
+	    my::log.Write(L"Can't enter insert mode, read only");
 	    break;
 	case CTRL_MASK('e'):
-	    my::log.Info() << "Can't enter edit mode, read only" << std::endl;
+	    my::log.Write(L"Can't enter edit mode, read only");
 	    break;
 	case CTRL_MASK('v'):
 	    Input_.Paste();
@@ -135,7 +135,7 @@ void ReadOnlyMenuController::ToggleData_() {
 	if (Menu_Data_.SelectedMode == MenuData::DATA) { Menu_Data_.SelectedMode = MenuData::NAME; }
 	else { Menu_Data_.SelectedMode = MenuData::DATA; }
     } else {
-	my::log.Info() << "Not a bookmark list" << std::endl;
+	my::log.Write(L"Not a bookmark list");
     }
 }
 
