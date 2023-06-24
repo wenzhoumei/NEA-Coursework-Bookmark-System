@@ -25,16 +25,20 @@ void OptionListController::Add() {
 }
 
 void OptionListController::Remove() {
-    std::wstring name = Menu_Data_->Option_List->NameAt(Menu_Data_->Selected_Option_Position);
+    std::wstring name;
+    if (Menu_Data_->Selected_Option_Position < Menu_Data_->Option_List->SearchedSize() && Menu_Data_->Option_List->SearchedSize() != 0) {
+	name = Menu_Data_->Option_List->NameAt(Menu_Data_->Selected_Option_Position);
+    }
     OptionList::ModifyStatus m_s = Menu_Data_->Option_List->Remove(Menu_Data_->Selected_Option_Position);
 
     if (m_s.BackendError) {
 	my::log.Write(L"WriteError: Backend failed to remove string");
+	return;
     } else if (m_s.Modified) {
 	my::log.Write(L"Info: Removed string: " + name);
 	Search();
     } else {
-	my::log.Write(L"Info: Can't remove string, probably doesn't exists: " + name);
+	my::log.Write(L"Info: Can't remove string, probably doesn't exist");
     }
 }
 

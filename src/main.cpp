@@ -42,12 +42,7 @@ int main(int argc, char* argv[]) {
     std::wstring argument = parameter_processor.GetOptionString();
 
     if (argument == L"") {
-	std::wstring workspace = config_directory.GetWorkspaceFileContents();
-	if (workspace == L"") {
-	    argument = L"root@bmk";
-	} else {
-	    argument = workspace;
-	}
+	argument = L"root@bmk";
     }
 
     parser.LoadScripts();
