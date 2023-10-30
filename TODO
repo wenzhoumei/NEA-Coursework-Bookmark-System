@@ -1,0 +1,4 @@
+- Curate default config
+- Add workspaces (multiple different non-volatile root lists)
+- Change location of files to more appropriate locations (for example LOG to a var dir)
+- Restore state of terminal after running

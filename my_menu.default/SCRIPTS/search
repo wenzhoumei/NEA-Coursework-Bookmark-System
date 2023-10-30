@@ -1,0 +1,30 @@
+#!/bin/bash
+
+### DESCRIPTION
+### Anything that starts with one of the listed protocols is opened as a link
+### Anything else is searched on google
+
+# Define the search engine URL
+engine="https://www.google.co.uk/search?q=%s"
+separator="+"
+
+# Define a regex pattern to check if the input starts with a valid protocol
+protocol='^(https?|ftps?|mailto|about|file)://.*'
+
+# Get the search text from command line argument 1
+search_text="$1"
+
+# Check if the search_text starts with a valid protocol
+if [[ "$search_text" =~ $protocol ]]; then
+  search_link="$search_text"
+else
+  # Replace spaces in the search text with plus signs for the URL
+  search_text="${search_text// /$separator}"
+  search_link=$(printf "$engine" "$search_text")
+fi
+
+# Print the search text (optional)
+echo "Searching for: $search_text"
+
+# Open Chromium in a new window with the search link and disown it
+chromium --new-window --app="$search_link" & disown
