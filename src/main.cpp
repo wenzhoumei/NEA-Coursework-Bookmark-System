@@ -4,6 +4,12 @@
 #include "log.hpp"
 #include <functional>
 
+void ExitProgram(int exit_code) {
+    my::log.PrintSession();
+    my::log.FlushSession();
+
+    exit(exit_code);
+}
 
 int main(int argc, char* argv[]) {
     std::locale::global(std::locale(""));
@@ -21,14 +27,21 @@ int main(int argc, char* argv[]) {
 
     if (!std::filesystem::is_directory(config_file_path)) {
 	my::log.Write(L"ConfigLoadError: Please add configuration directory into $HOME/.config/my_menu");
+	ExitProgram(1);
     }
 
     ConfigDirectory& config_directory = ConfigDirectory::Instance();
-    config_directory.Initialize(config_file_path);
+
+    if (!config_directory.Initialize(config_file_path)) {
+	ExitProgram(1);
+    }
 
     std::atexit([]() { my::log.PrintSession(); my::log.FlushSession(); });
 
-    my::log.LoadLogPath(config_directory.GetLogFilePath());
+    if (!my::log.LoadLogPath(config_directory.GetLogFilePath())) {
+	my::log.Write(L"ConfigLoadError: Please add configuration directory into $HOME/.config/my_menu");
+	ExitProgram(1);
+    }
     my::log.LoadLogPath(config_directory.GetHistoryFilePath());
 
     Parser& parser = Parser::Instance();
@@ -37,6 +50,7 @@ int main(int argc, char* argv[]) {
 
     if (!parameter_processor.IsNumParametersValid()) {
 	my::log.Write(L"Invalid parameters");
+	ExitProgram(1);
     }
 
     std::wstring argument = parameter_processor.GetOptionString();
@@ -50,4 +64,5 @@ int main(int argc, char* argv[]) {
     if (!parser.LoadIdentifierExtensions()) { return 3; };
 
     parser.ExecuteOptionString(argument);
+
 }

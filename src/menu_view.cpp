@@ -203,9 +203,5 @@ void MenuView::UpdateCursorPosition_(int cols) {
 }
 
 void MenuView::UpdateStatusLog_(int rows, int cols) {
-    /*
-    attron(COLOR_PAIR(my::log.GetCurrentColorForMenu()));
-    mvprintw(rows - 1, 0, "%-*ls", cols, my::log.Peek().c_str());
-    attron(COLOR_PAIR(LogColor::Normal));
-    */
+    mvprintw(rows - 1, 0, "%-*ls", cols, my::log.GetStatusMessage().c_str());
 }

@@ -75,8 +75,10 @@ MenuController::SpecialChar ReadOnlyMenuController::ProcessSpecialChars_(const w
 	    Input_.Paste();
 	    break;
 	case CTRL_MASK('c'): // Copy operation to copy name/data depending on which one
-	    Input_.Copy(Menu_Data_.SelectedMode == MenuData::NAME ? Menu_Data_.SelectedName(): Menu_Data_.SelectedData());
-	    Menu_Data_.SelectedMode = MenuData::NAME;
+	    if (!Menu_Data_.IsSearchListEmpty()) {
+		Input_.Copy(Menu_Data_.SelectedMode == MenuData::NAME ? Menu_Data_.SelectedName(): Menu_Data_.SelectedData());
+		Menu_Data_.SelectedMode = MenuData::NAME;
+	    }
 	    break;
 	case CTRL_MASK('x'): // Cut operation to move option string
 	    Input_.Copy(Menu_Data_.SelectedOptionString());

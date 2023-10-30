@@ -36,7 +36,7 @@ public:
     /**
      * @brief Checks if directories and files that should exist exist, tries to load information, and forces exit if there is a failiure
      */
-    void Initialize(const std::filesystem::path& directory_path);
+    bool Initialize(const std::filesystem::path& directory_path);
 
     std::unique_ptr<DirectoryRetriever> Scripts_Retriever = nullptr; ///> Should contain all file names of SCRIPTS directory
     std::unique_ptr<FileRetriever> IdentifierExtension_To_Action_Retriever = nullptr; ///> Contains all lines of IDENTIFIER_EXTENSIONS file
@@ -92,11 +92,11 @@ private:
      *
      * @param directory_path Directory path to check
      */
-    void CheckDirectory_(const std::filesystem::path& directory_path);
+    bool CheckDirectory_(const std::filesystem::path& directory_path);
     /**
      * @brief Checks if file is valid, exits if not
      *
      * @param file_path File path to check
      */
-    void CheckFile_(const std::filesystem::path& file_path);
+    bool CheckFile_(const std::filesystem::path& file_path);
 };

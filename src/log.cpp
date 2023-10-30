@@ -1,6 +1,6 @@
 #include "log.hpp"
 
-void Log::LoadLogPath(std::filesystem::path log_path) {
+bool Log::LoadLogPath(std::filesystem::path log_path) {
     Path_ = log_path;
     std::wifstream file(Path_, std::wios::in);
     
@@ -9,11 +9,23 @@ void Log::LoadLogPath(std::filesystem::path log_path) {
         while (std::getline(file, line)) {
             Entries_.push_back(line);
         }
+
         file.close();
+
+	return true;
+    } else {
+	return false;
     }
 }
 
 void Log::Write(std::wstring str) {
+    // Using substrings
+    std::wstring prefix = L"Info: ";
+    if (str.substr(0, prefix.size()) == prefix) {
+        //The wstring starts with the prefix
+	Status_Message_ = str;
+    }
+
     Entries_.push_front(str);
     FlushSession();
 }

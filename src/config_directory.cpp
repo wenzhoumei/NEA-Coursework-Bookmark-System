@@ -5,28 +5,34 @@
 #include "log.hpp"
 #include "config_directory.hpp"
 
-void ConfigDirectory::Initialize(const std::filesystem::path& directory_path) {
+bool ConfigDirectory::Initialize(const std::filesystem::path& directory_path) {
     Config_Directory_Path_ = directory_path;
-
-    // Exits if fails
-    CheckDirectory_(directory_path);
-    CheckFile_(GetLogFilePath());
-    CheckFile_(GetHistoryFilePath());
-    CheckFile_(GetWorkspaceFilePath());
-    CheckDirectory_(GetScriptsDirectoryPath());
-    CheckDirectory_(GetOptionListsDirectoryPath());
-    CheckFile_(GetIdentifierExtensionsFilePath());
-
+    
     Scripts_Retriever = std::make_unique<DirectoryRetriever>(DirectoryRetriever(GetScriptsDirectoryPath()));
     IdentifierExtension_To_Action_Retriever = std::make_unique<FileRetriever>(FileRetriever(GetIdentifierExtensionsFilePath()));
 
+    bool init_success = true;
+
+    // Exits if fails
+    init_success = CheckDirectory_(directory_path) &&
+    CheckFile_(GetLogFilePath()) &&
+    CheckFile_(GetHistoryFilePath()) &&
+    CheckFile_(GetWorkspaceFilePath()) &&
+    CheckDirectory_(GetScriptsDirectoryPath()) &&
+    CheckDirectory_(GetOptionListsDirectoryPath()) &&
+    CheckFile_(GetIdentifierExtensionsFilePath());
+
     if (!Scripts_Retriever->Load()) {
+	init_success = false;
 	my::log.Write(L"Error 5: Scripts failed to load");
     }
 
     if (!IdentifierExtension_To_Action_Retriever->Load()) {
+	init_success = false;
 	my::log.Write(L"Error 5: Identifier extensions failed to load");
     }
+
+    return init_success;
 }
 
 std::filesystem::path ConfigDirectory::GetPath() const {
@@ -89,18 +95,26 @@ bool ConfigDirectory::SetWorkspaceFileContents(const std::wstring& option_string
     return false;
 }
 
-void ConfigDirectory::CheckDirectory_(const std::filesystem::path& directory_path) {
+bool ConfigDirectory::CheckDirectory_(const std::filesystem::path& directory_path) {
     if (!std::filesystem::exists(directory_path)) {
 	my::log.Write(L"Error 1: The specified directory does not exist: " + directory_path.wstring());
+	return false;
     } else if (!std::filesystem::is_directory(directory_path)) {
 	my::log.Write(L"Error 2: The specified path is not a directory: " + directory_path.wstring());
+	return false;
     }
+
+    return true;
 }
 
-void ConfigDirectory::CheckFile_(const std::filesystem::path& file_path) {
+bool ConfigDirectory::CheckFile_(const std::filesystem::path& file_path) {
     if (!std::filesystem::exists(file_path)) {
 	my::log.Write(L"Error 1: The specified file does not exist: " + file_path.wstring());
+	return false;
     } else if (!std::filesystem::is_regular_file(file_path)) {
 	my::log.Write(L"Error 2: The specified path is not a regular file: " + file_path.wstring());
+	return false;
     }
+
+    return true;
 }
